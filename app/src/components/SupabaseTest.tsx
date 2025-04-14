@@ -3,21 +3,14 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import type { Database } from "@/types/supabase";
 
-const supabase = createClient(
+const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-interface POFeedback {
-  id: number;
-  created_at: string;
-  submitted_by: string;
-  progress_percent: number;
-  velocity_next_week: "Rot" | "Gelb" | "Grün";
-  team_happiness: number;
-  customer_happiness: number;
-}
+type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
 export function SupabaseTest() {
   const [data, setData] = useState<POFeedback[]>([]);

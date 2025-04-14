@@ -14,7 +14,7 @@
       "id": 2,
       "title": "Integrate Supabase Client",
       "description": "Set up Supabase client integration with proper environment configuration",
-      "status": "in-progress",
+      "status": "done",
       "dependencies": [
         1
       ],

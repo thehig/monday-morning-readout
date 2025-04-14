@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate:types": "npx supabase gen types typescript --project-id \"$PROJECT_ID\" --schema public > src/types/supabase.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.7",
@@ -30,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
+    "supabase": "^2.20.12",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
