@@ -4,7 +4,7 @@
       "id": 1,
       "title": "Setup NextJS Project with TypeScript",
       "description": "Initialize a new NextJS 14+ project with TypeScript, Tailwind CSS, and shadcn/ui components",
-      "status": "pending",
+      "status": "in-progress",
       "dependencies": [],
       "priority": "high",
       "details": "Create a new NextJS 14+ project using the App Router. Install TypeScript 5+, configure Tailwind CSS, and set up shadcn/ui components. Ensure Node.js 18+ is being used. Create the basic folder structure following NextJS 14 conventions with app directory. Initialize Git repository with appropriate .gitignore file.",
