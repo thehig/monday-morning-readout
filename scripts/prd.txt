@@ -1,0 +1,102 @@
+# Overview
+
+The Monday Morning Readout is a modern dashboard application built to visualize and interact with data stored in a Supabase database. It provides an insight into team activity on a week-to-week basis
+
+# Core Features
+
+1. Data Visualization
+   - Visually pleasing, easy to understand graphs
+   - Minimal text on screen unless in expanded mode
+   - Strong colors, large images/icons. Used in presentation
+
+# User Experience
+
+Primary User: Software Development Company team
+Key Flows:
+
+- Dashboard visualization
+- At-a-glance team-wide view or
+- Expanded, single user view
+
+# Technical Architecture
+
+Stack:
+
+- Frontend: NextJS 14+ with App Router
+- Database: Existing Supabase instance
+- State Management: React Query for server state
+- Styling: Tailwind CSS with shadcn/ui components
+
+Components:
+
+- Layout system with responsive grid
+- Reusable chart components
+
+Data Flow:
+
+- Server-side data fetching with NextJS
+- Type-safe database queries
+
+# Development Roadmap
+
+Phase 1 - Foundation & Auth:
+
+- Project setup with NextJS
+- Supabase client configuration
+- Basic layout and navigation
+- TypeScript types for database schema
+
+Phase 2 - Core Dashboard:
+
+- Main dashboard layout
+- Initial data fetching logic
+- Basic chart implementations
+- Loading and error states
+- Responsive design implementation
+
+# Logical Dependency Chain
+
+1. Project Foundation
+
+   - NextJS setup with TypeScript
+   - Supabase client integration
+   - Basic routing structure
+
+2. Data Layer
+
+   - Database type definitions
+   - Data fetching hooks
+   - Error handling
+
+3. UI Components
+   - Layout system
+   - Chart components
+   - Loading states
+
+# Risks and Mitigations
+
+Technical Challenges:
+
+- Risk: Performance with large datasets
+  Mitigation: Implement pagination and virtual scrolling
+
+- Risk: Type safety with Supabase
+  Mitigation: Generate types from database schema
+
+Resource Constraints:
+
+- Risk: Complex chart requirements
+  Mitigation: Use established charting libraries
+
+# Appendix
+
+Technical Specifications:
+
+- Node.js 18+
+- NextJS 14+
+- TypeScript 5+
+- Supabase JS Client
+- React Query v5
+- Tailwind CSS
+- shadcn/ui components
+- Recharts or Chart.js for visualizations
