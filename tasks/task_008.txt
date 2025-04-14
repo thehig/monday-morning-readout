@@ -1,0 +1,11 @@
+# Task ID: 8
+# Title: Build Main Dashboard Layout
+# Status: pending
+# Dependencies: 6, 7
+# Priority: medium
+# Description: Implement the main dashboard view with at-a-glance team-wide visualization
+# Details:
+Create the main dashboard layout combining the responsive grid system and chart components. Implement the at-a-glance team-wide view as specified in requirements. Use strong colors and large images/icons as required. Minimize text display. Ensure all elements are properly aligned and visually balanced. Implement loading states for data fetching.
+
+# Test Strategy:
+Verify that the dashboard displays all required information. Test with different data scenarios. Ensure visual consistency across browsers. Test loading and error states.

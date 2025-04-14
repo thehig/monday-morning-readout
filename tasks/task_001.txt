@@ -1,0 +1,11 @@
+# Task ID: 1
+# Title: Setup NextJS Project with TypeScript
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Initialize a new NextJS 14+ project with TypeScript, Tailwind CSS, and shadcn/ui components
+# Details:
+Create a new NextJS 14+ project using the App Router. Install TypeScript 5+, configure Tailwind CSS, and set up shadcn/ui components. Ensure Node.js 18+ is being used. Create the basic folder structure following NextJS 14 conventions with app directory. Initialize Git repository with appropriate .gitignore file.
+
+# Test Strategy:
+Verify that the application builds and runs without errors. Confirm that TypeScript is properly configured with no type errors. Test that Tailwind CSS styles are applied correctly and shadcn/ui components can be imported and rendered.

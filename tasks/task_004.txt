@@ -1,0 +1,11 @@
+# Task ID: 4
+# Title: Implement Basic Routing Structure
+# Status: pending
+# Dependencies: 1
+# Priority: medium
+# Description: Set up the application's routing system using NextJS App Router
+# Details:
+Create the main page routes using the NextJS 14 App Router. Implement a layout component that will be shared across all pages. Set up navigation between different sections of the dashboard. Create error and loading states for each route. Implement dynamic routes for expanded user views.
+
+# Test Strategy:
+Test navigation between all routes. Verify that layouts are applied correctly. Ensure that dynamic routes work with different parameters. Test error handling for invalid routes.
