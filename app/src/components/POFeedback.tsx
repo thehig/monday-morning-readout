@@ -139,13 +139,13 @@ function FeedbackCard({
   );
 }
 
-interface POFeedbackTestProps {
+interface POFeedbackProps {
   initialWeek?: number;
 }
 
-export function POFeedbackTest({
+export function POFeedback({
   initialWeek = getCurrentWeek(),
-}: POFeedbackTestProps) {
+}: POFeedbackProps) {
   const router = useRouter();
   const [selectedWeek, setSelectedWeek] = useState(initialWeek);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { POFeedbackTest } from "@/components/POFeedbackTest";
+import { POFeedback } from "@/components/POFeedback";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { getCurrentWeek } from "@/hooks/use-po-feedback";
@@ -17,7 +17,7 @@ export default function HomePage() {
       className="h-full bg-gray-50"
     >
       <div className="h-full">
-        <POFeedbackTest initialWeek={week} />
+        <POFeedback initialWeek={week} />
       </div>
     </motion.main>
   );

@@ -4,9 +4,6 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { usePOFeedbackByWeek } from "@/hooks/use-po-feedback";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-import type { Database } from "@/types/supabase";
-
-type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
 function Thermometer({ value }: { value: number }) {
   return (
