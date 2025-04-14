@@ -1,6 +1,6 @@
 # Task ID: 1
 # Title: Setup NextJS Project with TypeScript
-# Status: in-progress
+# Status: done
 # Dependencies: None
 # Priority: high
 # Description: Initialize a new NextJS 14+ project with TypeScript, Tailwind CSS, and shadcn/ui components

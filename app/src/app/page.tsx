@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SupabaseTest } from "@/components/SupabaseTest";
 
 export default function Home() {
   return (
@@ -62,6 +63,16 @@ export default function Home() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>Welcome</CardHeader>
+          <CardContent>
+            <p>This is your Monday Morning Readout dashboard.</p>
+          </CardContent>
+        </Card>
+        <SupabaseTest />
+      </div>
     </div>
   );
 }
