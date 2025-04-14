@@ -14,9 +14,9 @@ export default function HomePage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-gray-50"
+      className="h-screen bg-gray-50 overflow-hidden"
     >
-      <div className="container mx-auto px-4 py-6">
+      <div className="h-full">
         <POFeedbackTest initialWeek={week} />
       </div>
     </motion.main>
