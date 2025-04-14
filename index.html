@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Monday Morning Team Progress Report" />
+    <title>Monday Morning Readout</title>
+
+    <!-- Google Fonts - Quicksand for optimal readability -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome for navigation and UI icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- External Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-gauges/gauge.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+      :root {
+        /* Enhanced Color Variables for Video Call Visibility */
+        --bg-primary: rgb(16, 17, 38);
+        --bg-card: rgba(
+          255,
+          255,
+          255,
+          0.2
+        ); /* Increased opacity for better visibility */
+        --text-primary: #ffffff;
+        --accent-color: rgb(255, 128, 0); /* Solid color for better contrast */
+        --accent-hover: rgb(255, 165, 0);
+        --metric-good: rgb(0, 255, 128); /* Brighter metrics colors */
+        --metric-warning: rgb(255, 255, 0);
+        --metric-danger: rgb(255, 64, 64);
+
+        /* Enhanced Text Shadows */
+        --text-shadow-strong: 0 2px 8px rgba(0, 0, 0, 0.8),
+          0 0 2px rgba(0, 0, 0, 1);
+        --text-shadow-light: 0 1px 4px rgba(0, 0, 0, 0.6),
+          0 0 1px rgba(0, 0, 0, 1);
+
+        /* Increased Spacing */
+        --spacing-sm: 16px;
+        --spacing-md: 32px;
+        --spacing-lg: 64px;
+
+        /* Enhanced Card Variables */
+        --card-radius: 16px;
+        --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.6),
+          0 2px 8px rgba(0, 0, 0, 0.4);
+      }
+
+      /* Enhanced Base Styles */
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: "Quicksand", sans-serif;
+        font-weight: 600; /* Increased base font weight */
+        font-size: 18px; /* Larger base font size */
+        line-height: 1.6;
+        letter-spacing: 0.02em;
+      }
+
+      /* Enhanced Header Visibility */
+      #headerTitle {
+        font-size: 3.5em;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+      }
+
+      /* Enhanced Card Visibility */
+      .card {
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+      }
+
+      .card h2 {
+        font-size: 2.8em;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      /* Enhanced Metric Labels */
+      .metric-label {
+        font-size: 1.6em;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+      }
+
+      /* Enhanced Button Visibility */
+      .nav-btn {
+        width: 80px;
+        height: 80px;
+        font-size: 2em;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+
+      /* Enhanced Error Messages */
+      #errorMessage {
+        font-size: 1.4em;
+        font-weight: 600;
+        text-shadow: var(--text-shadow-light);
+      }
+
+      /* Enhanced Loading States */
+      .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border-width: 6px;
+        filter: drop-shadow(0 0 12px var(--accent-color));
+      }
+
+      #initialLoading {
+        font-size: 3em;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      /* Enhanced Responsive Adjustments */
+      @media (max-width: 768px) {
+        body {
+          font-size: 16px;
+        }
+
+        #headerTitle {
+          font-size: 3em;
+        }
+
+        .card h2 {
+          font-size: 2.4em;
+        }
+
+        .nav-btn {
+          width: 70px;
+          height: 70px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          font-size: 14px;
+        }
+
+        #headerTitle {
+          font-size: 2.6em;
+        }
+
+        .card h2 {
+          font-size: 2.2em;
+        }
+
+        .nav-btn {
+          width: 60px;
+          height: 60px;
+        }
+      }
+
+      /* Add Logout Button Styles */
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-md);
+        background-color: rgba(0, 0, 0, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(8px);
+      }
+
+      #logoutButton {
+        background-color: transparent;
+        border: 2px solid var(--accent-color);
+        color: var(--accent-color);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--card-radius);
+        font-size: 1.2em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      #logoutButton:hover {
+        background-color: var(--accent-color);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+      }
+
+      #logoutButton:active {
+        transform: translateY(0);
+      }
+
+      /* Team Member Grid Layout */
+      .dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: var(--spacing-lg);
+        padding: var(--spacing-lg);
+        margin: 0 auto;
+        max-width: 1800px;
+      }
+
+      /* Team Member Card Styles */
+      .team-member-card {
+        background: var(--bg-card);
+        border-radius: var(--card-radius);
+        box-shadow: var(--card-shadow);
+        padding: var(--spacing-lg);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        min-height: 400px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Add maximized card styles */
+      .team-member-card.maximized {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 800px;
+        height: 90vh;
+        max-height: 800px;
+        z-index: 1000;
+        cursor: default;
+        overflow-y: auto;
+      }
+
+      /* Add overlay styles */
+      .card-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      .card-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Add close button styles */
+      .close-button {
+        position: absolute;
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-size: 1.5em;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+        display: none;
+      }
+
+      .close-button:hover {
+        opacity: 1;
+      }
+
+      .maximized .close-button {
+        display: block;
+      }
+
+      /* Enhance metrics display in maximized state */
+      .maximized .metrics-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-lg);
+        margin: var(--spacing-lg) 0;
+      }
+
+      .maximized .metric-box {
+        padding: var(--spacing-md);
+      }
+
+      .maximized .metric-box-value {
+        font-size: 2.5em;
+      }
+
+      .maximized .metric-box-label {
+        font-size: 1.2em;
+      }
+
+      /* Add keyboard focus styles */
+      .team-member-card:focus {
+        outline: 2px solid var(--accent-color);
+        outline-offset: 2px;
+      }
+
+      .close-button:focus {
+        outline: 2px solid var(--accent-color);
+        outline-offset: 2px;
+      }
+
+      /* Responsive adjustments for maximized state */
+      @media (max-width: 768px) {
+        .team-member-card.maximized {
+          width: 95%;
+          height: 95vh;
+        }
+      }
+
+      .team-member-card h2 {
+        margin: 0;
+        color: var(--accent-color);
+        text-shadow: var(--text-shadow-strong);
+      }
+
+      .team-member-card .role {
+        font-size: 1.2em;
+        opacity: 0.9;
+        margin-top: -var(--spacing-sm);
+      }
+
+      .team-member-card .progress-label {
+        font-size: 1.2em;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-sm);
+        text-shadow: var(--text-shadow-light);
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+        margin: var(--spacing-md) 0;
+      }
+
+      .metric {
+        text-align: center;
+        padding: var(--spacing-sm);
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: calc(var(--card-radius) / 2);
+      }
+
+      .metric-value {
+        font-size: 2em;
+        font-weight: 700;
+        margin: var(--spacing-sm) 0;
+      }
+
+      .metric-label {
+        font-size: 1em;
+        opacity: 0.9;
+      }
+
+      .status-updates {
+        margin-top: auto;
+      }
+
+      .status-update {
+        padding: var(--spacing-sm);
+        border-left: 3px solid var(--accent-color);
+        margin: var(--spacing-sm) 0;
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .status-update .date {
+        font-size: 0.9em;
+        opacity: 0.8;
+        margin-bottom: var(--spacing-sm);
+      }
+
+      /* Responsive adjustments for team member cards */
+      @media (max-width: 768px) {
+        .dashboard {
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          padding: var(--spacing-md);
+          gap: var(--spacing-md);
+        }
+
+        .team-member-card {
+          padding: var(--spacing-md);
+          min-height: 350px;
+        }
+
+        .metrics-grid {
+          gap: var(--spacing-sm);
+        }
+      }
+
+      @media (max-width: 480px) {
+        .dashboard {
+          grid-template-columns: 1fr;
+          padding: var(--spacing-sm);
+        }
+
+        .team-member-card {
+          padding: var(--spacing-sm);
+          min-height: 300px;
+        }
+      }
+
+      /* Loading States and Animations */
+      .loading-spinner {
+        width: 80px;
+        height: 80px;
+        border: 8px solid rgba(255, 255, 255, 0.1);
+        border-left-color: var(--accent-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: var(--spacing-lg) auto;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #initialLoading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-primary);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-md);
+        z-index: 1000;
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+      }
+
+      #initialLoading.hiding {
+        opacity: 0;
+      }
+
+      /* Panel Transitions */
+      #authPanel,
+      #appPanel {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+      }
+
+      #authPanel.entering,
+      #appPanel.entering {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      #authPanel.hiding,
+      #appPanel.hiding {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      /* Card Loading Animation */
+      .team-member-card {
+        animation: cardFadeIn 0.5s ease-out forwards;
+        opacity: 0;
+      }
+
+      @keyframes cardFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Error Message Animation */
+      .error-message {
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        background: rgba(255, 0, 0, 0.2);
+        border-left: 4px solid var(--metric-danger);
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
+        border-radius: 4px;
+      }
+
+      .error-message.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Password Input Error Animation */
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-10px);
+        }
+        75% {
+          transform: translateX(10px);
+        }
+      }
+
+      #passwordInput.error {
+        animation: shake 0.4s ease-in-out;
+        border-color: var(--metric-danger);
+      }
+
+      /* Week Navigation Styles */
+      .dashboard-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-md);
+      }
+
+      .week-navigation {
+        display: flex;
+        align-items: center;
+      }
+
+      .week-display {
+        font-size: 1.8em;
+        font-weight: 600;
+        color: var(--accent-color);
+        text-shadow: var(--text-shadow-light);
+        min-width: 300px;
+        text-align: center;
+      }
+
+      .nav-btn {
+        background-color: transparent;
+        border: 2px solid var(--accent-color);
+        color: var(--accent-color);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .nav-btn:hover {
+        background-color: var(--accent-color);
+        color: var(--text-primary);
+      }
+
+      .nav-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      @media (max-width: 768px) {
+        .week-navigation {
+          flex-direction: row;
+          gap: var(--spacing-sm);
+        }
+
+        .week-display {
+          font-size: 1.4em;
+          min-width: 200px;
+        }
+
+        .nav-btn {
+          width: 40px;
+          height: 40px;
+        }
+      }
+
+      /* Progress Bar Styles */
+      .progress-bar-container {
+        width: 100%;
+        height: 24px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        margin: var(--spacing-sm) 0;
+      }
+
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--metric-danger) 0%,
+          var(--metric-warning) 50%,
+          var(--metric-good) 100%
+        );
+        transition: width 1s ease-out, background-position 1s ease-out;
+        background-size: 200% 100%;
+        position: relative;
+      }
+
+      .progress-bar::after {
+        content: attr(data-progress);
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-primary);
+        font-weight: 600;
+        text-shadow: var(--text-shadow-light);
+      }
+
+      .progress-bar.low {
+        background-position: 0% 50%;
+      }
+
+      .progress-bar.medium {
+        background-position: 50% 50%;
+      }
+
+      .progress-bar.high {
+        background-position: 100% 50%;
+      }
+
+      .progress-label {
+        position: absolute;
+        right: var(--spacing-sm);
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.8em;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        z-index: 1;
+      }
+
+      /* Metric Progress Section */
+      .metric-progress {
+        margin: var(--spacing-md) 0;
+        padding: var(--spacing-sm);
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: var(--card-radius);
+      }
+
+      .metric-progress h4 {
+        margin-bottom: var(--spacing-sm);
+        font-size: 1em;
+        opacity: 0.9;
+      }
+
+      /* Team Member Card Grid Layout */
+      .team-member-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: var(--spacing-lg);
+        padding: var(--spacing-md);
+        margin: 0 auto;
+        max-width: 1600px;
+        width: 100%;
+      }
+
+      .team-member-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8);
+      }
+
+      .team-member-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+      }
+
+      .team-member-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--accent-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+        color: var(--text-primary);
+        text-shadow: var(--text-shadow-light);
+      }
+
+      .team-member-info {
+        flex: 1;
+      }
+
+      .team-member-name {
+        font-size: 1.5em;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-primary);
+        text-shadow: var(--text-shadow-light);
+      }
+
+      .team-member-email {
+        font-size: 0.9em;
+        opacity: 0.8;
+        margin-top: 4px;
+      }
+
+      .metrics-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+        margin: var(--spacing-md) 0;
+      }
+
+      .metric-box {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: calc(var(--card-radius) / 2);
+        padding: var(--spacing-sm);
+        text-align: center;
+      }
+
+      .metric-box-label {
+        font-size: 0.9em;
+        opacity: 0.9;
+        margin-bottom: 4px;
+      }
+
+      .metric-box-value {
+        font-size: 1.8em;
+        font-weight: 600;
+        color: var(--accent-color);
+        text-shadow: var(--text-shadow-light);
+      }
+
+      .card-footer {
+        margin-top: auto;
+        padding-top: var(--spacing-md);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .last-update {
+        font-size: 0.9em;
+        opacity: 0.7;
+        text-align: right;
+      }
+
+      /* Responsive adjustments for team member grid */
+      @media (max-width: 1200px) {
+        .team-member-grid {
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+      }
+
+      @media (max-width: 768px) {
+        .team-member-grid {
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: var(--spacing-md);
+          padding: var(--spacing-sm);
+        }
+
+        .team-member-card {
+          padding: var(--spacing-md);
+          min-height: 350px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .team-member-grid {
+          grid-template-columns: 1fr;
+          padding: var(--spacing-sm);
+        }
+
+        .team-member-card {
+          min-height: 300px;
+        }
+
+        .metrics-container {
+          gap: var(--spacing-sm);
+        }
+      }
+
+      /* Layout Controls */
+      .layout-controls {
+        display: flex;
+        gap: var(--spacing-md);
+        align-items: center;
+        margin-right: var(--spacing-md);
+      }
+
+      .layout-controls button {
+        background-color: transparent;
+        border: 2px solid var(--accent-color);
+        color: var(--accent-color);
+        padding: 8px 16px;
+        border-radius: var(--card-radius);
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .layout-controls button:hover {
+        background-color: var(--accent-color);
+        color: var(--text-primary);
+      }
+
+      .layout-controls button.active {
+        background-color: var(--accent-color);
+        color: var(--text-primary);
+      }
+
+      .layout-controls .size-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Presentation Mode Styles */
+      body.presentation-mode {
+        font-size: 24px;
+      }
+
+      body.presentation-mode .dashboard {
+        gap: var(--spacing-lg);
+        padding: var(--spacing-lg) var(--spacing-lg) 120px;
+      }
+
+      body.presentation-mode .team-member-card {
+        padding: var(--spacing-lg);
+      }
+
+      body.presentation-mode .metric-value {
+        font-size: 2.5em;
+      }
+
+      body.presentation-mode .metric-label {
+        font-size: 1.2em;
+      }
+
+      /* Grid Density Classes */
+      .dashboard.compact {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-md);
+      }
+
+      .dashboard.normal {
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: var(--spacing-lg);
+      }
+
+      .dashboard.spacious {
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: calc(var(--spacing-lg) * 1.5);
+      }
+
+      /* Card Size Classes */
+      .team-member-card.small {
+        min-height: 300px;
+        font-size: 0.9em;
+      }
+
+      .team-member-card.medium {
+        min-height: 400px;
+        font-size: 1em;
+      }
+
+      .team-member-card.large {
+        min-height: 500px;
+        font-size: 1.1em;
+      }
+
+      /* Enhanced Responsive Breakpoints */
+      @media (min-width: 2560px) {
+        body {
+          font-size: 20px;
+        }
+
+        .dashboard.normal {
+          grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        }
+      }
+
+      @media (max-width: 1440px) {
+        .dashboard.normal {
+          grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+      }
+
+      @media (max-width: 1024px) {
+        body {
+          font-size: 16px;
+        }
+
+        .layout-controls {
+          flex-wrap: wrap;
+          justify-content: center;
+          margin: var(--spacing-sm) 0;
+        }
+
+        .dashboard.normal {
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+      }
+
+      @media (max-width: 768px) {
+        .layout-controls {
+          flex-direction: column;
+          gap: var(--spacing-sm);
+        }
+
+        .dashboard {
+          padding: var(--spacing-sm);
+        }
+
+        .team-member-card {
+          min-height: 350px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          font-size: 14px;
+        }
+
+        .dashboard {
+          grid-template-columns: 1fr;
+        }
+
+        .team-member-card {
+          min-height: 300px;
+        }
+      }
+
+      /* Screen Sharing Optimizations */
+      @media screen and (min-resolution: 1.25dppx) {
+        body.presentation-mode {
+          font-size: 28px;
+        }
+      }
+
+      @media screen and (min-resolution: 1.5dppx) {
+        body.presentation-mode {
+          font-size: 32px;
+        }
+      }
+
+      /* Enhanced Gauge Animations and Styling */
+      .gauge-container {
+        position: relative;
+        transition: transform 0.3s ease-out;
+      }
+
+      .gauge-container:hover {
+        transform: scale(1.05);
+      }
+
+      .gauge-container canvas {
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+      }
+
+      /* Glow effects for different states */
+      .gauge-container[data-state="good"] canvas {
+        filter: drop-shadow(0 0 12px rgba(0, 255, 128, 0.3));
+      }
+
+      .gauge-container[data-state="warning"] canvas {
+        filter: drop-shadow(0 0 12px rgba(255, 255, 0, 0.3));
+      }
+
+      .gauge-container[data-state="danger"] canvas {
+        filter: drop-shadow(0 0 12px rgba(255, 64, 64, 0.3));
+      }
+
+      .gauge-label {
+        margin-top: 12px;
+        font-weight: 600;
+        text-shadow: var(--text-shadow-light);
+        transition: opacity 0.3s ease;
+      }
+
+      .gauge-container:hover .gauge-label {
+        opacity: 0.9;
+      }
+
+      /* Progress bar enhancements */
+      .progress-bar {
+        background: linear-gradient(
+          90deg,
+          var(--metric-danger) 0%,
+          var(--metric-warning) 50%,
+          var(--metric-good) 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
+        background-position: 100% 50%;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 100% 50%;
+        }
+        50% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+
+      /* Performance optimizations */
+      .gauge-container {
+        will-change: transform;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+      }
+
+      .progress-bar {
+        will-change: width, background-position;
+        transform: translateZ(0);
+      }
+
+      /* Remove auth-related styles */
+      #authPanel,
+      #authPanel.entering,
+      #authPanel.hiding,
+      #passwordInput.error,
+      #logoutButton,
+      #logoutButton:hover,
+      #logoutButton:active {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1 id="headerTitle">Monday Morning Readout</h1>
+      <div class="header-controls">
+        <button id="presentationModeToggle" title="Toggle Presentation Mode">
+          <i class="fas fa-tv"></i>
+        </button>
+        <button id="gridDensityToggle" title="Toggle Grid Density">
+          <i class="fas fa-th"></i>
+        </button>
+      </div>
+    </header>
+
+    <div id="appPanel">
+      <div id="toastContainer" class="toast-container"></div>
+      <div id="connectionStatus" class="connection-status">
+        <i class="fa-solid fa-circle"></i>
+        <span>Connected</span>
+      </div>
+      <main>
+        <div class="dashboard-header">
+          <div class="week-navigation">
+            <button id="prevWeek" class="nav-btn" onclick="navigateWeek(-1)">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <span id="weekDisplay" class="week-display"></span>
+            <button id="nextWeek" class="nav-btn" onclick="navigateWeek(1)">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div id="dashboard" class="dashboard">
+          <!-- Team member grid container -->
+          <div class="team-member-grid">
+            <!-- Team member cards will be dynamically inserted here -->
+            <template id="team-member-card-template">
+              <div class="team-member-card">
+                <div class="team-member-header">
+                  <div class="team-member-avatar">
+                    <!-- First letter of name will be inserted here -->
+                  </div>
+                  <div class="team-member-info">
+                    <h3 class="team-member-name"></h3>
+                    <div class="team-member-email"></div>
+                  </div>
+                </div>
+
+                <div class="metrics-container">
+                  <div class="metric-box">
+                    <div class="metric-box-label">Progress</div>
+                    <div class="metric-box-value progress-value">0%</div>
+                  </div>
+                  <div class="metric-box">
+                    <div class="metric-box-label">Velocity</div>
+                    <div class="metric-box-value velocity-value">-</div>
+                  </div>
+                  <div class="metric-box">
+                    <div class="metric-box-label">Team Happiness</div>
+                    <div class="metric-box-value team-happiness-value">-</div>
+                  </div>
+                  <div class="metric-box">
+                    <div class="metric-box-label">Customer Happiness</div>
+                    <div class="metric-box-value customer-happiness-value">
+                      -
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-footer">
+                  <div class="last-update"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Core Application Script - to be implemented in subsequent tasks -->
+    <script>
+      // Initialize Supabase with environment variables
+      const SUPABASE_CONFIG = {
+        url: "https://your-project.supabase.co",
+        anonKey: "your-anon-key",
+      };
+
+      let supabaseClient = null;
+
+      async function initializeSupabase() {
+        try {
+          supabaseClient = supabase.createClient(
+            SUPABASE_CONFIG.url,
+            SUPABASE_CONFIG.anonKey
+          );
+
+          const { data, error } = await supabaseClient
+            .from("team_members")
+            .select("id")
+            .limit(1);
+
+          if (error) throw error;
+          return true;
+        } catch (error) {
+          console.error("Supabase initialization error:", error);
+          return false;
+        }
+      }
+
+      // Initialize application on load
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          // Initialize Supabase
+          const initialized = await initializeSupabase();
+          if (!initialized) {
+            throw new Error("Failed to initialize database connection");
+          }
+
+          // Show dashboard and load initial data
+          document.getElementById("appPanel").style.display = "block";
+          await updateDashboard();
+        } catch (error) {
+          console.error("Initialization error:", error);
+          showErrorBoundary(error, () => location.reload());
+        }
+      });
+
+      // Team Member Card Creation
+      function createTeamMemberCard(member, index) {
+        const card = document.createElement("div");
+        card.className = "team-member-card";
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.tabIndex = 0; // Make card focusable
+
+        const closeButton = document.createElement("button");
+        closeButton.className = "close-button";
+        closeButton.innerHTML = '<i class="fas fa-times"></i>';
+        closeButton.setAttribute("aria-label", "Close");
+        closeButton.style.display = "none";
+
+        const completionRate = calculateCompletionRate(member);
+        const progressClass = getProgressClass(completionRate);
+
+        card.innerHTML = `
+          <h3>${member.name}</h3>
+          <div class="role">${member.role}</div>
+
+          <div class="metric-progress">
+            <h4>Sprint Progress</h4>
+            <div class="progress-bar-container">
+              <div class="progress-bar ${progressClass}" style="width: ${completionRate}%"></div>
+              <span class="progress-label">${completionRate}%</span>
+            </div>
+          </div>
+
+          <div class="metrics-container">
+            <div class="metric-box">
+              <div class="metric-box-label">Completed</div>
+              <div class="metric-box-value">${
+                member.metrics.tasksCompleted
+              }</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-box-label">In Progress</div>
+              <div class="metric-box-value">${
+                member.metrics.tasksInProgress
+              }</div>
+            </div>
+          </div>
+
+          <div class="status-updates">
+            ${member.statusUpdates
+              .map(
+                (update) => `
+              <div class="status-update">
+                <div class="date">${formatDate(update.created_at)}</div>
+                ${update.message}
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        `;
+
+        card.appendChild(closeButton);
+
+        // Add event listeners for card maximization
+        card.addEventListener("click", (e) => {
+          if (
+            !card.classList.contains("maximized") &&
+            e.target !== closeButton
+          ) {
+            maximizeCard(card);
+          }
+        });
+
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            if (!card.classList.contains("maximized")) {
+              maximizeCard(card);
+            }
+          } else if (
+            e.key === "Escape" &&
+            card.classList.contains("maximized")
+          ) {
+            minimizeCard(card);
+          }
+        });
+
+        closeButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          minimizeCard(card);
+        });
+
+        return card;
+      }
+
+      // Card maximization functions
+      let currentMaximizedCard = null;
+      let overlay = null;
+
+      function createOverlay() {
+        if (!overlay) {
+          overlay = document.createElement("div");
+          overlay.className = "card-overlay";
+          document.body.appendChild(overlay);
+
+          overlay.addEventListener("click", (e) => {
+            if (e.target === overlay && currentMaximizedCard) {
+              minimizeCard(currentMaximizedCard);
+            }
+          });
+        }
+        return overlay;
+      }
+
+      function maximizeCard(card) {
+        if (currentMaximizedCard) {
+          minimizeCard(currentMaximizedCard);
+        }
+
+        const overlay = createOverlay();
+        overlay.classList.add("active");
+
+        // Store original position for smooth animation
+        const rect = card.getBoundingClientRect();
+        card.style.top = `${rect.top}px`;
+        card.style.left = `${rect.left}px`;
+        card.style.width = `${rect.width}px`;
+        card.style.height = `${rect.height}px`;
+
+        // Force reflow
+        card.offsetHeight;
+
+        card.classList.add("maximized");
+        card.querySelector(".close-button").style.display = "block";
+
+        currentMaximizedCard = card;
+
+        // Prevent body scroll
+        document.body.style.overflow = "hidden";
+
+        // Ensure the card is focused for keyboard navigation
+        card.focus();
+      }
+
+      function minimizeCard(card) {
+        if (!card) return;
+
+        card.classList.remove("maximized");
+        card.querySelector(".close-button").style.display = "none";
+
+        if (overlay) {
+          overlay.classList.remove("active");
+        }
+
+        currentMaximizedCard = null;
+
+        // Restore body scroll
+        document.body.style.overflow = "";
+
+        // Clear inline styles after animation
+        setTimeout(() => {
+          card.style.top = "";
+          card.style.left = "";
+          card.style.width = "";
+          card.style.height = "";
+        }, 300);
+      }
+
+      function calculateCompletionRate(member) {
+        const total =
+          member.metrics.tasksCompleted + member.metrics.tasksInProgress;
+        if (total === 0) return 0;
+        return Math.round((member.metrics.tasksCompleted / total) * 100);
+      }
+
+      function getProgressClass(percentage) {
+        if (percentage < 33) return "low";
+        if (percentage < 66) return "medium";
+        return "high";
+      }
+
+      function formatDate(date) {
+        const formattedDate = moment(date).format("MMM D, YYYY");
+        return formattedDate;
+      }
+
+      // Progress Bar Functions
+      function updateProgressBar(element, progress) {
+        // Convert 0-10 scale to percentage
+        const percentage = (progress / 10) * 100;
+
+        // Update width and text
+        element.style.width = `${percentage}%`;
+        element.setAttribute("data-progress", `${Math.round(percentage)}%`);
+
+        // Update color class based on progress
+        element.classList.remove("low", "medium", "high");
+        if (percentage <= 33) {
+          element.classList.add("low");
+        } else if (percentage <= 66) {
+          element.classList.add("medium");
+        } else {
+          element.classList.add("high");
+        }
+      }
+
+      // Layout Control Functions
+      function initializeLayoutControls() {
+        // Grid density controls
+        const gridButtons = ["gridCompact", "gridNormal", "gridSpacious"];
+        const gridClasses = ["compact", "normal", "spacious"];
+        const dashboard = document.querySelector(".dashboard");
+
+        gridButtons.forEach((buttonId, index) => {
+          const button = document.getElementById(buttonId);
+          button.addEventListener("click", () => {
+            // Remove all grid classes
+            gridClasses.forEach((cls) => dashboard.classList.remove(cls));
+            // Add the selected class
+            dashboard.classList.add(gridClasses[index]);
+            // Update button states
+            gridButtons.forEach((id) =>
+              document.getElementById(id).classList.remove("active")
+            );
+            button.classList.add("active");
+          });
+        });
+
+        // Card size controls
+        const cardButtons = ["cardSmall", "cardMedium", "cardLarge"];
+        const cardClasses = ["small", "medium", "large"];
+        const cards = document.querySelectorAll(".team-member-card");
+
+        cardButtons.forEach((buttonId, index) => {
+          const button = document.getElementById(buttonId);
+          button.addEventListener("click", () => {
+            // Remove all size classes from cards
+            cards.forEach((card) => {
+              cardClasses.forEach((cls) => card.classList.remove(cls));
+              card.classList.add(cardClasses[index]);
+            });
+            // Update button states
+            cardButtons.forEach((id) =>
+              document.getElementById(id).classList.remove("active")
+            );
+            button.classList.add("active");
+          });
+        });
+
+        // Presentation mode toggle
+        const presentationButton = document.getElementById(
+          "presentationModeToggle"
+        );
+        presentationButton.addEventListener("click", () => {
+          document.body.classList.toggle("presentation-mode");
+          presentationButton.classList.toggle("active");
+        });
+      }
+
+      // Initialize layout controls after DOM content is loaded
+      document.addEventListener("DOMContentLoaded", () => {
+        initializeLayoutControls();
+      });
+
+      // Add layout controls initialization to the existing init function
+      async function init() {
+        try {
+          // ... existing initialization code ...
+
+          // Initialize layout controls
+          initializeLayoutControls();
+
+          // Set initial layout classes
+          const dashboard = document.querySelector(".dashboard");
+          dashboard.classList.add("normal");
+          const cards = document.querySelectorAll(".team-member-card");
+          cards.forEach((card) => card.classList.add("medium"));
+
+          // ... rest of existing initialization code ...
+        } catch (error) {
+          console.error("Initialization error:", error);
+          showError("Failed to initialize the application. Please try again.");
+        }
+      }
+    </script>
+  </body>
+</html>
