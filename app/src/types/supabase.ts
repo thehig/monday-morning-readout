@@ -18,6 +18,11 @@ export interface Database {
           velocity_next_week: "Rot" | "Gelb" | "Grün";
           team_happiness: number;
           customer_happiness: number;
+          goals_next_week: string;
+          milestones_done: string;
+          ps_call_context: string;
+          ps_call_needed: "NEIN" | "JA";
+          risks: string;
         };
         Insert: {
           id?: number;
@@ -27,6 +32,11 @@ export interface Database {
           velocity_next_week: "Rot" | "Gelb" | "Grün";
           team_happiness: number;
           customer_happiness: number;
+          goals_next_week: string;
+          milestones_done: string;
+          ps_call_context: string;
+          ps_call_needed: "NEIN" | "JA";
+          risks: string;
         };
         Update: {
           id?: number;
@@ -36,6 +46,11 @@ export interface Database {
           velocity_next_week?: "Rot" | "Gelb" | "Grün";
           team_happiness?: number;
           customer_happiness?: number;
+          goals_next_week?: string;
+          milestones_done?: string;
+          ps_call_context?: string;
+          ps_call_needed?: "NEIN" | "JA";
+          risks?: string;
         };
       };
     };

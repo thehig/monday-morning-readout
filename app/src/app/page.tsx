@@ -14,7 +14,7 @@ export default function HomePage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="h-screen bg-gray-50 overflow-hidden"
+      className="h-full bg-gray-50"
     >
       <div className="h-full">
         <POFeedbackTest initialWeek={week} />

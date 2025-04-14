@@ -25,7 +25,7 @@ export default function RootLayout({
                 <h1 className="text-2xl font-bold">Monday Morning Readout</h1>
               </div>
             </header>
-            <main className="flex-1 overflow-hidden">{children}</main>
+            <main className="flex-1 overflow-auto">{children}</main>
           </div>
         </Providers>
       </body>
