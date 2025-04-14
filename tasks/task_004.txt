@@ -1,6 +1,6 @@
 # Task ID: 4
 # Title: Implement Basic Routing Structure
-# Status: pending
+# Status: done
 # Dependencies: 1
 # Priority: medium
 # Description: Set up the application's routing system using NextJS App Router

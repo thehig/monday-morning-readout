@@ -1,6 +1,6 @@
 # Task ID: 3
 # Title: Generate TypeScript Types from Database Schema
-# Status: pending
+# Status: done
 # Dependencies: 2
 # Priority: high
 # Description: Create type definitions for the database schema to ensure type safety
