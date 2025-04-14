@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { getWeekDates, getCurrentWeek } from "@/lib/date-utils";
 
 interface WeekPickerProps {
   currentWeek: number;
@@ -12,23 +13,12 @@ export function WeekPicker({ currentWeek, onWeekChange }: WeekPickerProps) {
   const currentYear = now.getFullYear();
   const totalWeeks = 52;
 
-  function getWeekDates(week: number): { start: Date; end: Date } {
-    const start = new Date(currentYear, 0, 1);
-    start.setDate(start.getDate() + (week - 1) * 7);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 4);
-    return { start, end };
-  }
+  const { start, end: endSaturday } = getWeekDates(currentWeek, currentYear);
+  // Create a new date for Friday by subtracting one day from Saturday
+  const end = new Date(endSaturday);
+  end.setDate(end.getDate() - 1);
 
-  const { start, end } = getWeekDates(currentWeek);
-  const isCurrentWeek =
-    currentWeek ===
-    Math.ceil(
-      (now.getTime() -
-        new Date(currentYear, 0, 1).getTime() +
-        24 * 60 * 60 * 1000) /
-        (1000 * 60 * 60 * 24 * 7)
-    );
+  const isCurrentWeek = currentWeek === getCurrentWeek(currentYear);
 
   return (
     <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4 mb-6">

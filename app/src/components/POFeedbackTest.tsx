@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { WeekPicker } from "./WeekPicker";
+import { useRouter } from "next/navigation";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
@@ -26,9 +27,22 @@ function VelocityIndicator({
   return <span className="text-xl">{emoji[velocity]}</span>;
 }
 
-function FeedbackCard({ feedback }: { feedback: POFeedback }) {
+function FeedbackCard({
+  feedback,
+  currentWeek,
+}: {
+  feedback: POFeedback;
+  currentWeek: number;
+}) {
+  const router = useRouter();
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div
+      onClick={() =>
+        router.push(`/feedback/${feedback.id}?week=${currentWeek}`)
+      }
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
+    >
       <div className="flex justify-between items-start mb-6">
         <div>
           <h3 className="font-medium text-gray-900">{feedback.submitted_by}</h3>
@@ -68,8 +82,24 @@ function FeedbackCard({ feedback }: { feedback: POFeedback }) {
   );
 }
 
-export function POFeedbackTest() {
-  const [selectedWeek, setSelectedWeek] = useState(getCurrentWeek());
+interface POFeedbackTestProps {
+  initialWeek?: number;
+}
+
+export function POFeedbackTest({
+  initialWeek = getCurrentWeek(),
+}: POFeedbackTestProps) {
+  const router = useRouter();
+  const [selectedWeek, setSelectedWeek] = useState(initialWeek);
+
+  const handleWeekChange = (week: number) => {
+    setSelectedWeek(week);
+    // Update URL without navigation
+    const url = new URL(window.location.href);
+    url.searchParams.set("week", week.toString());
+    router.replace(url.pathname + url.search);
+  };
+
   const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(selectedWeek);
 
   if (isLoading) {
@@ -89,12 +119,16 @@ export function POFeedbackTest() {
           </h2>
           <WeekPicker
             currentWeek={selectedWeek}
-            onWeekChange={setSelectedWeek}
+            onWeekChange={handleWeekChange}
           />
         </div>
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {weeklyFeedback?.map((feedback: POFeedback) => (
-            <FeedbackCard key={feedback.id} feedback={feedback} />
+            <FeedbackCard
+              key={feedback.id}
+              feedback={feedback}
+              currentWeek={selectedWeek}
+            />
           ))}
           {weeklyFeedback?.length === 0 && (
             <div className="col-span-full text-center py-8 text-gray-500">

@@ -1,16 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../lib/supabaseClient";
 import type { Database } from "@/types/supabase";
+import { getCurrentWeek as getWeek, getWeekDates } from "@/lib/date-utils";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
-// Utility function to get current ISO week number
 export function getCurrentWeek(): number {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 1);
-  const diff = now.getTime() - start.getTime();
-  const oneWeek = 1000 * 60 * 60 * 24 * 7;
-  return Math.ceil(diff / oneWeek);
+  return getWeek(new Date().getFullYear());
 }
 
 export function usePOFeedbackByWeek(weekNumber: number) {
@@ -20,17 +16,10 @@ export function usePOFeedbackByWeek(weekNumber: number) {
       const now = new Date();
       const year = now.getFullYear();
 
-      // Calculate the start of the year
-      const yearStart = new Date(year, 0, 1);
+      const { start: weekStart, end: weekEnd } = getWeekDates(weekNumber, year);
 
-      // Calculate the start of the target week (Monday)
-      const weekStart = new Date(yearStart);
-      weekStart.setDate(yearStart.getDate() + (weekNumber - 1) * 7);
       weekStart.setUTCHours(0, 0, 0, 0);
 
-      // Calculate the end of the target week (Friday)
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 4);
       weekEnd.setUTCHours(23, 59, 59, 999);
 
       console.log("Fetching PO feedback for date range:", {
@@ -43,7 +32,7 @@ export function usePOFeedbackByWeek(weekNumber: number) {
         .from("po_feedback")
         .select("*")
         .gte("created_at", weekStart.toISOString())
-        .lt("created_at", weekEnd.toISOString())
+        .lte("created_at", weekEnd.toISOString())
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -52,6 +41,22 @@ export function usePOFeedbackByWeek(weekNumber: number) {
 
       console.log("Retrieved data:", data);
       return data as POFeedback[];
+    },
+  });
+}
+
+export function usePOFeedbackById(id: string) {
+  return useQuery({
+    queryKey: ["po-feedback", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("po_feedback")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+      return data as POFeedback;
     },
   });
 }
