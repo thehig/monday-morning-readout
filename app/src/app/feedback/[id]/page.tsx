@@ -1,12 +1,6 @@
-import { FeedbackContent } from "./feedback-content";
+"use client";
 
-// This needs to be a server component to use generateStaticParams
-export async function generateStaticParams() {
-  // Pre-generate a reasonable range of IDs
-  return Array.from({ length: 1000 }, (_, i) => ({
-    id: (i + 1).toString(),
-  }));
-}
+import { FeedbackContent } from "./feedback-content";
 
 export default function FeedbackPage() {
   return <FeedbackContent />;

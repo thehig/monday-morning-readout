@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  // Force static rendering
+  reactStrictMode: true,
+  trailingSlash: true,
 };
 
 export default nextConfig;
