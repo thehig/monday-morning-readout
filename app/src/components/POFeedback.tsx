@@ -151,9 +151,7 @@ export function POFeedback({
 
   const handleWeekChange = (week: number) => {
     setSelectedWeek(week);
-    const url = new URL(window.location.href);
-    url.searchParams.set("week", week.toString());
-    router.replace(url.pathname + url.search);
+    router.push(`?week=${week}`);
   };
 
   const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(selectedWeek);
