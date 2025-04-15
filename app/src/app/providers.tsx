@@ -2,7 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, useEffect } from "react";
+import { debugEnvironmentVariables } from "@/utils/env-debug";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -16,6 +17,10 @@ export function Providers({ children }: { children: ReactNode }) {
         },
       })
   );
+
+  useEffect(() => {
+    debugEnvironmentVariables();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
