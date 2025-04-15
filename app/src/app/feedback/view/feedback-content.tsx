@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { usePOFeedbackByWeek } from "@/hooks/use-po-feedback";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
@@ -80,12 +80,12 @@ function VelocityIndicator({
 
 export function FeedbackContent() {
   const router = useRouter();
-  const params = useParams();
   const searchParams = useSearchParams();
   const week = parseInt(searchParams.get("week") || "1", 10);
+  const id = searchParams.get("id");
   const { data: weeklyFeedback } = usePOFeedbackByWeek(week);
 
-  const feedback = weeklyFeedback?.find((f) => f.id.toString() === params.id);
+  const feedback = weeklyFeedback?.find((f) => f.id.toString() === id);
 
   if (!feedback) {
     return (

@@ -102,7 +102,7 @@ function FeedbackCard({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() =>
-        router.push(`/feedback/${feedback.id}?week=${currentWeek}`)
+        router.push(`/feedback/view?id=${feedback.id}&week=${currentWeek}`)
       }
       className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer"
     >
