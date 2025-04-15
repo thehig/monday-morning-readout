@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
+import { AuthProvider } from "@/lib/auth";
+import { RouteGuard } from "@/components/RouteGuard";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -19,8 +21,12 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
-      <ReactQueryDevtools initialIsOpen={false} />
+      <AuthProvider>
+        <RouteGuard>
+          {children}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </RouteGuard>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
