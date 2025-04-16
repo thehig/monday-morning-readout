@@ -35,7 +35,7 @@ function HappinessIndicator({
 }) {
   const emojis = ["😢", "😕", "😐", "🙂", "😊"];
   const emojiIndex = Math.min(
-    Math.floor((value / 10) * (emojis.length - 1)),
+    Math.floor(((value - 1) / 4) * (emojis.length - 1)),
     emojis.length - 1
   );
   const emoji = emojis[emojiIndex];
@@ -43,9 +43,9 @@ function HappinessIndicator({
   const label = type === "team" ? "Team Happiness" : "Customer Happiness";
 
   return (
-    <div className="flex flex-col items-center" title={`${label}: ${value}/10`}>
+    <div className="flex flex-col items-center" title={`${label}: ${value}/5`}>
       <span className="text-3xl mb-1">{emoji}</span>
-      <span className={`text-lg font-semibold ${color}`}>{value}/10</span>
+      <span className={`text-lg font-semibold ${color}`}>{value}/5</span>
     </div>
   );
 }
@@ -214,7 +214,7 @@ export function FeedbackContent() {
                   (feedback.team_happiness + feedback.customer_happiness) /
                   2
                 ).toFixed(1)}
-                /10
+                /5
               </div>
             </div>
             <div className="grid grid-cols-2 gap-8 p-4 bg-gray-50 rounded-lg">
