@@ -15,31 +15,19 @@ export function RouteGuard({ children }: RouteGuardProps) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    console.log("RouteGuard: Checking route", {
-      isAuthenticated,
-      isLoading,
-      pathname,
-      isCheckingAuth,
-    });
-
     const isLoginPage = pathname === "/login";
 
     if (!isLoading) {
       if (!isAuthenticated && !isLoginPage) {
-        console.log("RouteGuard: Not authenticated, redirecting to login");
         router.push("/login");
       } else if (isAuthenticated && isLoginPage) {
-        console.log("RouteGuard: Already authenticated, redirecting to home");
         router.push("/");
-      } else {
-        console.log("RouteGuard: Route access allowed");
       }
       setIsCheckingAuth(false);
     }
   }, [isAuthenticated, isLoading, pathname, router]);
 
   if (error) {
-    console.error("RouteGuard: Authentication error:", error);
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-red-500">
@@ -50,7 +38,6 @@ export function RouteGuard({ children }: RouteGuardProps) {
   }
 
   if (isCheckingAuth) {
-    console.log("RouteGuard: Showing loading state");
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-gray-500">Checking authentication...</div>
