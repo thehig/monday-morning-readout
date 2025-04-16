@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSupabase } from "../utils/supabase";
 import type { Database } from "../types/supabase";
+import { aggregateFeedbackByEmail } from "../lib/utils";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
@@ -73,7 +74,9 @@ export function usePOFeedbackByWeek(weekNumber: number) {
       }
 
       console.log("Retrieved data:", data);
-      return data as POFeedback[];
+
+      // Aggregate feedback by email before returning
+      return aggregateFeedbackByEmail(data as POFeedback[]);
     },
   });
 }
