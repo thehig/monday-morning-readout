@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { FeedbackContent } from "./feedback-content";
 
 export default function FeedbackPage() {
@@ -11,5 +12,9 @@ export default function FeedbackPage() {
     return <div>Missing feedback ID</div>;
   }
 
-  return <FeedbackContent />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FeedbackContent />
+    </Suspense>
+  );
 }

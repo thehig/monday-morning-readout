@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { usePOFeedbackByWeek } from "@/hooks/use-po-feedback";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { Suspense } from "react";
 
 function Thermometer({ value }: { value: number }) {
   return (
@@ -78,7 +79,7 @@ function VelocityIndicator({
   );
 }
 
-export function FeedbackContent() {
+function FeedbackContentInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const week = parseInt(searchParams.get("week") || "1", 10);
@@ -459,5 +460,13 @@ export function FeedbackContent() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export function FeedbackContent() {
+  return (
+    <Suspense fallback={<div>Loading feedback...</div>}>
+      <FeedbackContentInner />
+    </Suspense>
   );
 }
