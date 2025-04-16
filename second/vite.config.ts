@@ -9,6 +9,8 @@ const REACT_CDN =
   "https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js";
 const REACT_DOM_CDN =
   "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js";
+const CRYPTO_JS_CDN =
+  "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -17,6 +19,10 @@ export default defineConfig({
     viteSingleFile(),
     injectHtml({
       scripts: [
+        {
+          src: CRYPTO_JS_CDN,
+          crossorigin: true,
+        },
         {
           src: REACT_CDN,
           crossorigin: true,
