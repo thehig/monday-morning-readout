@@ -6,80 +6,13 @@ import { usePOFeedbackByWeek } from "@/hooks/use-po-feedback";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { Suspense } from "react";
 import { formatEmailDisplayName } from "@/lib/utils";
-import { getDateTimeProps, formatTime, formatDate } from "@/lib/date-utils";
-
-function Thermometer({ value }: { value: number }) {
-  return (
-    <div
-      className="relative h-6 w-full bg-gray-200 rounded-full overflow-hidden"
-      title={`Progress: ${value}% complete`}
-    >
-      <motion.div
-        initial={{ width: 0 }}
-        animate={{ width: `${value}%` }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        className="absolute left-0 h-full bg-blue-500 rounded-full"
-      />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-sm font-bold text-white drop-shadow">
-          {value}%
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function HappinessIndicator({
-  value,
-  type,
-}: {
-  value: number;
-  type: "team" | "customer";
-}) {
-  const emojis = ["😢", "😕", "😐", "🙂", "😊"];
-  const emojiIndex = Math.min(
-    Math.floor(((value - 1) / 4) * (emojis.length - 1)),
-    emojis.length - 1
-  );
-  const emoji = emojis[emojiIndex];
-  const color = type === "team" ? "text-red-500" : "text-green-500";
-  const label = type === "team" ? "Team Happiness" : "Customer Happiness";
-
-  return (
-    <div className="flex flex-col items-center" title={`${label}: ${value}/5`}>
-      <span className="text-3xl mb-1">{emoji}</span>
-      <span className={`text-lg font-semibold ${color}`}>{value}/5</span>
-    </div>
-  );
-}
-
-function VelocityIndicator({
-  velocity,
-}: {
-  velocity: "Rot" | "Gelb" | "Grün";
-}) {
-  const colors = {
-    Rot: "bg-red-500",
-    Gelb: "bg-yellow-400",
-    Grün: "bg-green-500",
-  };
-
-  const labels = {
-    Rot: "Low velocity expected",
-    Gelb: "Medium velocity expected",
-    Grün: "High velocity expected",
-  };
-
-  return (
-    <div className="flex items-center gap-2">
-      <div
-        className={`w-4 h-4 rounded-full ${colors[velocity]} animate-pulse`}
-        title={labels[velocity]}
-      />
-      <span className="text-sm text-gray-600">{labels[velocity]}</span>
-    </div>
-  );
-}
+import { getDateTimeProps } from "@/lib/date-utils";
+import {
+  Thermometer,
+  HappinessIndicator,
+  VelocityIndicator,
+} from "@/components/indicators";
+import { TechnicalDetails } from "@/components/feedback/TechnicalDetails";
 
 function FeedbackContentInner() {
   const router = useRouter();
@@ -98,10 +31,7 @@ function FeedbackContentInner() {
     );
   }
 
-  // Extract name from email
   const displayName = formatEmailDisplayName(feedback.submitted_by);
-
-  // Format date with time
   const submissionDate = new Date(feedback.created_at);
   const { dateTime, title, relativeTime } = getDateTimeProps(submissionDate);
 
@@ -364,68 +294,14 @@ function FeedbackContentInner() {
           </div>
 
           {/* Technical Details Panel */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-gray-500">
-                Technical Details
-              </h2>
-              <div className="text-xs text-gray-400">System Information</div>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-              <div className="space-y-1">
-                <div className="text-xs text-gray-400">Feedback ID</div>
-                <div className="font-mono text-gray-600">{feedback.id}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-gray-400">Calendar Week</div>
-                <div className="font-mono text-gray-600">{week}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-gray-400">Submission Time</div>
-                <div className="font-mono text-gray-600">
-                  {formatTime(submissionDate, true)}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-gray-400">Submission Date</div>
-                <div className="font-mono text-gray-600">
-                  {formatDate(submissionDate, "isoDate")}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-gray-400">Raw Timestamp</div>
-                <div className="font-mono text-gray-600">
-                  {feedback.created_at}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-gray-400">Submitter Email</div>
-                <div
-                  className="font-mono text-gray-600 truncate"
-                  title={feedback.submitted_by}
-                >
-                  {feedback.submitted_by}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-center gap-2 text-xs text-gray-400">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>Last updated: {relativeTime}</span>
-            </div>
-          </div>
+          <TechnicalDetails
+            id={feedback.id}
+            week={week}
+            submissionDate={submissionDate}
+            createdAt={feedback.created_at}
+            submittedBy={feedback.submitted_by}
+            relativeTime={relativeTime}
+          />
 
           {/* End of content */}
         </motion.div>
