@@ -249,7 +249,196 @@ export function FeedbackContent() {
             </div>
           </div>
 
-          {/* Rest of your existing JSX */}
+          {/* Milestones Done */}
+          <div className="mb-8">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-lg font-medium text-gray-900">
+                Completed Milestones
+              </h2>
+              <div className="text-sm text-emerald-600">
+                Week {week} achievements
+              </div>
+            </div>
+            <div className="p-6 bg-emerald-50/50 rounded-lg border border-emerald-100">
+              {feedback.milestones_done ? (
+                <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                  {feedback.milestones_done}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-400">
+                  No milestones reported for this week
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Next Week's Goals */}
+          <div className="mb-8">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-lg font-medium text-gray-900">
+                Goals for Next Week
+              </h2>
+              <div className="text-sm text-blue-600">
+                Week {week + 1} planning
+              </div>
+            </div>
+            <div className="p-6 bg-blue-50/50 rounded-lg border border-blue-100">
+              {feedback.goals_next_week ? (
+                <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                  {feedback.goals_next_week}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-400">
+                  No goals set for next week
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Risks */}
+          <div className="mb-8">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-lg font-medium text-gray-900">
+                Identified Risks
+              </h2>
+              <div className="text-sm text-amber-600">Current challenges</div>
+            </div>
+            <div className="p-6 bg-amber-50/50 rounded-lg border border-amber-100 border-l-4 border-l-amber-400">
+              {feedback.risks ? (
+                <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                  {feedback.risks}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-400">
+                  No risks identified for this period
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* PS Call Status */}
+          <div>
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-lg font-medium text-gray-900">
+                PS Call Status
+              </h2>
+              <div className="text-sm text-purple-600">
+                Professional Services Support
+              </div>
+            </div>
+            <div
+              className={`p-6 rounded-lg border ${
+                feedback.ps_call_needed === "JA"
+                  ? "bg-yellow-50/50 border-yellow-100 border-l-4 border-l-yellow-400"
+                  : "bg-emerald-50/50 border-emerald-100"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-4 h-4 rounded-full ${
+                    feedback.ps_call_needed === "JA"
+                      ? "bg-yellow-400 animate-pulse"
+                      : "bg-emerald-500"
+                  }`}
+                />
+                <span
+                  className={`font-medium ${
+                    feedback.ps_call_needed === "JA"
+                      ? "text-yellow-700"
+                      : "text-emerald-700"
+                  }`}
+                >
+                  PS Call{" "}
+                  {feedback.ps_call_needed === "JA" ? "Needed" : "Not Needed"}
+                </span>
+              </div>
+              {feedback.ps_call_context && (
+                <div className="mt-4 pl-7 prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                  {feedback.ps_call_context}
+                </div>
+              )}
+              {!feedback.ps_call_context &&
+                feedback.ps_call_needed === "JA" && (
+                  <div className="mt-4 pl-7 text-gray-400">
+                    No additional context provided
+                  </div>
+                )}
+            </div>
+          </div>
+
+          {/* Technical Details Panel */}
+          <div className="mt-12 pt-6 border-t border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-medium text-gray-500">
+                Technical Details
+              </h2>
+              <div className="text-xs text-gray-400">System Information</div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+              <div className="space-y-1">
+                <div className="text-xs text-gray-400">Feedback ID</div>
+                <div className="font-mono text-gray-600">{feedback.id}</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-gray-400">Calendar Week</div>
+                <div className="font-mono text-gray-600">{week}</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-gray-400">Submission Time</div>
+                <div className="font-mono text-gray-600">
+                  {submissionDate.toLocaleTimeString(undefined, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-gray-400">Submission Date</div>
+                <div className="font-mono text-gray-600">
+                  {submissionDate.toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-gray-400">Raw Timestamp</div>
+                <div className="font-mono text-gray-600">
+                  {feedback.created_at}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-gray-400">Submitter Email</div>
+                <div
+                  className="font-mono text-gray-600 truncate"
+                  title={feedback.submitted_by}
+                >
+                  {feedback.submitted_by}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center gap-2 text-xs text-gray-400">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>Last updated: {relativeTime}</span>
+            </div>
+          </div>
+
+          {/* End of content */}
         </motion.div>
       </div>
     </div>
