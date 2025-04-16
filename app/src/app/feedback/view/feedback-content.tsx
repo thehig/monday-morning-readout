@@ -123,15 +123,15 @@ export function FeedbackContent() {
   const relativeTime = rtf.format(-daysAgo, "day");
 
   return (
-    <div className="bg-gray-50">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto p-4 lg:p-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-8"
+          className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:p-8"
         >
           {/* Header with back button */}
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-4 mb-6">
             <button
               onClick={() => router.back()}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -150,224 +150,241 @@ export function FeedbackContent() {
             </div>
           </div>
 
-          {/* Submitter Info */}
-          <div className="mb-8">
-            <h2 className="text-lg font-medium text-gray-900 mb-2">
-              Submitted by
-            </h2>
-            <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
-              <div
-                className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0"
-                title={feedback.submitted_by}
-              >
-                <span className="text-blue-600 font-medium">
-                  {displayName
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </span>
-              </div>
-              <div className="min-w-0">
-                <div className="font-medium text-gray-900">{displayName}</div>
-                <div className="text-sm text-gray-500 break-all">
-                  {feedback.submitted_by}
-                </div>
-                <div className="text-sm text-gray-500 mt-1">
-                  <time
-                    dateTime={feedback.created_at}
-                    title={`${formattedDate} at ${formattedTime}`}
+          {/* Two-column layout */}
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+            {/* Left Column - Status & Progress */}
+            <div className="space-y-6">
+              {/* Submitter Info */}
+              <div>
+                <h2 className="text-lg font-medium text-gray-900 mb-2">
+                  Submitted by
+                </h2>
+                <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
+                  <div
+                    className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0"
+                    title={feedback.submitted_by}
                   >
-                    {formattedDate} at {formattedTime}
-                  </time>
-                  <span className="text-gray-400"> · </span>
-                  <span title={formattedDate}>{relativeTime}</span>
+                    <span className="text-blue-600 font-medium">
+                      {displayName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-medium text-gray-900">
+                      {displayName}
+                    </div>
+                    <div className="text-sm text-gray-500 break-all">
+                      {feedback.submitted_by}
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      <time
+                        dateTime={feedback.created_at}
+                        title={`${formattedDate} at ${formattedTime}`}
+                      >
+                        {formattedDate} at {formattedTime}
+                      </time>
+                      <span className="text-gray-400"> · </span>
+                      <span title={formattedDate}>{relativeTime}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Progress Section */}
-          <div className="mb-8">
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">
-                Sprint Progress
-              </h2>
-              <div
-                className="text-sm text-gray-500"
-                title="Current progress percentage"
-              >
-                {feedback.progress_percent}% Complete
-              </div>
-            </div>
-            <Thermometer value={feedback.progress_percent} />
-          </div>
-
-          {/* Happiness Metrics */}
-          <div className="mb-8">
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">
-                Team & Customer Satisfaction
-              </h2>
-              <div className="text-sm text-gray-500">
-                Average:{" "}
-                {(
-                  (feedback.team_happiness + feedback.customer_happiness) /
-                  2
-                ).toFixed(1)}
-                /5
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-8 p-4 bg-gray-50 rounded-lg">
+              {/* Progress Section */}
               <div>
-                <div className="text-sm text-gray-500 text-center mb-2">
-                  Team Satisfaction
+                <div className="flex items-baseline justify-between mb-4">
+                  <h2 className="text-lg font-medium text-gray-900">
+                    Sprint Progress
+                  </h2>
+                  <div
+                    className="text-sm text-gray-500"
+                    title="Current progress percentage"
+                  >
+                    {feedback.progress_percent}% Complete
+                  </div>
                 </div>
-                <HappinessIndicator
-                  value={feedback.team_happiness}
-                  type="team"
-                />
+                <Thermometer value={feedback.progress_percent} />
               </div>
+
+              {/* Milestones Done */}
               <div>
-                <div className="text-sm text-gray-500 text-center mb-2">
-                  Customer Satisfaction
+                <div className="flex items-baseline justify-between mb-4">
+                  <h2 className="text-lg font-medium text-gray-900">
+                    Completed Milestones
+                  </h2>
+                  <div className="text-sm text-emerald-600">
+                    Week {week} achievements
+                  </div>
                 </div>
-                <HappinessIndicator
-                  value={feedback.customer_happiness}
-                  type="customer"
-                />
+                <div className="p-4 bg-emerald-50/50 rounded-lg border border-emerald-100">
+                  {feedback.milestones_done ? (
+                    <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                      {feedback.milestones_done}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-400">
+                      No milestones reported for this week
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Risks */}
+              <div>
+                <div className="flex items-baseline justify-between mb-4">
+                  <h2 className="text-lg font-medium text-gray-900">
+                    Identified Risks
+                  </h2>
+                  <div className="text-sm text-amber-600">
+                    Current challenges
+                  </div>
+                </div>
+                <div className="p-4 bg-amber-50/50 rounded-lg border border-amber-100 border-l-4 border-l-amber-400">
+                  {feedback.risks ? (
+                    <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                      {feedback.risks}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-400">
+                      No risks identified for this period
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Velocity Prediction */}
-          <div className="mb-8">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
-              Next Week&apos;s Velocity Prediction
-            </h2>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <VelocityIndicator velocity={feedback.velocity_next_week} />
-            </div>
-          </div>
-
-          {/* Milestones Done */}
-          <div className="mb-8">
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">
-                Completed Milestones
-              </h2>
-              <div className="text-sm text-emerald-600">
-                Week {week} achievements
-              </div>
-            </div>
-            <div className="p-6 bg-emerald-50/50 rounded-lg border border-emerald-100">
-              {feedback.milestones_done ? (
-                <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
-                  {feedback.milestones_done}
+            {/* Right Column - Metrics & Planning */}
+            <div className="space-y-6">
+              {/* Happiness Metrics */}
+              <div>
+                <div className="flex items-baseline justify-between mb-4">
+                  <h2 className="text-lg font-medium text-gray-900">
+                    Team & Customer Satisfaction
+                  </h2>
+                  <div className="text-sm text-gray-500">
+                    Average:{" "}
+                    {(
+                      (feedback.team_happiness + feedback.customer_happiness) /
+                      2
+                    ).toFixed(1)}
+                    /5
+                  </div>
                 </div>
-              ) : (
-                <div className="text-center py-4 text-gray-400">
-                  No milestones reported for this week
+                <div className="grid grid-cols-2 gap-8 p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="text-sm text-gray-500 text-center mb-2">
+                      Team Satisfaction
+                    </div>
+                    <HappinessIndicator
+                      value={feedback.team_happiness}
+                      type="team"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500 text-center mb-2">
+                      Customer Satisfaction
+                    </div>
+                    <HappinessIndicator
+                      value={feedback.customer_happiness}
+                      type="customer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Velocity Prediction */}
+              {feedback.velocity_next_week && (
+                <div>
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">
+                    Next Week&apos;s Velocity Prediction
+                  </h2>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <VelocityIndicator velocity={feedback.velocity_next_week} />
+                  </div>
                 </div>
               )}
-            </div>
-          </div>
 
-          {/* Next Week's Goals */}
-          <div className="mb-8">
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">
-                Goals for Next Week
-              </h2>
-              <div className="text-sm text-blue-600">
-                Week {week + 1} planning
+              {/* Next Week's Goals */}
+              <div>
+                <div className="flex items-baseline justify-between mb-4">
+                  <h2 className="text-lg font-medium text-gray-900">
+                    Goals for Next Week
+                  </h2>
+                  <div className="text-sm text-blue-600">
+                    Week {week + 1} planning
+                  </div>
+                </div>
+                <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-100">
+                  {feedback.goals_next_week ? (
+                    <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                      {feedback.goals_next_week}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-400">
+                      No goals set for next week
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="p-6 bg-blue-50/50 rounded-lg border border-blue-100">
-              {feedback.goals_next_week ? (
-                <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
-                  {feedback.goals_next_week}
-                </div>
-              ) : (
-                <div className="text-center py-4 text-gray-400">
-                  No goals set for next week
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Risks */}
-          <div className="mb-8">
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">
-                Identified Risks
-              </h2>
-              <div className="text-sm text-amber-600">Current challenges</div>
-            </div>
-            <div className="p-6 bg-amber-50/50 rounded-lg border border-amber-100 border-l-4 border-l-amber-400">
-              {feedback.risks ? (
-                <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
-                  {feedback.risks}
+              {/* PS Call Status */}
+              <div>
+                <div className="flex items-baseline justify-between mb-4">
+                  <h2 className="text-lg font-medium text-gray-900">
+                    PS Call Status
+                  </h2>
+                  <div className="text-sm text-purple-600">
+                    Professional Services Support
+                  </div>
                 </div>
-              ) : (
-                <div className="text-center py-4 text-gray-400">
-                  No risks identified for this period
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* PS Call Status */}
-          <div>
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">
-                PS Call Status
-              </h2>
-              <div className="text-sm text-purple-600">
-                Professional Services Support
-              </div>
-            </div>
-            <div
-              className={`p-6 rounded-lg border ${
-                feedback.ps_call_needed === "JA"
-                  ? "bg-yellow-50/50 border-yellow-100 border-l-4 border-l-yellow-400"
-                  : "bg-emerald-50/50 border-emerald-100"
-              }`}
-            >
-              <div className="flex items-center gap-3">
                 <div
-                  className={`w-4 h-4 rounded-full ${
+                  className={`p-4 rounded-lg border ${
                     feedback.ps_call_needed === "JA"
-                      ? "bg-yellow-400 animate-pulse"
-                      : "bg-emerald-500"
-                  }`}
-                />
-                <span
-                  className={`font-medium ${
-                    feedback.ps_call_needed === "JA"
-                      ? "text-yellow-700"
-                      : "text-emerald-700"
+                      ? "bg-yellow-50/50 border-yellow-100 border-l-4 border-l-yellow-400"
+                      : "bg-emerald-50/50 border-emerald-100"
                   }`}
                 >
-                  PS Call{" "}
-                  {feedback.ps_call_needed === "JA" ? "Needed" : "Not Needed"}
-                </span>
-              </div>
-              {feedback.ps_call_context && (
-                <div className="mt-4 pl-7 prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
-                  {feedback.ps_call_context}
-                </div>
-              )}
-              {!feedback.ps_call_context &&
-                feedback.ps_call_needed === "JA" && (
-                  <div className="mt-4 pl-7 text-gray-400">
-                    No additional context provided
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-4 h-4 rounded-full ${
+                        feedback.ps_call_needed === "JA"
+                          ? "bg-yellow-400 animate-pulse"
+                          : "bg-emerald-500"
+                      }`}
+                    />
+                    <span
+                      className={`font-medium ${
+                        feedback.ps_call_needed === "JA"
+                          ? "text-yellow-700"
+                          : "text-emerald-700"
+                      }`}
+                    >
+                      PS Call{" "}
+                      {feedback.ps_call_needed === "JA"
+                        ? "Needed"
+                        : "Not Needed"}
+                    </span>
                   </div>
-                )}
+                  {feedback.ps_call_context && (
+                    <div className="mt-4 pl-7 prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                      {feedback.ps_call_context}
+                    </div>
+                  )}
+                  {!feedback.ps_call_context &&
+                    feedback.ps_call_needed === "JA" && (
+                      <div className="mt-4 pl-7 text-gray-400">
+                        No additional context provided
+                      </div>
+                    )}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Technical Details Panel */}
-          <div className="mt-12 pt-6 border-t border-gray-100">
+          <div className="mt-8 pt-6 border-t border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-medium text-gray-500">
                 Technical Details
