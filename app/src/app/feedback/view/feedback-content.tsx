@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { usePOFeedbackByWeek } from "@/hooks/use-po-feedback";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { Suspense } from "react";
+import { formatEmailDisplayName } from "@/lib/utils";
+import { getDateTimeProps, formatTime, formatDate } from "@/lib/date-utils";
 
 function Thermometer({ value }: { value: number }) {
   return (
@@ -97,31 +99,11 @@ function FeedbackContentInner() {
   }
 
   // Extract name from email
-  const displayName = feedback.submitted_by
-    .split("@")[0]
-    .split(/[._-]/)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(" ");
+  const displayName = formatEmailDisplayName(feedback.submitted_by);
 
   // Format date with time
   const submissionDate = new Date(feedback.created_at);
-  const formattedDate = submissionDate.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const formattedTime = submissionDate.toLocaleTimeString(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  // Calculate relative time
-  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-  const daysAgo = Math.floor(
-    (Date.now() - submissionDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  const relativeTime = rtf.format(-daysAgo, "day");
+  const { dateTime, title, relativeTime } = getDateTimeProps(submissionDate);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -180,14 +162,11 @@ function FeedbackContentInner() {
                       {feedback.submitted_by}
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
-                      <time
-                        dateTime={feedback.created_at}
-                        title={`${formattedDate} at ${formattedTime}`}
-                      >
-                        {formattedDate} at {formattedTime}
+                      <time dateTime={dateTime} title={title}>
+                        {title}
                       </time>
                       <span className="text-gray-400"> · </span>
-                      <span title={formattedDate}>{relativeTime}</span>
+                      <span title={title}>{relativeTime}</span>
                     </div>
                   </div>
                 </div>
@@ -404,21 +383,13 @@ function FeedbackContentInner() {
               <div className="space-y-1">
                 <div className="text-xs text-gray-400">Submission Time</div>
                 <div className="font-mono text-gray-600">
-                  {submissionDate.toLocaleTimeString(undefined, {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                  })}
+                  {formatTime(submissionDate, true)}
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="text-xs text-gray-400">Submission Date</div>
                 <div className="font-mono text-gray-600">
-                  {submissionDate.toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
+                  {formatDate(submissionDate, "isoDate")}
                 </div>
               </div>
               <div className="space-y-1">

@@ -35,11 +35,75 @@ export function getCurrentWeek(year: number): number {
   return Math.ceil(diff / oneWeek);
 }
 
-export const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
-  month: "short",
-  day: "numeric",
+export const DATE_FORMAT_OPTIONS = {
+  short: {
+    month: "short",
+    day: "numeric",
+  } as const,
+  long: {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  } as const,
+  time: {
+    hour: "2-digit",
+    minute: "2-digit",
+  } as const,
+  timeWithSeconds: {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  } as const,
+  isoDate: {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  } as const,
 } as const;
 
-export function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", DATE_FORMAT_OPTIONS);
+export function formatDate(
+  date: Date,
+  format: keyof typeof DATE_FORMAT_OPTIONS = "short"
+): string {
+  return date.toLocaleDateString("en-US", DATE_FORMAT_OPTIONS[format]);
+}
+
+export function formatTime(date: Date, includeSeconds = false): string {
+  return date.toLocaleTimeString(
+    "en-US",
+    includeSeconds
+      ? DATE_FORMAT_OPTIONS.timeWithSeconds
+      : DATE_FORMAT_OPTIONS.time
+  );
+}
+
+export function formatDateTime(
+  date: Date,
+  dateFormat: keyof typeof DATE_FORMAT_OPTIONS = "long"
+): string {
+  const formattedDate = formatDate(date, dateFormat);
+  const formattedTime = formatTime(date);
+  return `${formattedDate} at ${formattedTime}`;
+}
+
+export function getRelativeTime(date: Date): string {
+  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  const daysAgo = Math.floor(
+    (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  return rtf.format(-daysAgo, "day");
+}
+
+export function getDateTimeProps(date: Date | string): {
+  dateTime: string;
+  title: string;
+  relativeTime: string;
+} {
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  return {
+    dateTime: dateObj.toISOString(),
+    title: formatDateTime(dateObj),
+    relativeTime: getRelativeTime(dateObj),
+  };
 }
