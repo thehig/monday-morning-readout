@@ -1,11 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import { initializeSupabase, testConnection } from "./utils/supabase";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { usePOFeedbackByWeek, getCurrentWeek } from "./hooks/use-po-feedback";
 import type { Database } from "./types/supabase";
 import { WeekPicker } from "./components/WeekPicker";
-import { HashRouter, Routes, Route, Link } from "react-router-dom";
+import {
+  HashRouter,
+  Routes,
+  Route,
+  Link,
+  useSearchParams,
+} from "react-router-dom";
 import { FeedbackDetail } from "./components/feedback/FeedbackDetail";
 
 // Extend Window interface to include our custom properties
@@ -38,9 +44,18 @@ function AppContent() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isDecrypted, setIsDecrypted] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Get week from URL or default to current week
+  const weekParam = searchParams.get("week");
   const [currentWeek, setCurrentWeek] = useState(
-    getCurrentWeek(new Date().getFullYear())
+    weekParam ? parseInt(weekParam) : getCurrentWeek(new Date().getFullYear())
   );
+
+  // Update URL when week changes
+  useEffect(() => {
+    setSearchParams({ week: currentWeek.toString() });
+  }, [currentWeek, setSearchParams]);
 
   const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(currentWeek);
 
@@ -110,7 +125,10 @@ function AppContent() {
     <div className="h-screen bg-background flex flex-col">
       <header className="border-b">
         <div className="flex h-16 items-center justify-between px-4">
-          <Link to="/" className="text-2xl font-bold hover:text-primary">
+          <Link
+            to={`/?week=${currentWeek}`}
+            className="text-2xl font-bold hover:text-primary"
+          >
             Monday Morning Readout
           </Link>
           <WeekPicker currentWeek={currentWeek} onWeekChange={setCurrentWeek} />
@@ -131,7 +149,7 @@ function AppContent() {
                     {weeklyFeedback.map((feedback: POFeedback) => (
                       <Link
                         key={feedback.id}
-                        to={`/feedback/${feedback.id}`}
+                        to={`/feedback/${feedback.id}?week=${currentWeek}`}
                         className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
                       >
                         <h3 className="font-medium mb-2">

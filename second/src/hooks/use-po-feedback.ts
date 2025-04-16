@@ -60,25 +60,21 @@ export function usePOFeedbackByWeek(weekNumber: number) {
 }
 
 export function usePOFeedbackById(id: string | undefined) {
-  return useQuery({
-    queryKey: ["po-feedback", "id", id],
-    queryFn: async () => {
-      if (!id) {
-        return null;
-      }
+  const supabase = getSupabase();
 
-      const supabase = getSupabase();
+  return useQuery({
+    queryKey: ["po-feedback", id],
+    queryFn: async () => {
+      if (!id) throw new Error("ID is required");
+
       const { data, error } = await supabase
         .from("po_feedback")
         .select("*")
-        .eq("id", id)
+        .eq("id", parseInt(id))
         .single();
 
-      if (error) {
-        throw error;
-      }
-
-      return data as POFeedback;
+      if (error) throw error;
+      return data;
     },
     enabled: !!id,
   });

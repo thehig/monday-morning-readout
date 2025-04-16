@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { usePOFeedbackById } from "../../hooks/use-po-feedback";
 import { Button } from "../ui/button";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
@@ -6,9 +6,14 @@ import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 export function FeedbackDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: feedback, isLoading } = usePOFeedbackById(
-    id ? parseInt(id) : undefined
-  );
+  const [searchParams] = useSearchParams();
+  const week = searchParams.get("week");
+
+  const { data: feedback, isLoading } = usePOFeedbackById(id ? id : undefined);
+
+  const handleBack = () => {
+    navigate(week ? `/?week=${week}` : "/");
+  };
 
   if (isLoading) {
     return (
@@ -22,7 +27,7 @@ export function FeedbackDetail() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="text-gray-600">Feedback not found</div>
-        <Button onClick={() => navigate(-1)} variant="outline">
+        <Button onClick={handleBack} variant="outline">
           <ChevronLeftIcon className="w-4 h-4" />
           Go Back
         </Button>
@@ -33,7 +38,7 @@ export function FeedbackDetail() {
   return (
     <div className="container mx-auto p-4">
       <div className="mb-4">
-        <Button onClick={() => navigate(-1)} variant="outline">
+        <Button onClick={handleBack} variant="outline">
           <ChevronLeftIcon className="w-4 h-4" />
           Back to List
         </Button>
