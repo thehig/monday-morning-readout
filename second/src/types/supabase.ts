@@ -1,5 +1,3 @@
-export type VelocityIndicator = "Rot" | "Gelb" | "Grün";
-
 export type Json =
   | string
   | number
@@ -13,46 +11,46 @@ export interface Database {
     Tables: {
       po_feedback: {
         Row: {
-          id: number;
+          id: string;
           created_at: string;
           submitted_by: string;
+          week_number: number;
           progress_percent: number;
-          velocity_next_week: "Rot" | "Gelb" | "Grün";
           team_happiness: number;
           customer_happiness: number;
-          goals_next_week: string;
-          milestones_done: string;
-          ps_call_context: string;
-          ps_call_needed: "NEIN" | "JA";
-          risks: string;
+          velocity_next_week: "Rot" | "Gelb" | "Grün";
+          milestones_done?: string;
+          risks?: string;
+          goals_next_week?: string;
+          ps_call_status?: string;
         };
         Insert: {
-          id?: number;
+          id?: string;
           created_at?: string;
           submitted_by: string;
+          week_number: number;
           progress_percent: number;
-          velocity_next_week: "Rot" | "Gelb" | "Grün";
           team_happiness: number;
           customer_happiness: number;
-          goals_next_week: string;
-          milestones_done: string;
-          ps_call_context: string;
-          ps_call_needed: "NEIN" | "JA";
-          risks: string;
+          velocity_next_week: "Rot" | "Gelb" | "Grün";
+          milestones_done?: string;
+          risks?: string;
+          goals_next_week?: string;
+          ps_call_status?: string;
         };
         Update: {
-          id?: number;
+          id?: string;
           created_at?: string;
           submitted_by?: string;
+          week_number?: number;
           progress_percent?: number;
-          velocity_next_week?: "Rot" | "Gelb" | "Grün";
           team_happiness?: number;
           customer_happiness?: number;
-          goals_next_week?: string;
+          velocity_next_week?: "Rot" | "Gelb" | "Grün";
           milestones_done?: string;
-          ps_call_context?: string;
-          ps_call_needed?: "NEIN" | "JA";
           risks?: string;
+          goals_next_week?: string;
+          ps_call_status?: string;
         };
       };
     };

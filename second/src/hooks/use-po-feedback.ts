@@ -1,11 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSupabase } from "../utils/supabase";
 import type { Database } from "../types/supabase";
-import { getCurrentWeek as getWeek, getWeekDates } from "../lib/date-utils";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
-export { getWeek as getCurrentWeek };
+export function getCurrentWeek(
+  year: number = new Date().getFullYear()
+): number {
+  const now = new Date();
+  const start = new Date(year, 0, 1);
+  const diff = now.getTime() - start.getTime();
+  const oneWeek = 1000 * 60 * 60 * 24 * 7;
+  return Math.ceil(diff / oneWeek);
+}
+
+function getWeekDates(weekNumber: number, year: number) {
+  const start = new Date(year, 0, 1);
+  start.setDate(start.getDate() + (weekNumber - 1) * 7);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  return { start, end };
+}
 
 export function usePOFeedbackByWeek(weekNumber: number) {
   return useQuery({
@@ -25,7 +40,8 @@ export function usePOFeedbackByWeek(weekNumber: number) {
         end: weekEnd.toISOString(),
       });
 
-      const { data, error } = await getSupabase()
+      const supabase = getSupabase();
+      const { data, error } = await supabase
         .from("po_feedback")
         .select("*")
         .gte("created_at", weekStart.toISOString())
@@ -33,7 +49,8 @@ export function usePOFeedbackByWeek(weekNumber: number) {
         .order("created_at", { ascending: false });
 
       if (error) {
-        throw new Error(`Error fetching PO feedback: ${error.message}`);
+        console.error("Error fetching PO feedback:", error);
+        throw error;
       }
 
       console.log("Retrieved data:", data);
@@ -42,18 +59,27 @@ export function usePOFeedbackByWeek(weekNumber: number) {
   });
 }
 
-export function usePOFeedbackById(id: string) {
+export function usePOFeedbackById(id: string | undefined) {
   return useQuery({
-    queryKey: ["po-feedback", id],
+    queryKey: ["po-feedback", "id", id],
     queryFn: async () => {
-      const { data, error } = await getSupabase()
+      if (!id) {
+        return null;
+      }
+
+      const supabase = getSupabase();
+      const { data, error } = await supabase
         .from("po_feedback")
         .select("*")
         .eq("id", id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
+
       return data as POFeedback;
     },
+    enabled: !!id,
   });
 }

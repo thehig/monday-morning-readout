@@ -1,10 +1,30 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "../types/supabase";
 
-let supabase: ReturnType<typeof createClient> | null = null;
+let supabase: ReturnType<typeof createClient<Database>> | null = null;
 
 export function initializeSupabase(url: string, anonKey: string) {
-  supabase = createClient(url, anonKey);
-  return supabase;
+  try {
+    if (!url || !anonKey) {
+      throw new Error("Supabase URL and anon key are required");
+    }
+    supabase = createClient<Database>(url, anonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+      global: {
+        headers: {
+          "X-Client-Info": "monday-morning-readout",
+        },
+      },
+    });
+    return supabase;
+  } catch (error) {
+    console.error("Failed to initialize Supabase client:", error);
+    throw error;
+  }
 }
 
 export function getSupabase() {
@@ -17,15 +37,11 @@ export function getSupabase() {
 }
 
 export async function testConnection() {
-  if (!supabase) {
-    throw new Error("Supabase client not initialized");
-  }
-
   try {
-    // Simple query to test connection - just fetch the current timestamp from Postgres
+    const supabase = getSupabase();
     const { data, error } = await supabase
-      .from("po_feedback") // This is a system table that always exists
-      .select("*")
+      .from("po_feedback")
+      .select("created_at")
       .limit(1);
 
     if (error) {
@@ -33,13 +49,13 @@ export async function testConnection() {
       return { success: false, error: error.message };
     }
 
-    console.log("Supabase connection test successful:", data);
-    return { success: true, timestamp: new Date().toISOString() };
-  } catch (err) {
-    console.error("Supabase connection test error:", err);
+    const timestamp = data?.[0]?.created_at || new Date().toISOString();
+    return { success: true, timestamp };
+  } catch (error) {
+    console.error("Supabase connection test failed:", error);
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Unknown error",
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }

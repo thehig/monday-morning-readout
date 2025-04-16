@@ -5,31 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { usePOFeedbackByWeek, getCurrentWeek } from "./hooks/use-po-feedback";
 import type { Database } from "./types/supabase";
 import { WeekPicker } from "./components/WeekPicker";
-
-interface EncryptedEnv {
-  ENCRYPTED_ENV: {
-    iv: string;
-    salt: string;
-    encrypted: string;
-  };
-}
-
-interface DecryptedEnv {
-  DECRYPTED_ENV: {
-    VITE_SUPABASE_URL: string;
-    VITE_SUPABASE_ANON_KEY: string;
-  };
-  secureEnv: {
-    decryptEnvVars: (
-      encryptedEnv: EncryptedEnv["ENCRYPTED_ENV"],
-      password: string
-    ) => DecryptedEnv["DECRYPTED_ENV"];
-  };
-}
-
-declare global {
-  interface Window extends EncryptedEnv, DecryptedEnv {}
-}
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { FeedbackDetail } from "./components/feedback/FeedbackDetail";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
@@ -101,8 +78,7 @@ function AppContent() {
   if (!isDecrypted) {
     return (
       <div className="container">
-        <h1>Environment Variable Decryption</h1>
-
+        <h1>Monday Morning Readout</h1>
         <div className="decrypt-form">
           <input
             type="password"
@@ -116,18 +92,6 @@ function AppContent() {
           </button>
           {error && <div className="error-message">{error}</div>}
         </div>
-
-        <div className="status-container">
-          {connectionStatus && (
-            <div
-              className={`connection-status ${
-                connectionStatus.includes("Failed") ? "error" : "success"
-              }`}
-            >
-              {connectionStatus}
-            </div>
-          )}
-        </div>
       </div>
     );
   }
@@ -136,45 +100,58 @@ function AppContent() {
     <div className="h-screen bg-background flex flex-col">
       <header className="border-b">
         <div className="flex h-16 items-center justify-between px-4">
-          <h1 className="text-2xl font-bold">Monday Morning Readout</h1>
+          <Link to="/" className="text-2xl font-bold hover:text-primary">
+            Monday Morning Readout
+          </Link>
           <WeekPicker currentWeek={currentWeek} onWeekChange={setCurrentWeek} />
         </div>
       </header>
       <main className="flex-1 overflow-auto">
-        <div className="container mx-auto p-4">
-          {isLoading ? (
-            <div className="text-center text-gray-600">
-              Loading feedback data...
-            </div>
-          ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {weeklyFeedback.map((feedback: POFeedback) => (
-                <div
-                  key={feedback.id}
-                  className="bg-white p-4 rounded-lg shadow"
-                >
-                  <h3 className="font-medium mb-2">{feedback.submitted_by}</h3>
-                  <p className="text-sm text-gray-600">
-                    Progress: {feedback.progress_percent}%
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Team Happiness: {feedback.team_happiness}/10
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Customer Happiness: {feedback.customer_happiness}/10
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Velocity Next Week: {feedback.velocity_next_week}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center text-gray-600">
-              No feedback found for week {currentWeek}
-            </div>
-          )}
-        </div>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <div className="container mx-auto p-4">
+                {isLoading ? (
+                  <div className="text-center text-gray-600">
+                    Loading feedback data...
+                  </div>
+                ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {weeklyFeedback.map((feedback: POFeedback) => (
+                      <Link
+                        key={feedback.id}
+                        to={`/feedback/${feedback.id}`}
+                        className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+                      >
+                        <h3 className="font-medium mb-2">
+                          {feedback.submitted_by}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Progress: {feedback.progress_percent}%
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Team Happiness: {feedback.team_happiness}/10
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Customer Happiness: {feedback.customer_happiness}/10
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Velocity Next Week: {feedback.velocity_next_week}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-600">
+                    No feedback found for week {currentWeek}
+                  </div>
+                )}
+              </div>
+            }
+          />
+          <Route path="/feedback/:id" element={<FeedbackDetail />} />
+        </Routes>
       </main>
     </div>
   );
@@ -183,7 +160,9 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppContent />
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
