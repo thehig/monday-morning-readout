@@ -34,6 +34,9 @@ export default defineConfig({
       ],
     }),
   ],
+  css: {
+    postcss: "./postcss.config.js",
+  },
   build: {
     target: "esnext",
     assetsInlineLimit: 100000000,

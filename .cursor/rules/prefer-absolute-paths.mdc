@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Prefer Absolute Paths
+
+- When generating command line commands (like 'npm install') prefer full/absolute path names
+- Use Windows path encoding
