@@ -7,9 +7,9 @@ const nextConfig: NextConfig = {
   // Enable static HTML export
   output: "export",
 
-  // Repository base path for production
+  // Repository base path for GitHub Pages deployment
   basePath:
-    process.env.NODE_ENV === "production" ? "/monday-morning-readout" : "",
+    process.env.GITHUB_PAGES === "true" ? "/monday-morning-readout" : "",
 
   // Optimize imports from heavy libraries
   experimental: {
