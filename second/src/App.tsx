@@ -125,8 +125,8 @@ function AppContent() {
   }
 
   return (
-    <div className="h-screen bg-background flex flex-col">
-      <header className="border-b">
+    <div className="h-screen bg-gray-50 flex flex-col">
+      <header className="border-b bg-white">
         <div className="flex h-16 items-center justify-between px-4">
           <Link
             to={`/?week=${currentWeek}`}
@@ -142,13 +142,13 @@ function AppContent() {
           <Route
             path="/"
             element={
-              <div className="container mx-auto p-4">
+              <div className="p-4">
                 {isLoading ? (
                   <div className="text-center text-gray-600">
                     Loading feedback data...
                   </div>
                 ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
-                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min p-4">
+                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min">
                     {weeklyFeedback.map((feedback: POFeedback) => (
                       <FeedbackCard
                         key={feedback.id}

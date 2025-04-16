@@ -82,15 +82,25 @@ interface HappinessIndicatorProps {
 export function HappinessIndicator({
   value,
   type,
-  className,
-}: HappinessIndicatorProps) {
-  const { emoji } = getHappinessDetails(value);
+}: {
+  value: number;
+  type: "team" | "customer";
+}) {
+  const scoreText = `${value}/5`;
+  const isGood = value >= 4;
 
   return (
-    <div className={cn("text-center", className)}>
-      <div className="text-3xl mb-2">{emoji}</div>
-      <div className="text-sm text-gray-500">
+    <div className="flex flex-col items-center gap-2">
+      <div className="text-sm text-gray-600">
         {type === "team" ? "Team" : "Customer"}
+      </div>
+      <div className="text-2xl">{getHappinessDetails(value).emoji}</div>
+      <div
+        className={`text-lg font-bold ${
+          isGood ? "text-green-500" : "text-red-500"
+        }`}
+      >
+        {scoreText}
       </div>
     </div>
   );

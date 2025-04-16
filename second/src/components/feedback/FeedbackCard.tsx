@@ -55,16 +55,16 @@ export function FeedbackCard({ feedback, currentWeek }: FeedbackCardProps) {
       animate="animate"
       whileHover="hover"
       whileTap="tap"
-      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer"
+      className="bg-white rounded-xl shadow-md border border-gray-100 p-6 cursor-pointer min-h-[200px] hover:shadow-lg transition-shadow"
     >
       <Link
         to={`/feedback/${feedback.id}?week=${currentWeek}`}
-        className="block"
+        className="block h-full"
       >
         <div className="flex justify-between items-start mb-6">
           <div>
             <h3
-              className="font-medium text-gray-900"
+              className="font-medium text-lg text-gray-900"
               title={feedback.submitted_by}
             >
               {displayName}
@@ -82,7 +82,7 @@ export function FeedbackCard({ feedback, currentWeek }: FeedbackCardProps) {
         <div className="space-y-6">
           <Thermometer value={feedback.progress_percent} />
 
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-2 gap-4">
             <HappinessIndicator value={feedback.team_happiness} type="team" />
             <HappinessIndicator
               value={feedback.customer_happiness}
