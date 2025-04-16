@@ -3,9 +3,18 @@
 # Status: pending
 # Dependencies: 1
 # Priority: high
-# Description: Set up Supabase connection and create the required database schema for storing PO feedback.
+# Description: Set up Supabase connection and implement secure credential management for the existing database.
 # Details:
-Create a Supabase project and configure the po_feedback table with all required fields: id (primary key), submitted_by (email), created_at (timestamp), week_number (integer), progress_percent (integer 0-100), team_happiness (integer 1-5), customer_happiness (integer 1-5), velocity_next_week (enum: 'Rot', 'Gelb', 'Grün'), milestones_done (text, nullable), and risks (text, nullable). Set up environment variables for Supabase credentials and API endpoints.
+Configure the connection to the existing Supabase project and po_feedback table. Implement a secure credential management system where:
+1. Environment variables for Supabase credentials and API endpoints will be stored locally
+2. During the build process, these credentials will be encrypted using CryptoJS PBKDF2 with a password stored as a separate environment variable
+3. The encrypted credentials will be included in the final build, allowing secure deployment without exposing raw secrets
+
+The po_feedback table schema includes: id (primary key), submitted_by (email), created_at (timestamp), week_number (integer), progress_percent (integer 0-100), team_happiness (integer 1-5), customer_happiness (integer 1-5), velocity_next_week (enum: 'Rot', 'Gelb', 'Grün'), milestones_done (text, nullable), and risks (text, nullable).
 
 # Test Strategy:
-Test the connection to Supabase by performing basic CRUD operations on the po_feedback table. Verify that all fields are correctly defined and constraints are working as expected.
+1. Verify connection to Supabase using the existing credentials
+2. Test the encryption/decryption process:
+   - Ensure environment variables are correctly encrypted during build
+   - Verify the application can decrypt and use the credentials at runtime
+3. Perform basic CRUD operations on the po_feedback table to validate the connection works end-to-end
