@@ -13,6 +13,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { FeedbackDetail } from "./components/feedback/FeedbackDetail";
+import { FeedbackCard } from "./components/feedback/FeedbackCard";
 
 // Extend Window interface to include our custom properties
 declare global {
@@ -147,27 +148,11 @@ function AppContent() {
                 ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {weeklyFeedback.map((feedback: POFeedback) => (
-                      <Link
+                      <FeedbackCard
                         key={feedback.id}
-                        to={`/feedback/${feedback.id}?week=${currentWeek}`}
-                        className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-                      >
-                        <h3 className="font-medium mb-2">
-                          {feedback.submitted_by}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Progress: {feedback.progress_percent}%
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Team Happiness: {feedback.team_happiness}/10
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Customer Happiness: {feedback.customer_happiness}/10
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Velocity Next Week: {feedback.velocity_next_week}
-                        </p>
-                      </Link>
+                        feedback={feedback}
+                        currentWeek={currentWeek}
+                      />
                     ))}
                   </div>
                 ) : (
