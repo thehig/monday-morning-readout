@@ -1,11 +1,11 @@
 # Task ID: 7
-# Title: Implement Chart Components
+# Title: Implement Dashboard Grid with Loading States
 # Status: pending
 # Dependencies: 5, 6
-# Priority: high
-# Description: Develop reusable chart components using Recharts or Chart.js
+# Priority: medium
+# Description: Create the main dashboard grid to display feedback cards with proper loading states and empty state handling.
 # Details:
-Select and install either Recharts or Chart.js. Create wrapper components for common chart types (bar, line, pie). Implement theming that aligns with the requirement for strong colors. Create higher-order components for data transformation. Ensure charts are responsive and visually appealing. Focus on minimal text display as per requirements.
+Implement the dashboard grid to display feedback cards sorted by submission date (most recent first). Create skeleton placeholders for loading states. Implement empty state handling for weeks with no feedback. Ensure proper spacing and visual hierarchy. Connect the grid to the week navigation system to display data for the selected week.
 
 # Test Strategy:
-Test charts with various data sets. Verify responsiveness of charts at different screen sizes. Ensure accessibility features are working. Test performance with larger data sets.
+Test the grid with various data scenarios including: multiple cards, single card, no cards, and loading state. Verify sorting works correctly and that the empty state is displayed appropriately.

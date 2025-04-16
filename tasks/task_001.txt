@@ -1,11 +1,83 @@
 # Task ID: 1
-# Title: Setup NextJS Project with TypeScript
+# Title: Setup Project Repository with Vite
 # Status: done
 # Dependencies: None
 # Priority: high
-# Description: Initialize a new NextJS 14+ project with TypeScript, Tailwind CSS, and shadcn/ui components
+# Description: Initialize the project repository with Vite, configure TypeScript, and set up the build process to produce a single HTML file.
 # Details:
-Create a new NextJS 14+ project using the App Router. Install TypeScript 5+, configure Tailwind CSS, and set up shadcn/ui components. Ensure Node.js 18+ is being used. Create the basic folder structure following NextJS 14 conventions with app directory. Initialize Git repository with appropriate .gitignore file.
+Create a new Vite project with React and TypeScript. Configure Vite to bundle all JavaScript into a single HTML file with inlined CSS. Set up the project structure with appropriate folders for components, hooks, utils, and types. Configure the build process to ensure all local assets are bundled into the HTML file while external dependencies are loaded via CDN.
 
 # Test Strategy:
-Verify that the application builds and runs without errors. Confirm that TypeScript is properly configured with no type errors. Test that Tailwind CSS styles are applied correctly and shadcn/ui components can be imported and rendered.
+Verify that the build process produces a single HTML file that loads correctly in a browser with all styles applied and no console errors.
+
+# Subtasks:
+## 1. Initialize Vite project with React and TypeScript [done]
+### Dependencies: None
+### Description: Create a new Vite project with React and TypeScript templates, and install necessary dependencies.
+### Details:
+1. Install Node.js and npm if not already installed
+2. Run `npm create vite@latest my-project -- --template react-ts` to create a new project
+3. Navigate to the project directory with `cd my-project`
+4. Run `npm install` to install dependencies
+5. Test the setup by running `npm run dev` and verifying the development server starts
+6. Create a `.gitignore` file with appropriate entries for node_modules, dist, etc.
+7. Initialize git repository with `git init` and make initial commit
+
+## 2. Set up project folder structure [done]
+### Dependencies: 1.1
+### Description: Create the appropriate folder structure for components, hooks, utils, and types to ensure a well-organized codebase.
+### Details:
+1. Create the following directories in the src folder:
+   - `src/components` for React components
+   - `src/hooks` for custom React hooks
+   - `src/utils` for utility functions
+   - `src/types` for TypeScript type definitions
+   - `src/assets` for static assets
+2. Create index.ts files in each directory to facilitate imports
+3. Update tsconfig.json to include path aliases for these directories
+4. Create a basic component in the components folder to test the structure
+5. Update the main App.tsx file to import and use this component
+
+## 3. Configure Vite for single HTML file output [done]
+### Dependencies: 1.1, 1.2
+### Description: Modify Vite configuration to bundle JavaScript and CSS into a single HTML file with inlined assets.
+### Details:
+1. Create or modify `vite.config.ts` file
+2. Install required plugins: `npm install --save-dev vite-plugin-singlefile vite-plugin-html-config`
+3. Configure the singlefile plugin to inline all JavaScript and CSS
+4. Set up asset handling to inline small assets as base64
+5. Configure minification options for production builds
+6. Add build command options in package.json
+7. Test the configuration with a small build using `npm run build`
+8. Verify that the output in the dist folder contains a single HTML file with inlined resources
+
+## 4. Set up CDN configuration for external dependencies [done]
+### Dependencies: 1.3
+### Description: Configure external dependencies to be loaded from CDNs instead of being bundled with the application.
+### Details:
+1. Identify external dependencies that should be loaded from CDNs (React, React DOM, etc.)
+2. Update vite.config.ts to use external option for these dependencies
+3. Install `npm install --save-dev @rollup/plugin-inject` if needed for proper CDN integration
+4. Configure the HTML template to include CDN script tags for external dependencies
+5. Update the build process to exclude these dependencies from the bundle
+6. Test the build to ensure external dependencies are properly loaded from CDNs
+7. Verify application functionality with externalized dependencies
+8. Measure and document the reduction in bundle size
+
+## 5. Create build and deployment scripts [done]
+### Dependencies: 1.3, 1.4
+### Description: Set up npm scripts for building, testing, and deploying the single HTML file application.
+### Details:
+1. Update package.json with comprehensive npm scripts:
+   - `build:dev` for development builds
+   - `build:prod` for production builds with full optimization
+   - `analyze` to analyze bundle size (install `rollup-plugin-visualizer`)
+   - `test` to run tests
+   - `deploy` script if applicable
+2. Create a simple CI configuration file (.github/workflows or similar)
+3. Add documentation in README.md about the build process
+4. Create a test HTML file that loads the built application
+5. Test all scripts to ensure they work correctly
+6. Document any environment variables or configuration options
+7. Create a sample deployment to verify the single HTML file works in a production-like environment
+

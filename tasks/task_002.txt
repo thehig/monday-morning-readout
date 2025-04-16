@@ -1,11 +1,11 @@
 # Task ID: 2
-# Title: Integrate Supabase Client
-# Status: done
+# Title: Configure Supabase Integration
+# Status: pending
 # Dependencies: 1
 # Priority: high
-# Description: Set up Supabase client integration with proper environment configuration
+# Description: Set up Supabase connection and create the required database schema for storing PO feedback.
 # Details:
-Install the Supabase JS Client. Create environment variables for Supabase URL and API key. Implement a singleton pattern for the Supabase client to ensure consistent usage across the application. Set up proper typing for the Supabase client. Create utility functions for common database operations.
+Create a Supabase project and configure the po_feedback table with all required fields: id (primary key), submitted_by (email), created_at (timestamp), week_number (integer), progress_percent (integer 0-100), team_happiness (integer 1-5), customer_happiness (integer 1-5), velocity_next_week (enum: 'Rot', 'Gelb', 'Grün'), milestones_done (text, nullable), and risks (text, nullable). Set up environment variables for Supabase credentials and API endpoints.
 
 # Test Strategy:
-Create a simple test query to verify connection to the Supabase instance. Ensure environment variables are properly loaded. Verify that the client can authenticate and perform basic operations.
+Test the connection to Supabase by performing basic CRUD operations on the po_feedback table. Verify that all fields are correctly defined and constraints are working as expected.

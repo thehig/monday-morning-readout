@@ -28,3 +28,7 @@ node_modules/
 # tasks.json
 # tasks/ 
 app/src/lib/encrypted-env.ts
+
+# Added by Claude Task Master
+tasks.json
+tasks/ 

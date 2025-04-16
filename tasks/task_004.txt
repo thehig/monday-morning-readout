@@ -1,11 +1,11 @@
 # Task ID: 4
-# Title: Implement Basic Routing Structure
-# Status: done
+# Title: Create Week Calculation Utility
+# Status: pending
 # Dependencies: 1
-# Priority: medium
-# Description: Set up the application's routing system using NextJS App Router
+# Priority: high
+# Description: Develop utility functions for week number calculation, date formatting, and week boundary determination.
 # Details:
-Create the main page routes using the NextJS 14 App Router. Implement a layout component that will be shared across all pages. Set up navigation between different sections of the dashboard. Create error and loading states for each route. Implement dynamic routes for expanded user views.
+Create utility functions to: 1) Calculate the current week number based on the calendar year, 2) Determine week start (Monday) and end (Friday) dates, 3) Handle year transitions properly, 4) Format dates in short, long, and ISO formats, and 5) Generate relative time strings (e.g., '2 days ago'). Ensure proper handling of week boundaries across year transitions.
 
 # Test Strategy:
-Test navigation between all routes. Verify that layouts are applied correctly. Ensure that dynamic routes work with different parameters. Test error handling for invalid routes.
+Write unit tests for all date utility functions with various test cases including edge cases like year transitions, leap years, and different timezones.

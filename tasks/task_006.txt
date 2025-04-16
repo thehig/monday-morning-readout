@@ -1,11 +1,11 @@
 # Task ID: 6
-# Title: Develop Layout System with Responsive Grid
+# Title: Create Feedback Card Component
 # Status: pending
-# Dependencies: 1, 4
+# Dependencies: 1
 # Priority: medium
-# Description: Create a responsive layout system for the dashboard using Tailwind CSS
+# Description: Develop the feedback card component with all required visual elements and interactive states.
 # Details:
-Design and implement a responsive grid system using Tailwind CSS. Create container components for different sections of the dashboard. Implement breakpoints for various screen sizes. Ensure the layout adapts well to both desktop and mobile views. Create utility components for spacing and alignment.
+Create a reusable feedback card component that displays: PO name (derived from email), submission date with relative time, progress indicator (animated thermometer), team and customer happiness scores with emoji visualization, and next week's velocity indicator using the traffic light system. Implement hover scaling effect, active state feedback, and cursor pointer indication. Use white background with subtle shadow and border.
 
 # Test Strategy:
-Test the layout on different screen sizes and devices. Verify that components resize and reflow appropriately. Ensure no overflow issues or layout breaks occur at any breakpoint.
+Test the component with various input data combinations. Verify all visual elements render correctly and that interactive states work as expected. Check accessibility of interactive elements.
