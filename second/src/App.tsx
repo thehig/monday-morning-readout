@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./App.css";
+import { initializeSupabase, testConnection } from "./utils/supabase";
 
 interface EncryptedEnv {
   ENCRYPTED_ENV: {
@@ -10,12 +11,15 @@ interface EncryptedEnv {
 }
 
 interface DecryptedEnv {
-  DECRYPTED_ENV: Record<string, string>;
+  DECRYPTED_ENV: {
+    VITE_SUPABASE_URL: string;
+    VITE_SUPABASE_ANON_KEY: string;
+  };
   secureEnv: {
     decryptEnvVars: (
       encryptedEnv: EncryptedEnv["ENCRYPTED_ENV"],
       password: string
-    ) => Record<string, string>;
+    ) => DecryptedEnv["DECRYPTED_ENV"];
   };
 }
 
@@ -29,7 +33,7 @@ function App() {
   const [isDecrypted, setIsDecrypted] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<string | null>(null);
 
-  const handleDecrypt = () => {
+  const handleDecrypt = async () => {
     try {
       console.log("Starting decryption process");
       console.log("ENCRYPTED_ENV available:", !!window.ENCRYPTED_ENV);
@@ -45,28 +49,31 @@ function App() {
         Object.keys(decryptedVars)
       );
 
+      // Initialize Supabase with decrypted credentials
+      initializeSupabase(
+        decryptedVars.VITE_SUPABASE_URL,
+        decryptedVars.VITE_SUPABASE_ANON_KEY
+      );
+      console.log("Supabase client initialized, testing connection...");
+
+      const result = await testConnection();
+      if (result.success) {
+        setConnectionStatus(
+          `Connected to Supabase! Server time: ${result.timestamp}`
+        );
+      } else {
+        setConnectionStatus(`Failed to connect: ${result.error}`);
+      }
+
       setIsDecrypted(true);
       setError(null);
-    } catch {
-      console.error("Decryption failed in handleDecrypt");
+    } catch (err) {
+      console.error("Decryption or connection failed:", err);
       setError(
         "Failed to decrypt environment variables. Please check your password."
       );
       setIsDecrypted(false);
-    }
-  };
-
-  const testConnection = async () => {
-    try {
-      const response = await fetch("/api/test-connection");
-      if (!response.ok) {
-        throw new Error("Connection test failed");
-      }
-      const data = await response.json();
-      setConnectionStatus(data.message);
-    } catch (err) {
-      console.error("Connection test error:", err);
-      setConnectionStatus("Connection test failed");
+      setConnectionStatus(null);
     }
   };
 
@@ -95,15 +102,14 @@ function App() {
           </div>
         )}
 
-        {isDecrypted && (
-          <>
-            <button onClick={testConnection} className="decrypt-button">
-              Test Connection
-            </button>
-            {connectionStatus && (
-              <div className="connection-status">{connectionStatus}</div>
-            )}
-          </>
+        {connectionStatus && (
+          <div
+            className={`connection-status ${
+              connectionStatus.includes("Failed") ? "error" : "success"
+            }`}
+          >
+            {connectionStatus}
+          </div>
         )}
       </div>
     </div>
