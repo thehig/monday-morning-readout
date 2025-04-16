@@ -73,15 +73,20 @@ Monday Morning Readout is a modern web application designed to streamline the co
 
 ### Frontend
 
-- Next.js 15+ with App Router
-- React 19+
-- TypeScript for type safety
-- TailwindCSS for styling
-- Framer Motion for animations
-- React Query for data management with:
-  - Automatic caching
-  - Query invalidation
-  - Loading/error states
+- Vite for bundling and development
+- React 19+ (loaded via CDN)
+- TypeScript for development (compiled to JavaScript)
+- TailwindCSS (loaded via CDN)
+- Single file output requirements:
+  - All local JavaScript bundled into the HTML file
+  - All local CSS inlined in the HTML file
+  - External dependencies loaded via CDN
+  - No separate asset files required
+- Build process must produce a single, self-contained index.html
+- CDN dependencies to include:
+  - React and ReactDOM
+  - TailwindCSS
+  - Other UI libraries as needed
 
 ### Backend & Data
 
@@ -163,12 +168,15 @@ Monday Morning Readout is a modern web application designed to streamline the co
 
 ## Performance Requirements
 
-- Fast initial page load
+- Fast initial page load with minimal CDN dependencies
+- Efficient state management using React hooks
+- Browser caching of CDN resources
 - Smooth animations (60fps)
-- Efficient data fetching with React Query
 - Proper loading state management
 - Responsive to user interactions
 - Optimized for mobile devices
+- Minimal initial bundle size
+- Smart lazy loading of CDN resources
 
 ## Future Considerations
 
