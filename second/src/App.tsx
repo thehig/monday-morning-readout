@@ -5,8 +5,22 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { usePOFeedbackByWeek, getCurrentWeek } from "./hooks/use-po-feedback";
 import type { Database } from "./types/supabase";
 import { WeekPicker } from "./components/WeekPicker";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { HashRouter, Routes, Route, Link } from "react-router-dom";
 import { FeedbackDetail } from "./components/feedback/FeedbackDetail";
+
+// Extend Window interface to include our custom properties
+declare global {
+  interface Window {
+    ENCRYPTED_ENV: string;
+    DECRYPTED_ENV: Record<string, string>;
+    secureEnv: {
+      decryptEnvVars: (
+        encrypted: string,
+        password: string
+      ) => Record<string, string>;
+    };
+  }
+}
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
@@ -24,7 +38,6 @@ function AppContent() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isDecrypted, setIsDecrypted] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<string | null>(null);
   const [currentWeek, setCurrentWeek] = useState(
     getCurrentWeek(new Date().getFullYear())
   );
@@ -56,11 +69,9 @@ function AppContent() {
 
       const result = await testConnection();
       if (result.success) {
-        setConnectionStatus(
-          `Connected to Supabase! Server time: ${result.timestamp}`
-        );
+        console.log(`Connected to Supabase! Server time: ${result.timestamp}`);
       } else {
-        setConnectionStatus(`Failed to connect: ${result.error}`);
+        console.error(`Failed to connect: ${result.error}`);
       }
 
       setIsDecrypted(true);
@@ -71,7 +82,6 @@ function AppContent() {
         "Failed to decrypt environment variables. Please check your password."
       );
       setIsDecrypted(false);
-      setConnectionStatus(null);
     }
   };
 
@@ -160,9 +170,9 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <HashRouter>
         <AppContent />
-      </BrowserRouter>
+      </HashRouter>
     </QueryClientProvider>
   );
 }

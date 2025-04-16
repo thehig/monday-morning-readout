@@ -14,6 +14,7 @@ const CRYPTO_JS_CDN =
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "./",
   plugins: [
     react(),
     viteSingleFile(),
@@ -51,6 +52,7 @@ export default defineConfig({
           react: "React",
           "react-dom": "ReactDOM",
         },
+        assetFileNames: "[name].[ext]",
       },
       plugins: [
         inject({
