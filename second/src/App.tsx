@@ -4,6 +4,7 @@ import { initializeSupabase, testConnection } from "./utils/supabase";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { usePOFeedbackByWeek, getCurrentWeek } from "./hooks/use-po-feedback";
 import type { Database } from "./types/supabase";
+import { WeekPicker } from "./components/WeekPicker";
 
 interface EncryptedEnv {
   ENCRYPTED_ENV: {
@@ -47,7 +48,9 @@ function AppContent() {
   const [error, setError] = useState<string | null>(null);
   const [isDecrypted, setIsDecrypted] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<string | null>(null);
-  const [currentWeek, setCurrentWeek] = useState(getCurrentWeek());
+  const [currentWeek, setCurrentWeek] = useState(
+    getCurrentWeek(new Date().getFullYear())
+  );
 
   const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(currentWeek);
 
@@ -130,41 +133,49 @@ function AppContent() {
   }
 
   return (
-    <div className="container">
-      <h1>PO Feedback - Week {currentWeek}</h1>
-      <div className="week-navigation">
-        <button
-          onClick={() => setCurrentWeek((prev) => Math.max(1, prev - 1))}
-          disabled={currentWeek <= 1}
-        >
-          Previous Week
-        </button>
-        <span>Week {currentWeek}</span>
-        <button
-          onClick={() => setCurrentWeek((prev) => prev + 1)}
-          disabled={currentWeek >= 52}
-        >
-          Next Week
-        </button>
-      </div>
-
-      {isLoading ? (
-        <div>Loading feedback data...</div>
-      ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
-        <div className="feedback-grid">
-          {weeklyFeedback.map((feedback: POFeedback) => (
-            <div key={feedback.id} className="feedback-card">
-              <h3>{feedback.submitted_by}</h3>
-              <p>Progress: {feedback.progress_percent}%</p>
-              <p>Team Happiness: {feedback.team_happiness}/10</p>
-              <p>Customer Happiness: {feedback.customer_happiness}/10</p>
-              <p>Velocity Next Week: {feedback.velocity_next_week}</p>
-            </div>
-          ))}
+    <div className="h-screen bg-background flex flex-col">
+      <header className="border-b">
+        <div className="flex h-16 items-center justify-between px-4">
+          <h1 className="text-2xl font-bold">Monday Morning Readout</h1>
+          <WeekPicker currentWeek={currentWeek} onWeekChange={setCurrentWeek} />
         </div>
-      ) : (
-        <div>No feedback found for week {currentWeek}</div>
-      )}
+      </header>
+      <main className="flex-1 overflow-auto">
+        <div className="container mx-auto p-4">
+          {isLoading ? (
+            <div className="text-center text-gray-600">
+              Loading feedback data...
+            </div>
+          ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {weeklyFeedback.map((feedback: POFeedback) => (
+                <div
+                  key={feedback.id}
+                  className="bg-white p-4 rounded-lg shadow"
+                >
+                  <h3 className="font-medium mb-2">{feedback.submitted_by}</h3>
+                  <p className="text-sm text-gray-600">
+                    Progress: {feedback.progress_percent}%
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Team Happiness: {feedback.team_happiness}/10
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Customer Happiness: {feedback.customer_happiness}/10
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Velocity Next Week: {feedback.velocity_next_week}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-gray-600">
+              No feedback found for week {currentWeek}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

@@ -1,13 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSupabase } from "../utils/supabase";
 import type { Database } from "../types/supabase";
-import { getCurrentWeek as getWeek, getWeekDates } from "../utils/date-utils";
+import { getCurrentWeek as getWeek, getWeekDates } from "../lib/date-utils";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
-export function getCurrentWeek(): number {
-  return getWeek(new Date().getFullYear());
-}
+export { getWeek as getCurrentWeek };
 
 export function usePOFeedbackByWeek(weekNumber: number) {
   return useQuery({
