@@ -33,8 +33,16 @@ export default defineConfig({
     assetsInlineLimit: 100000000,
     chunkSizeWarningLimit: 100000000,
     cssCodeSplit: false,
+    copyPublicDir: false, // Prevent copying of public directory
     rollupOptions: {
       external: ["react", "react-dom"],
+      output: {
+        format: "iife",
+        globals: {
+          react: "React",
+          "react-dom": "ReactDOM",
+        },
+      },
       plugins: [
         inject({
           React: "react",
