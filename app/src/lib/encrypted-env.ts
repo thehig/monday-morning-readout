@@ -1,5 +1,0 @@
-// This file is auto-generated. Do not edit manually.
-export const encryptedEnvVars = {
-  url: 'U2FsdGVkX18yjDdn9sfD4M4RWEiiMStvJFQIo0tgBkmaAnxbKrdjFR06l+SDqnlLs88Evxl21yGKW7WenryJ1Q==',
-  key: 'U2FsdGVkX19TwN5/nswkUFiyNBZEaYX1yezlxmG52iyLhKYKhQUbRbnZ+AdxSBlUEhEk1MvCK1ON2RK9HtHm6nuPEYt9jK2r35oRtYTpQJeKGXxokzQMn+WSMHvCn8E/hJ5aQBrr1Ji9TFRSwTmwA7I3snBX4O39aQp9G+25lTBqBlMtIb45aAv2UwahBQY54MZp9bp8R2FvF9HuDjOQUE59suzJLbmzw9ZN7kqaoLSeb+7HUehahLSrseM6I4iK0wJqhL9bnG4eYBKJ+P1eV30m3fD4OKt9HKHR4l5tRnbnWwrSITPv/wMAf3oLT5eq',
-};

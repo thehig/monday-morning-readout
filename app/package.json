@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "prebuild": "tsx scripts/encrypt-env.ts",
+    "encrypt-env": "tsx scripts/encrypt-env.ts",
+    "prebuild": "npm run encrypt-env",
     "build": "next build",
-    "build:secure": "cross-env tsx scripts/secure-build.js",
-    "build:single": "npm run prebuild && node scripts/combine-build.js",
+    "package": "node scripts/combine-build.js",
+    "build:package": "npm run build && npm run package",
     "start": "next start",
     "lint": "next lint",
     "generate:types": "npx supabase gen types typescript --project-id \"$PROJECT_ID\" --schema public > src/types/supabase.ts"
