@@ -1,11 +1,9 @@
 "use client";
 
-import { usePOFeedbackByWeek, getCurrentWeek } from "@/hooks/use-po-feedback";
+import { usePOFeedbackByWeek } from "@/hooks/use-po-feedback";
 import type { Database } from "@/types/supabase";
-import { WeekPicker } from "./WeekPicker";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useState } from "react";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
@@ -140,21 +138,11 @@ function FeedbackCard({
 }
 
 interface POFeedbackProps {
-  initialWeek?: number;
+  initialWeek: number;
 }
 
-export function POFeedback({
-  initialWeek = getCurrentWeek(),
-}: POFeedbackProps) {
-  const router = useRouter();
-  const [selectedWeek, setSelectedWeek] = useState(initialWeek);
-
-  const handleWeekChange = (week: number) => {
-    setSelectedWeek(week);
-    router.push(`?week=${week}`);
-  };
-
-  const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(selectedWeek);
+export function POFeedback({ initialWeek }: POFeedbackProps) {
+  const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(initialWeek);
 
   if (isLoading) {
     return (
@@ -166,24 +154,18 @@ export function POFeedback({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between p-4 bg-white border-b">
-        <WeekPicker
-          currentWeek={selectedWeek}
-          onWeekChange={handleWeekChange}
-        />
-      </div>
       <div className="flex-1 overflow-auto p-4 scrollbar-hide">
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min">
           {weeklyFeedback?.map((feedback: POFeedback) => (
             <FeedbackCard
               key={feedback.id}
               feedback={feedback}
-              currentWeek={selectedWeek}
+              currentWeek={initialWeek}
             />
           ))}
           {weeklyFeedback?.length === 0 && (
             <div className="col-span-full text-center py-8 text-gray-500">
-              No feedback found for week {selectedWeek}
+              No feedback found for week {initialWeek}
             </div>
           )}
         </div>
