@@ -10,6 +10,8 @@ import {
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isLoading: boolean;
+  error: Error | null;
   login: (password: string) => boolean;
   logout: () => void;
 }
@@ -24,31 +26,54 @@ if (!process.env.NEXT_PUBLIC_AUTH_PASSWORD?.trim()) {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Check if there's a stored auth state
-    const storedAuth = localStorage.getItem("isAuthenticated");
-    if (storedAuth === "true") {
-      setIsAuthenticated(true);
+    try {
+      // Check if there's a stored auth state
+      const storedAuth = localStorage.getItem("isAuthenticated");
+      if (storedAuth === "true") {
+        setIsAuthenticated(true);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err : new Error("Failed to check authentication")
+      );
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   const login = (password: string) => {
-    if (password === process.env.NEXT_PUBLIC_AUTH_PASSWORD?.trim()) {
-      setIsAuthenticated(true);
-      localStorage.setItem("isAuthenticated", "true");
-      return true;
+    try {
+      if (password === process.env.NEXT_PUBLIC_AUTH_PASSWORD?.trim()) {
+        setIsAuthenticated(true);
+        localStorage.setItem("isAuthenticated", "true");
+        setError(null);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Failed to login"));
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem("isAuthenticated");
+    try {
+      setIsAuthenticated(false);
+      localStorage.removeItem("isAuthenticated");
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Failed to logout"));
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, isLoading, error, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

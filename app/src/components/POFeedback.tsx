@@ -4,6 +4,14 @@ import { usePOFeedbackByWeek } from "@/hooks/use-po-feedback";
 import type { Database } from "@/types/supabase";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { formatEmailDisplayName } from "@/lib/utils";
+import {
+  HAPPINESS_EMOJIS,
+  HAPPINESS_COLORS,
+  VELOCITY_COLORS,
+  VELOCITY_LABELS,
+} from "@/lib/constants";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
@@ -35,13 +43,12 @@ function HappinessIndicator({
   value: number;
   type: "team" | "customer";
 }) {
-  const emojis = ["😢", "😕", "😐", "🙂", "😊"];
   const emojiIndex = Math.min(
-    Math.floor(((value - 1) / 4) * (emojis.length - 1)),
-    emojis.length - 1
+    Math.floor(((value - 1) / 4) * (HAPPINESS_EMOJIS.length - 1)),
+    HAPPINESS_EMOJIS.length - 1
   );
-  const emoji = emojis[emojiIndex];
-  const color = type === "team" ? "text-red-500" : "text-green-500";
+  const emoji = HAPPINESS_EMOJIS[emojiIndex];
+  const color = HAPPINESS_COLORS[type];
   const label = type === "team" ? "Team Happiness" : "Customer Happiness";
 
   return (
@@ -57,23 +64,46 @@ function VelocityIndicator({
 }: {
   velocity: "Rot" | "Gelb" | "Grün";
 }) {
-  const colors = {
-    Rot: "bg-red-500",
-    Gelb: "bg-yellow-400",
-    Grün: "bg-green-500",
-  };
-
-  const labels = {
-    Rot: "Low velocity expected",
-    Gelb: "Medium velocity expected",
-    Grün: "High velocity expected",
-  };
-
   return (
     <div
-      className={`w-4 h-4 rounded-full ${colors[velocity]} animate-pulse`}
-      title={labels[velocity]}
+      className={`w-4 h-4 rounded-full ${VELOCITY_COLORS[velocity]} animate-pulse`}
+      title={VELOCITY_LABELS[velocity]}
     />
+  );
+}
+
+function FeedbackCardSkeleton() {
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <Skeleton className="h-5 w-32 mb-1" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+        <Skeleton className="h-4 w-4 rounded-full" />
+      </div>
+      <div className="space-y-6">
+        <Skeleton className="h-6 w-full rounded-full" />
+        <div className="grid grid-cols-2 gap-8">
+          <div className="flex flex-col items-center">
+            <Skeleton className="h-8 w-8 rounded-full mb-1" />
+            <Skeleton className="h-6 w-16" />
+          </div>
+          <div className="flex flex-col items-center">
+            <Skeleton className="h-8 w-8 rounded-full mb-1" />
+            <Skeleton className="h-6 w-16" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FeedbackGrid({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min">
+      {children}
+    </div>
   );
 }
 
@@ -85,13 +115,7 @@ function FeedbackCard({
   currentWeek: number;
 }) {
   const router = useRouter();
-
-  // Extract name from email (e.g., "john.doe@example.com" -> "John Doe")
-  const displayName = feedback.submitted_by
-    .split("@")[0] // Get part before @
-    .split(/[._-]/) // Split on . _ or -
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()) // Capitalize each part
-    .join(" "); // Join with spaces
+  const displayName = formatEmailDisplayName(feedback.submitted_by);
 
   return (
     <motion.div
@@ -142,12 +166,32 @@ interface POFeedbackProps {
 }
 
 export function POFeedback({ initialWeek }: POFeedbackProps) {
-  const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(initialWeek);
+  const {
+    data: weeklyFeedback,
+    isLoading,
+    error,
+  } = usePOFeedbackByWeek(initialWeek);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-red-500">
+          Error loading feedback: {error.message}
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-pulse text-gray-500">Loading feedback...</div>
+      <div className="h-full flex flex-col">
+        <div className="flex-1 overflow-auto p-4 scrollbar-hide">
+          <FeedbackGrid>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <FeedbackCardSkeleton key={i} />
+            ))}
+          </FeedbackGrid>
+        </div>
       </div>
     );
   }
@@ -155,7 +199,7 @@ export function POFeedback({ initialWeek }: POFeedbackProps) {
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-auto p-4 scrollbar-hide">
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min">
+        <FeedbackGrid>
           {weeklyFeedback?.map((feedback: POFeedback) => (
             <FeedbackCard
               key={feedback.id}
@@ -168,7 +212,7 @@ export function POFeedback({ initialWeek }: POFeedbackProps) {
               No feedback found for week {initialWeek}
             </div>
           )}
-        </div>
+        </FeedbackGrid>
       </div>
     </div>
   );

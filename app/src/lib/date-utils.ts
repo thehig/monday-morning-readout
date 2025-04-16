@@ -34,3 +34,12 @@ export function getCurrentWeek(year: number): number {
   const oneWeek = 1000 * 60 * 60 * 24 * 7;
   return Math.ceil(diff / oneWeek);
 }
+
+export const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+} as const;
+
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString("en-US", DATE_FORMAT_OPTIONS);
+}
