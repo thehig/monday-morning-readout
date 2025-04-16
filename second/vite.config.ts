@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { viteSingleFile } from "vite-plugin-singlefile";
-import injectHtml from "vite-plugin-html-config";
+import { createHtmlPlugin } from "vite-plugin-html";
 import inject from "@rollup/plugin-inject";
 
 // CDN URLs for external dependencies
@@ -18,21 +18,36 @@ export default defineConfig({
   plugins: [
     react(),
     viteSingleFile(),
-    injectHtml({
-      scripts: [
-        {
-          src: CRYPTO_JS_CDN,
-          crossorigin: true,
-        },
-        {
-          src: REACT_CDN,
-          crossorigin: true,
-        },
-        {
-          src: REACT_DOM_CDN,
-          crossorigin: true,
-        },
-      ],
+    createHtmlPlugin({
+      minify: true,
+      inject: {
+        tags: [
+          {
+            injectTo: "head",
+            tag: "script",
+            attrs: {
+              src: CRYPTO_JS_CDN,
+              crossorigin: true,
+            },
+          },
+          {
+            injectTo: "head",
+            tag: "script",
+            attrs: {
+              src: REACT_CDN,
+              crossorigin: true,
+            },
+          },
+          {
+            injectTo: "head",
+            tag: "script",
+            attrs: {
+              src: REACT_DOM_CDN,
+              crossorigin: true,
+            },
+          },
+        ],
+      },
     }),
   ],
   css: {
