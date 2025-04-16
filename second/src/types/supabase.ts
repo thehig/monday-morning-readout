@@ -1,27 +1,69 @@
 export type VelocityIndicator = "Rot" | "Gelb" | "Grün";
 
-export type Database = {
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+export interface Database {
   public: {
     Tables: {
       po_feedback: {
         Row: {
-          id: string;
-          submitted_by: string;
+          id: number;
           created_at: string;
-          week_number: number;
+          submitted_by: string;
           progress_percent: number;
+          velocity_next_week: "Rot" | "Gelb" | "Grün";
           team_happiness: number;
           customer_happiness: number;
-          velocity_next_week: VelocityIndicator;
-          milestones_done: string | null;
-          risks: string | null;
+          goals_next_week: string;
+          milestones_done: string;
+          ps_call_context: string;
+          ps_call_needed: "NEIN" | "JA";
+          risks: string;
         };
-        Insert: Omit<
-          Database["public"]["Tables"]["po_feedback"]["Row"],
-          "id" | "created_at"
-        >;
-        Update: Partial<Database["public"]["Tables"]["po_feedback"]["Insert"]>;
+        Insert: {
+          id?: number;
+          created_at?: string;
+          submitted_by: string;
+          progress_percent: number;
+          velocity_next_week: "Rot" | "Gelb" | "Grün";
+          team_happiness: number;
+          customer_happiness: number;
+          goals_next_week: string;
+          milestones_done: string;
+          ps_call_context: string;
+          ps_call_needed: "NEIN" | "JA";
+          risks: string;
+        };
+        Update: {
+          id?: number;
+          created_at?: string;
+          submitted_by?: string;
+          progress_percent?: number;
+          velocity_next_week?: "Rot" | "Gelb" | "Grün";
+          team_happiness?: number;
+          customer_happiness?: number;
+          goals_next_week?: string;
+          milestones_done?: string;
+          ps_call_context?: string;
+          ps_call_needed?: "NEIN" | "JA";
+          risks?: string;
+        };
       };
     };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
   };
-};
+}

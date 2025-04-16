@@ -1,6 +1,9 @@
 import { useState } from "react";
 import "./App.css";
 import { initializeSupabase, testConnection } from "./utils/supabase";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { usePOFeedbackByWeek, getCurrentWeek } from "./hooks/use-po-feedback";
+import type { Database } from "./types/supabase";
 
 interface EncryptedEnv {
   ENCRYPTED_ENV: {
@@ -27,11 +30,26 @@ declare global {
   interface Window extends EncryptedEnv, DecryptedEnv {}
 }
 
-function App() {
+type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      retry: 1,
+    },
+  },
+});
+
+function AppContent() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isDecrypted, setIsDecrypted] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<string | null>(null);
+  const [currentWeek, setCurrentWeek] = useState(getCurrentWeek());
+
+  const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(currentWeek);
 
   const handleDecrypt = async () => {
     try {
@@ -77,42 +95,85 @@ function App() {
     }
   };
 
+  if (!isDecrypted) {
+    return (
+      <div className="container">
+        <h1>Environment Variable Decryption</h1>
+
+        <div className="decrypt-form">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter decryption password"
+            className="password-input"
+          />
+          <button onClick={handleDecrypt} className="decrypt-button">
+            Decrypt Environment Variables
+          </button>
+          {error && <div className="error-message">{error}</div>}
+        </div>
+
+        <div className="status-container">
+          {connectionStatus && (
+            <div
+              className={`connection-status ${
+                connectionStatus.includes("Failed") ? "error" : "success"
+              }`}
+            >
+              {connectionStatus}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
-      <h1>Environment Variable Decryption</h1>
-
-      <div className="decrypt-form">
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter decryption password"
-          className="password-input"
-        />
-        <button onClick={handleDecrypt} className="decrypt-button">
-          Decrypt Environment Variables
+      <h1>PO Feedback - Week {currentWeek}</h1>
+      <div className="week-navigation">
+        <button
+          onClick={() => setCurrentWeek((prev) => Math.max(1, prev - 1))}
+          disabled={currentWeek <= 1}
+        >
+          Previous Week
         </button>
-        {error && <div className="error-message">{error}</div>}
+        <span>Week {currentWeek}</span>
+        <button
+          onClick={() => setCurrentWeek((prev) => prev + 1)}
+          disabled={currentWeek >= 52}
+        >
+          Next Week
+        </button>
       </div>
 
-      <div className="status-container">
-        {isDecrypted && (
-          <div className="success-message">
-            Environment variables have been successfully decrypted!
-          </div>
-        )}
-
-        {connectionStatus && (
-          <div
-            className={`connection-status ${
-              connectionStatus.includes("Failed") ? "error" : "success"
-            }`}
-          >
-            {connectionStatus}
-          </div>
-        )}
-      </div>
+      {isLoading ? (
+        <div>Loading feedback data...</div>
+      ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
+        <div className="feedback-grid">
+          {weeklyFeedback.map((feedback: POFeedback) => (
+            <div key={feedback.id} className="feedback-card">
+              <h3>{feedback.submitted_by}</h3>
+              <p>Progress: {feedback.progress_percent}%</p>
+              <p>Team Happiness: {feedback.team_happiness}/10</p>
+              <p>Customer Happiness: {feedback.customer_happiness}/10</p>
+              <p>Velocity Next Week: {feedback.velocity_next_week}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div>No feedback found for week {currentWeek}</div>
+      )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppContent />
+    </QueryClientProvider>
   );
 }
 
