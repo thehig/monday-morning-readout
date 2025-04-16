@@ -7,7 +7,7 @@
     "dev": "next dev --turbopack",
     "prebuild": "tsx scripts/encrypt-env.ts",
     "build": "next build",
-    "build:secure": "tsx scripts/build.js",
+    "build:secure": "cross-env tsx scripts/secure-build.js",
     "build:single": "node scripts/combine-build.js",
     "start": "next start",
     "lint": "next lint",
@@ -39,12 +39,15 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.5.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
     "html-inline": "^1.2.0",
     "next-export-optimize-images": "^4.6.2",
     "supabase": "^2.20.12",
     "tailwindcss": "^4",
+    "tsx": "^4.19.3",
     "typescript": "^5"
   }
 }

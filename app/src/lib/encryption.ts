@@ -62,7 +62,9 @@ export function decryptEnvVars(
     return { supabaseUrl, supabaseKey };
   } catch (error) {
     throw new Error(
-      "Failed to decrypt environment variables - invalid password"
+      `Failed to decrypt environment variables - invalid password: ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
   }
 }
