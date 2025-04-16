@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../lib/supabaseClient";
+import { getSupabase } from "../lib/supabaseClient";
 import type { Database } from "@/types/supabase";
 import { getCurrentWeek as getWeek, getWeekDates } from "@/lib/date-utils";
 
@@ -19,7 +19,6 @@ export function usePOFeedbackByWeek(weekNumber: number) {
       const { start: weekStart, end: weekEnd } = getWeekDates(weekNumber, year);
 
       weekStart.setUTCHours(0, 0, 0, 0);
-
       weekEnd.setUTCHours(23, 59, 59, 999);
 
       console.log("Fetching PO feedback for date range:", {
@@ -28,7 +27,7 @@ export function usePOFeedbackByWeek(weekNumber: number) {
         end: weekEnd.toISOString(),
       });
 
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from("po_feedback")
         .select("*")
         .gte("created_at", weekStart.toISOString())
@@ -49,7 +48,7 @@ export function usePOFeedbackById(id: string) {
   return useQuery({
     queryKey: ["po-feedback", id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from("po_feedback")
         .select("*")
         .eq("id", id)

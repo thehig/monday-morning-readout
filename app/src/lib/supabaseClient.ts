@@ -1,10 +1,28 @@
 import { createClient } from "@supabase/supabase-js";
+import { encryptedEnvVars } from "./encrypted-env";
+import { decryptEnvVars } from "./encryption";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+let supabase: ReturnType<typeof createClient>;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Missing Supabase environment variables");
+export function initializeSupabase(password: string) {
+  try {
+    const { supabaseUrl, supabaseKey } = decryptEnvVars(
+      password,
+      encryptedEnvVars.url,
+      encryptedEnvVars.key
+    );
+    supabase = createClient(supabaseUrl, supabaseKey);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export function getSupabase() {
+  if (!supabase) {
+    throw new Error(
+      "Supabase client not initialized. Call initializeSupabase first."
+    );
+  }
+  return supabase;
+}

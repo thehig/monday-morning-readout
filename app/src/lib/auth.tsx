@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { initializeSupabase } from "./supabaseClient";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -18,12 +19,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-if (!process.env.NEXT_PUBLIC_AUTH_PASSWORD?.trim()) {
-  throw new Error(
-    "NEXT_PUBLIC_AUTH_PASSWORD environment variable is not set or is empty"
-  );
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,10 +26,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      // Check if there's a stored auth state
+      // Check if there's a stored auth state and password
       const storedAuth = localStorage.getItem("isAuthenticated");
-      if (storedAuth === "true") {
-        setIsAuthenticated(true);
+      const storedPassword = localStorage.getItem("authPassword");
+
+      if (storedAuth === "true" && storedPassword) {
+        // Verify the stored password still works
+        if (initializeSupabase(storedPassword)) {
+          setIsAuthenticated(true);
+        } else {
+          // Invalid stored password, clear storage
+          localStorage.removeItem("isAuthenticated");
+          localStorage.removeItem("authPassword");
+        }
       }
     } catch (err) {
       setError(
@@ -47,9 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (password: string) => {
     try {
-      if (password === process.env.NEXT_PUBLIC_AUTH_PASSWORD?.trim()) {
+      if (initializeSupabase(password)) {
         setIsAuthenticated(true);
         localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("authPassword", password);
         setError(null);
         return true;
       }
@@ -64,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsAuthenticated(false);
       localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("authPassword");
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to logout"));
