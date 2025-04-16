@@ -1,47 +1,90 @@
 # Monday Morning Readout - Product Requirements Document
 
 ## Overview
+
 Monday Morning Readout is a modern web application designed to streamline the collection and visualization of weekly Product Owner (PO) feedback across multiple teams. The application provides a clean, intuitive interface for viewing team performance metrics and feedback in a consolidated dashboard format.
 
 ## Core Features
 
 ### 1. Weekly Feedback Dashboard
+
 - Display a grid of feedback cards showing weekly status updates from Product Owners
 - Each card should show:
   - Product Owner's name (derived from email)
-  - Submission date
-  - Progress indicator (percentage-based thermometer)
+  - Submission date with relative time (e.g., "2 days ago")
+  - Progress indicator (percentage-based animated thermometer)
   - Team happiness score (1-5 scale with emoji visualization)
   - Customer happiness score (1-5 scale with emoji visualization)
   - Next week's velocity indicator (traffic light system: Rot/Gelb/Grün)
+- Cards should be sorted by submission date (most recent first)
+- Empty state handling for weeks with no feedback
 
-### 2. Navigation & Filtering
+### 2. Week Management & Navigation
+
+- Automatic calculation of current week number based on calendar year
 - Week selection functionality to view historical data
+- Week dates calculation:
+  - Week starts on Monday
+  - Week ends on Friday (inclusive)
+  - Proper handling of year boundaries
+- URL-based week navigation with query parameters
 - Default to current week's view
-- Responsive grid layout adapting to different screen sizes
-- Smooth transitions and animations for state changes
+- Preserve week context across navigation
 
-### 3. Feedback Details
-- Clickable cards that navigate to detailed feedback view
-- Preserve week context when viewing details
+### 3. Detailed Feedback View
 
-### 4. User Experience
-- Loading states with skeleton placeholders
-- Error handling with user-friendly messages
-- Smooth animations for interactions
-- Responsive design (mobile, tablet, desktop)
+- Comprehensive feedback details page with two-column layout
+- Left Column - Status & Progress:
+  - Submitter information with email and avatar (initials-based)
+  - Submission timestamp with both absolute and relative time
+  - Sprint progress with percentage and thermometer visualization
+  - Completed milestones section with rich text support
+  - Risks section with highlighted border for visibility
+- Right Column - Metrics & Planning:
+  - Team and customer satisfaction scores
+  - Average satisfaction calculation
+  - Detailed happiness indicators with emoji visualization
+  - Velocity indicator for next week's planning
+- Technical details section for additional metadata
+- Back navigation with state preservation
+
+### 4. User Experience & Interactions
+
+- Loading states with skeleton placeholders for:
+  - Dashboard grid
+  - Individual feedback cards
+  - Detailed view
+- Error handling with user-friendly messages for:
+  - Data fetching failures
+  - Missing feedback IDs
+  - Network issues
+- Smooth animations and transitions:
+  - Card hover and tap effects
+  - Page transitions
+  - Progress bar animations
+  - Pulsing velocity indicators
+- Responsive design breakpoints:
+  - Mobile: 1 column
+  - Tablet: 2 columns
+  - Desktop: 3 columns
+  - Large screens: 4 columns
 
 ## Technical Requirements
 
 ### Frontend
+
 - Next.js 15+ with App Router
 - React 19+
 - TypeScript for type safety
 - TailwindCSS for styling
 - Framer Motion for animations
-- React Query for data management
+- React Query for data management with:
+  - Automatic caching
+  - Query invalidation
+  - Loading/error states
 
 ### Backend & Data
+
 - Supabase for database and authentication
 - Database schema should include:
   - po_feedback table with fields:
@@ -53,32 +96,56 @@ Monday Morning Readout is a modern web application designed to streamline the co
     - team_happiness (integer 1-5)
     - customer_happiness (integer 1-5)
     - velocity_next_week (enum: "Rot", "Gelb", "Grün")
+    - milestones_done (text, nullable)
+    - risks (text, nullable)
+
+### Date & Time Handling
+
+- Consistent date formatting options:
+  - Short format: Month (abbreviated) + day
+  - Long format: Full weekday, month, day, and year
+  - Time format: Hours and minutes (12-hour)
+  - ISO format for database storage
+- Relative time formatting for improved readability
+- Week calculation logic:
+  - Based on calendar year
+  - Proper handling of year transitions
+  - Monday-Friday work week definition
 
 ### Authentication & Security
+
 - Protected routes requiring authentication
 - Secure API endpoints
-- Environment variable configuration for sensitive data
+- Environment variable configuration for:
+  - Supabase credentials
+  - API endpoints
+  - Other sensitive data
 
 ## User Interface
 
 ### Dashboard Layout
+
 - Fixed header with navigation controls
 - Main content area with scrollable feedback grid
-- Responsive grid:
-  - 1 column on mobile
-  - 2 columns on tablet
-  - 3 columns on desktop
-  - 4 columns on large screens
+- Responsive grid system with dynamic columns
+- Consistent spacing and padding
+- Background colors for visual hierarchy
 
 ### Feedback Card Design
-- White background with subtle shadow
-- Clear hierarchy of information
-- Interactive hover and click states
+
+- White background with subtle shadow and border
+- Clear information hierarchy
+- Interactive states:
+  - Hover scaling effect
+  - Active state feedback
+  - Cursor pointer indication
 - Emoji-based happiness indicators
 - Animated progress thermometer
 - Pulsing velocity indicator
+- Relative timestamp display
 
 ### Visual Elements
+
 - Color coding:
   - Team happiness: Blue theme
   - Customer happiness: Green theme
@@ -87,25 +154,41 @@ Monday Morning Readout is a modern web application designed to streamline the co
     - Gelb (Yellow): Caution/Moderate
     - Grün (Green): Good/Fast
   - Progress bar: Blue gradient
+  - Risk section: Amber highlight
+  - Milestone section: Emerald theme
+- Typography:
+  - Clear hierarchy with different sizes
+  - Proper spacing for readability
+  - Consistent font usage
 
 ## Performance Requirements
+
 - Fast initial page load
 - Smooth animations (60fps)
+- Efficient data fetching with React Query
+- Proper loading state management
 - Responsive to user interactions
-- Efficient data caching
 - Optimized for mobile devices
 
 ## Future Considerations
+
 - Export functionality for reports
 - Historical trend analysis
 - Team comparison features
 - Comment/discussion functionality
 - Email notifications for missing feedback
 - Integration with project management tools
+- Feedback submission form
+- Advanced filtering and search
+- Custom date range selection
+- Team-based grouping and filtering
 
 ## Success Metrics
+
 - User engagement (weekly active users)
 - Feedback submission rate
 - Time spent reviewing feedback
 - User satisfaction with interface
 - System performance metrics
+- Data completeness percentage
+- Feature usage analytics
