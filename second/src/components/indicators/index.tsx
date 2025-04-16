@@ -1,3 +1,4 @@
+import { cn } from "../../lib/utils";
 import { motion } from "framer-motion";
 
 export type VelocityType = "Rot" | "Gelb" | "Grün";
@@ -56,29 +57,41 @@ export function Thermometer({ value }: ThermometerProps) {
   );
 }
 
+function getHappinessDetails(value: number) {
+  const emojiIndex = Math.min(
+    Math.floor(((value - 1) / 4) * (HAPPINESS_EMOJIS.length - 1)),
+    HAPPINESS_EMOJIS.length - 1
+  );
+  return {
+    emoji: HAPPINESS_EMOJIS[emojiIndex],
+  };
+}
+
 interface HappinessIndicatorProps {
   /** Happiness value from 1-5 */
   value: number;
   /** Type of happiness being measured */
   type: HappinessType;
+  /** Additional class names for styling */
+  className?: string;
 }
 
 /**
  * Displays a happiness score with an appropriate emoji and color-coded value
  */
-export function HappinessIndicator({ value, type }: HappinessIndicatorProps) {
-  const emojiIndex = Math.min(
-    Math.floor(((value - 1) / 4) * (HAPPINESS_EMOJIS.length - 1)),
-    HAPPINESS_EMOJIS.length - 1
-  );
-  const emoji = HAPPINESS_EMOJIS[emojiIndex];
-  const color = HAPPINESS_COLORS[type];
-  const label = HAPPINESS_LABELS[type];
+export function HappinessIndicator({
+  value,
+  type,
+  className,
+}: HappinessIndicatorProps) {
+  const { emoji } = getHappinessDetails(value);
 
   return (
-    <div className="flex flex-col items-center" title={`${label}: ${value}/5`}>
-      <span className="text-3xl mb-1">{emoji}</span>
-      <span className={`text-lg font-semibold ${color}`}>{value}/5</span>
+    <div className={cn("text-center", className)}>
+      <div className="text-3xl mb-2">{emoji}</div>
+      <div className="text-sm text-gray-500">
+        {type === "team" ? "Team" : "Customer"}
+      </div>
     </div>
   );
 }
@@ -86,19 +99,28 @@ export function HappinessIndicator({ value, type }: HappinessIndicatorProps) {
 interface VelocityIndicatorProps {
   /** Expected velocity for next week */
   velocity: VelocityType;
+  /** Whether to show the label text */
+  showLabel?: boolean;
 }
 
 /**
  * Displays a traffic light style indicator for velocity prediction
  */
-export function VelocityIndicator({ velocity }: VelocityIndicatorProps) {
+export function VelocityIndicator({
+  velocity,
+  showLabel = false,
+}: VelocityIndicatorProps) {
   return (
     <div className="flex items-center gap-2">
       <div
-        className={`w-4 h-4 rounded-full ${VELOCITY_COLORS[velocity]} animate-pulse`}
+        className={`w-3 h-3 rounded-full ${VELOCITY_COLORS[velocity]} animate-pulse`}
         title={VELOCITY_LABELS[velocity]}
       />
-      <span className="text-sm text-gray-600">{VELOCITY_LABELS[velocity]}</span>
+      {showLabel && (
+        <span className="text-sm text-gray-600">
+          {VELOCITY_LABELS[velocity]}
+        </span>
+      )}
     </div>
   );
 }

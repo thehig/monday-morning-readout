@@ -2,6 +2,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { usePOFeedbackById } from "../../hooks/use-po-feedback";
 import { Button } from "../ui/button";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { VelocityIndicator } from "../indicators";
 
 export function FeedbackDetail() {
   const { id } = useParams<{ id: string }>();
@@ -90,6 +91,20 @@ export function FeedbackDetail() {
             <div className="p-4 bg-gray-50 rounded-lg">
               <h3 className="font-medium mb-2">PS Call Status</h3>
               <p className="whitespace-pre-wrap">{feedback.ps_call_status}</p>
+            </div>
+          )}
+          {/* Velocity Prediction */}
+          {feedback.velocity_next_week && (
+            <div>
+              <h2 className="text-lg font-medium text-gray-900 mb-4">
+                Next Week's Velocity Prediction
+              </h2>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <VelocityIndicator
+                  velocity={feedback.velocity_next_week}
+                  showLabel
+                />
+              </div>
             </div>
           )}
         </div>

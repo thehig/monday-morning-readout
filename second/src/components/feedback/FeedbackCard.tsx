@@ -45,13 +45,6 @@ const cardVariants = {
   },
 };
 
-const contentVariants = {
-  hover: {
-    y: -2,
-    transition: { duration: 0.2 },
-  },
-};
-
 export function FeedbackCard({ feedback, currentWeek }: FeedbackCardProps) {
   const displayName = formatEmailDisplayName(feedback.submitted_by);
 
@@ -62,43 +55,41 @@ export function FeedbackCard({ feedback, currentWeek }: FeedbackCardProps) {
       animate="animate"
       whileHover="hover"
       whileTap="tap"
-      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer transition-colors hover:border-gray-200"
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer"
     >
       <Link
         to={`/feedback/${feedback.id}?week=${currentWeek}`}
         className="block"
       >
-        <motion.div variants={contentVariants} className="space-y-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3
-                className="font-medium text-gray-900 mb-1"
-                title={feedback.submitted_by}
-              >
-                {displayName}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {new Date(feedback.created_at).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </p>
-            </div>
-            <VelocityIndicator velocity={feedback.velocity_next_week} />
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h3
+              className="font-medium text-gray-900"
+              title={feedback.submitted_by}
+            >
+              {displayName}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {new Date(feedback.created_at).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+              })}
+            </p>
           </div>
+          <VelocityIndicator velocity={feedback.velocity_next_week} />
+        </div>
 
-          <div className="space-y-6">
-            <Thermometer value={feedback.progress_percent} />
+        <div className="space-y-6">
+          <Thermometer value={feedback.progress_percent} />
 
-            <div className="grid grid-cols-2 gap-8">
-              <HappinessIndicator value={feedback.team_happiness} type="team" />
-              <HappinessIndicator
-                value={feedback.customer_happiness}
-                type="customer"
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-8">
+            <HappinessIndicator value={feedback.team_happiness} type="team" />
+            <HappinessIndicator
+              value={feedback.customer_happiness}
+              type="customer"
+            />
           </div>
-        </motion.div>
+        </div>
       </Link>
     </motion.div>
   );
