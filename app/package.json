@@ -8,7 +8,7 @@
     "prebuild": "tsx scripts/encrypt-env.ts",
     "build": "next build",
     "build:secure": "cross-env tsx scripts/secure-build.js",
-    "build:single": "node scripts/combine-build.js",
+    "build:single": "npm run prebuild && node scripts/combine-build.js",
     "start": "next start",
     "lint": "next lint",
     "generate:types": "npx supabase gen types typescript --project-id \"$PROJECT_ID\" --schema public > src/types/supabase.ts"

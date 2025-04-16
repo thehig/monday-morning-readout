@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit manually.
 export const encryptedEnvVars = {
-  url: 'U2FsdGVkX19PzHJJHuealKdRg2Re00+cN+475II5MmEBifYXY/J+R24qtujG0rV7LSEHnzEuF/XXXdion3bhiw==',
-  key: 'U2FsdGVkX19Z5uuspf2aHqHNHkUpbUthFwmMlboGSrAqhUYRWKtIu+DYaxIN/6MdK1sQ7xwrvBZJLhW5R+Mx413LUt5Tz829E3neLvQEM05K8aBQQYUfgE2xehc0aMCWhTycF29LYlMMTckZExsm5J0zZJZbzCVYHm//29yv2w0eeXTwUFBUkIsuVSRsK7vm85wEDd+bckv8wOP5chTB0GRiQR1HEUDb4QPNMXrwGuoK3hzjWzgxJpAOs3oew087UKNJ+b3W8Z4laltnIobeASil5F2QioEIGQs+NlaOcgwaahKNTW5R3R7CskM1WbSx',
+  url: 'U2FsdGVkX18yjDdn9sfD4M4RWEiiMStvJFQIo0tgBkmaAnxbKrdjFR06l+SDqnlLs88Evxl21yGKW7WenryJ1Q==',
+  key: 'U2FsdGVkX19TwN5/nswkUFiyNBZEaYX1yezlxmG52iyLhKYKhQUbRbnZ+AdxSBlUEhEk1MvCK1ON2RK9HtHm6nuPEYt9jK2r35oRtYTpQJeKGXxokzQMn+WSMHvCn8E/hJ5aQBrr1Ji9TFRSwTmwA7I3snBX4O39aQp9G+25lTBqBlMtIb45aAv2UwahBQY54MZp9bp8R2FvF9HuDjOQUE59suzJLbmzw9ZN7kqaoLSeb+7HUehahLSrseM6I4iK0wJqhL9bnG4eYBKJ+P1eV30m3fD4OKt9HKHR4l5tRnbnWwrSITPv/wMAf3oLT5eq',
 };
