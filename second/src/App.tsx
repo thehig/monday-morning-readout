@@ -86,6 +86,8 @@ function AppContent() {
       const result = await testConnection();
       if (result.success) {
         console.log(`Connected to Supabase! Server time: ${result.timestamp}`);
+        // Invalidate and refetch all queries after successful connection
+        await queryClient.invalidateQueries({ queryKey: ["po-feedback"] });
       } else {
         console.error(`Failed to connect: ${result.error}`);
       }

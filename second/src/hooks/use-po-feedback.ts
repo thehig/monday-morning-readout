@@ -46,7 +46,8 @@ export function usePOFeedbackByWeek(weekNumber: number) {
         .select("*")
         .gte("created_at", weekStart.toISOString())
         .lte("created_at", weekEnd.toISOString())
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(100);
 
       if (error) {
         console.error("Error fetching PO feedback:", error);
