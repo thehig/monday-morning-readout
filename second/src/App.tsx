@@ -113,7 +113,13 @@ function AppContent() {
     return (
       <div className="container">
         <h1>Monday Morning Readout</h1>
-        <div className="decrypt-form">
+        <form
+          className="decrypt-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleDecrypt();
+          }}
+        >
           <input
             type="password"
             value={password}
@@ -121,11 +127,11 @@ function AppContent() {
             placeholder="Enter decryption password"
             className="password-input"
           />
-          <button onClick={handleDecrypt} className="decrypt-button">
+          <button type="submit" className="decrypt-button">
             Decrypt Environment Variables
           </button>
           {error && <div className="error-message">{error}</div>}
-        </div>
+        </form>
       </div>
     );
   }
