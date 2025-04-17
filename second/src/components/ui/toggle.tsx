@@ -13,7 +13,7 @@ export function Toggle({ enabled, onChange, label, className }: ToggleProps) {
     <Switch.Group>
       <div className={cn("flex items-center space-x-2", className)}>
         {label && (
-          <Switch.Label className="text-sm text-gray-600">{label}</Switch.Label>
+          <Switch.Label className="text-sm text-white">{label}</Switch.Label>
         )}
         <Switch
           checked={enabled}
