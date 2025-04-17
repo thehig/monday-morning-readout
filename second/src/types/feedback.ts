@@ -1,7 +1,7 @@
 export type VelocityType = "Rot" | "Gelb" | "Grün";
 
 export interface POFeedback {
-  id: string;
+  id: number;
   submitted_by: string;
   created_at: string;
   progress_percent: number;

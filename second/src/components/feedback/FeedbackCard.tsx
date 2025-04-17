@@ -6,24 +6,7 @@ import {
   HappinessIndicator,
   VelocityIndicator,
 } from "../indicators";
-
-export type VelocityType = "Rot" | "Gelb" | "Grün";
-
-export interface POFeedback {
-  id: string;
-  submitted_by: string;
-  created_at: string;
-  progress_percent: number;
-  team_happiness: number;
-  customer_happiness: number;
-  velocity_next_week: VelocityType;
-  week_number: number;
-  milestones_done?: string;
-  risks?: string;
-  goals_next_week?: string;
-  ps_call_status?: string;
-  ps_call_notes?: string;
-}
+import type { POFeedback, VelocityType } from "../../types/feedback";
 
 export interface FeedbackCardProps {
   feedback: POFeedback;
@@ -59,7 +42,7 @@ export function FeedbackCard({
   const relatedFeedback = allFeedback.filter(
     (f) => f.submitted_by === feedback.submitted_by
   );
-  const relatedIds = relatedFeedback.map((f) => f.id).join(",");
+  const relatedIds = relatedFeedback.map((f) => f.id.toString()).join(",");
   const aggregatedCount = relatedFeedback.length;
 
   return (

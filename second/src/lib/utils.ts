@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { Database } from "../types/supabase";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -13,21 +14,7 @@ export function formatEmailDisplayName(email: string): string {
     .join(" "); // Join with spaces
 }
 
-export type POFeedback = {
-  id: string;
-  submitted_by: string;
-  created_at: string;
-  progress_percent: number;
-  team_happiness: number;
-  customer_happiness: number;
-  velocity_next_week: "Rot" | "Gelb" | "Grün";
-  week_number: number;
-  milestones_done?: string;
-  risks?: string;
-  goals_next_week?: string;
-  ps_call_status?: string;
-  ps_call_notes?: string;
-};
+export type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
 export function aggregateFeedbackByEmail(
   feedbackList: POFeedback[]

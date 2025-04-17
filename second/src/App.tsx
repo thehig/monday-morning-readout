@@ -11,6 +11,8 @@ import {
   Route,
   Link,
   useSearchParams,
+  Outlet,
+  useLocation,
 } from "react-router-dom";
 import { FeedbackDetail } from "./components/feedback/FeedbackDetail";
 import { FeedbackCard } from "./components/feedback/FeedbackCard";
@@ -43,12 +45,64 @@ const queryClient = new QueryClient({
   },
 });
 
-function AppContent() {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isDecrypted, setIsDecrypted] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
+function Dashboard() {
+  const [searchParams] = useSearchParams();
   const [shouldAggregate, setShouldAggregate] = useState(true);
+
+  // Get week from URL or default to current week
+  const weekParam = searchParams.get("week");
+  const currentWeek = weekParam
+    ? parseInt(weekParam)
+    : getCurrentWeek(new Date().getFullYear());
+
+  const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(
+    currentWeek,
+    true
+  );
+
+  // Process the feedback data based on aggregation setting
+  const displayFeedback: POFeedback[] =
+    shouldAggregate && weeklyFeedback
+      ? aggregateFeedbackByEmail(weeklyFeedback)
+      : weeklyFeedback || [];
+
+  return (
+    <div className="p-4">
+      <div className="mb-4">
+        <Toggle
+          enabled={shouldAggregate}
+          onChange={setShouldAggregate}
+          label="Aggregate by Email"
+        />
+      </div>
+      {isLoading ? (
+        <div className="text-center text-gray-600">
+          Loading feedback data...
+        </div>
+      ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min">
+          {displayFeedback.map((feedback) => (
+            <FeedbackCard
+              key={feedback.id}
+              feedback={feedback}
+              currentWeek={currentWeek}
+              allFeedback={weeklyFeedback}
+              shouldAggregate={shouldAggregate}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center text-gray-600">
+          No feedback found for week {currentWeek}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Layout() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
 
   // Get week from URL or default to current week
   const weekParam = searchParams.get("week");
@@ -61,10 +115,37 @@ function AppContent() {
     setSearchParams({ week: currentWeek.toString() });
   }, [currentWeek, setSearchParams]);
 
-  const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(
-    currentWeek,
-    isDecrypted
+  return (
+    <div className="h-screen bg-gray-50 flex flex-col">
+      <header className="border-b bg-white">
+        <div className="flex h-16 items-center justify-between px-4">
+          <div className="flex items-center space-x-8">
+            <Link
+              to={`/?week=${currentWeek}`}
+              className="text-2xl font-bold hover:text-primary"
+            >
+              Monday Morning Readout
+            </Link>
+          </div>
+          {location.pathname === "/" && (
+            <WeekPicker
+              currentWeek={currentWeek}
+              onWeekChange={setCurrentWeek}
+            />
+          )}
+        </div>
+      </header>
+      <main className="flex-1 overflow-auto">
+        <Outlet />
+      </main>
+    </div>
   );
+}
+
+function AppContent() {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isDecrypted, setIsDecrypted] = useState(false);
 
   const handleDecrypt = async () => {
     try {
@@ -136,75 +217,13 @@ function AppContent() {
     );
   }
 
-  // Process the feedback data based on aggregation setting
-  const displayFeedback =
-    shouldAggregate && weeklyFeedback
-      ? aggregateFeedbackByEmail(weeklyFeedback)
-      : weeklyFeedback || [];
-
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
-      <header className="border-b bg-white">
-        <div className="flex h-16 items-center justify-between px-4">
-          <div className="flex items-center space-x-8">
-            <Link
-              to={`/?week=${currentWeek}`}
-              className="text-2xl font-bold hover:text-primary"
-            >
-              Monday Morning Readout
-            </Link>
-            <Toggle
-              enabled={shouldAggregate}
-              onChange={setShouldAggregate}
-              label="Aggregate by Email"
-              className="ml-4"
-            />
-          </div>
-          <WeekPicker currentWeek={currentWeek} onWeekChange={setCurrentWeek} />
-        </div>
-      </header>
-      <main className="flex-1 overflow-auto">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <div className="p-4">
-                {isLoading ? (
-                  <div className="text-center text-gray-600">
-                    Loading feedback data...
-                  </div>
-                ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
-                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min">
-                    {displayFeedback.map((feedback: POFeedback) => (
-                      <FeedbackCard
-                        key={feedback.id}
-                        feedback={feedback}
-                        currentWeek={currentWeek}
-                        allFeedback={weeklyFeedback}
-                        shouldAggregate={shouldAggregate}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-600">
-                    No feedback found for week {currentWeek}
-                  </div>
-                )}
-              </div>
-            }
-          />
-          <Route
-            path="/feedback/:id"
-            element={
-              <FeedbackDetail
-                shouldAggregate={shouldAggregate}
-                feedback={weeklyFeedback || []}
-              />
-            }
-          />
-        </Routes>
-      </main>
-    </div>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="/feedback/:id" element={<FeedbackDetail />} />
+      </Route>
+    </Routes>
   );
 }
 

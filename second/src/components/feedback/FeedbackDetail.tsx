@@ -2,59 +2,41 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { VelocityIndicator } from "../indicators";
-import { aggregateFeedbackByEmail } from "../../lib/utils";
-import { useQueries } from "@tanstack/react-query";
 import { getSupabase } from "../../lib/supabase/client";
-import type { POFeedback } from "../../types/feedback";
+import { aggregateFeedbackByEmail } from "../../lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import type { Database } from "../../types/supabase";
+import { useState } from "react";
+import { Toggle } from "../ui/toggle";
 
-interface FeedbackDetailProps {
-  feedback: POFeedback[];
-  shouldAggregate: boolean;
-}
+type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
-export function FeedbackDetail({
-  feedback: feedbackProp,
-  shouldAggregate,
-}: FeedbackDetailProps) {
+export function FeedbackDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const week = searchParams.get("week");
+  const [shouldAggregate, setShouldAggregate] = useState(true);
 
-  // Split IDs and fetch all feedback entries
-  const ids = id?.split(",") || [];
-  const feedbackQueries = useQueries({
-    queries: ids.map((feedbackId) => ({
-      queryKey: ["po-feedback", feedbackId],
-      queryFn: async () => {
-        const { data, error } = await getSupabase()
-          .from("po_feedback")
-          .select("*")
-          .eq("id", parseInt(feedbackId))
-          .single();
+  const {
+    data: feedback,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["feedback", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await getSupabase()
+        .from("po_feedback")
+        .select("*")
+        .eq("id", parseInt(id, 10))
+        .single();
 
-        if (error) throw error;
-        return data as POFeedback;
-      },
-      enabled: !!feedbackId,
-    })),
+      if (error) throw error;
+      return data as POFeedback;
+    },
+    enabled: !!id,
   });
-
-  const isLoading = feedbackQueries.some((query) => query.isLoading);
-  const queryHasError = feedbackQueries.some((query) => query.isError);
-  const queryFeedback = feedbackQueries
-    .filter((query) => query.data)
-    .map((query) => query.data as POFeedback);
-
-  // Use either queried feedback or prop feedback based on context
-  const feedback =
-    ids.length > 0
-      ? shouldAggregate && queryFeedback.length > 0
-        ? aggregateFeedbackByEmail(queryFeedback)[0]
-        : queryFeedback[0]
-      : shouldAggregate && feedbackProp.length > 0
-      ? aggregateFeedbackByEmail(feedbackProp)[0]
-      : feedbackProp[0];
 
   const handleBack = () => {
     navigate(week ? `/?week=${week}` : "/");
@@ -68,7 +50,7 @@ export function FeedbackDetail({
     );
   }
 
-  if (queryHasError || !feedback) {
+  if (isError || !feedback) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="text-gray-600">Feedback not found</div>
