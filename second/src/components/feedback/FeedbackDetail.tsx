@@ -18,9 +18,11 @@ import { useState } from "react";
 function FeedbackContent({
   feedback,
   week,
+  allFeedbackIds,
 }: {
   feedback: POFeedback;
   week: number;
+  allFeedbackIds?: string[];
 }) {
   const displayName = formatEmailDisplayName(feedback.submitted_by);
   const submissionDate = new Date(feedback.created_at);
@@ -237,6 +239,12 @@ function FeedbackContent({
         createdAt={feedback.created_at}
         submittedBy={feedback.submitted_by}
         relativeTime={relativeTime}
+        allSubmissionDates={feedback.all_submission_dates}
+        isAggregated={Boolean(
+          feedback.all_submission_dates &&
+            feedback.all_submission_dates.length > 1
+        )}
+        allIds={allFeedbackIds}
       />
     </motion.div>
   );
@@ -321,13 +329,18 @@ export function FeedbackDetail() {
 
         {/* Feedback Content */}
         {shouldAggregate && aggregatedFeedback ? (
-          <FeedbackContent feedback={aggregatedFeedback} week={week} />
+          <FeedbackContent
+            feedback={aggregatedFeedback}
+            week={week}
+            allFeedbackIds={feedbackArray.map((f) => f.id)}
+          />
         ) : (
           feedbackArray.map((feedback) => (
             <FeedbackContent
               key={feedback.id}
               feedback={feedback}
               week={week}
+              allFeedbackIds={undefined}
             />
           ))
         )}
