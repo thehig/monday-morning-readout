@@ -44,35 +44,35 @@ export function FeedbackCard({
       animate="animate"
       whileHover="hover"
       whileTap="tap"
-      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-lg transition-all duration-200"
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-lg transition-all duration-200 feedback-card"
     >
       <Link
         to={`/feedback/${relatedIds}?week=${currentWeek}`}
         className="block h-full"
       >
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3
-                className="font-medium text-gray-900"
-                title={feedback.submitted_by}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <h3
+              className="font-medium text-gray-900 user-name"
+              title={feedback.submitted_by}
+            >
+              {displayName}
+            </h3>
+            {shouldAggregate && aggregatedCount > 1 && (
+              <span
+                className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full relative z-1"
+                style={{ transform: "translateY(-6px)" }}
               >
-                {displayName}
-              </h3>
-              {shouldAggregate && aggregatedCount > 1 && (
-                <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                  {aggregatedCount} updates
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-gray-500">
-              {new Date(feedback.created_at).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-              })}
-            </p>
+                {aggregatedCount} updates
+              </span>
+            )}
           </div>
-          <VelocityIndicator velocity={feedback.velocity_next_week} />
+          <div
+            className="flex items-center"
+            style={{ transform: "translateY(-6px)" }}
+          >
+            <VelocityIndicator velocity={feedback.velocity_next_week} />
+          </div>
         </div>
 
         <div className="space-y-6">
