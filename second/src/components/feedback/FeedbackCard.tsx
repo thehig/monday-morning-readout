@@ -6,7 +6,7 @@ import {
   HappinessIndicator,
   VelocityIndicator,
 } from "../indicators";
-import type { POFeedback, VelocityType } from "../../types/feedback";
+import type { POFeedback } from "../../types/feedback";
 
 export interface FeedbackCardProps {
   feedback: POFeedback;
@@ -18,16 +18,8 @@ export interface FeedbackCardProps {
 const cardVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  hover: {
-    scale: 1.02,
-    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
-    transition: { duration: 0.2 },
-  },
-  tap: {
-    scale: 0.98,
-    boxShadow: "0 5px 15px -5px rgba(0, 0, 0, 0.1)",
-    transition: { duration: 0.1 },
-  },
+  hover: { scale: 1.02 },
+  tap: { scale: 0.98 },
 };
 
 export function FeedbackCard({
@@ -52,25 +44,33 @@ export function FeedbackCard({
       animate="animate"
       whileHover="hover"
       whileTap="tap"
-      className="bg-white rounded-xl shadow-md border border-gray-100 p-6 cursor-pointer min-h-[200px] hover:shadow-lg transition-shadow"
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-lg transition-all duration-200"
     >
       <Link
         to={`/feedback/${relatedIds}?week=${currentWeek}`}
         className="block h-full"
       >
         <div className="flex justify-between items-start mb-6">
-          <div className="flex items-start gap-2">
-            <h3
-              className="font-medium text-lg text-gray-900"
-              title={feedback.submitted_by}
-            >
-              {displayName}
-            </h3>
-            {shouldAggregate && aggregatedCount > 1 && (
-              <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                {aggregatedCount} updates
-              </span>
-            )}
+          <div>
+            <div className="flex items-center gap-2">
+              <h3
+                className="font-medium text-gray-900"
+                title={feedback.submitted_by}
+              >
+                {displayName}
+              </h3>
+              {shouldAggregate && aggregatedCount > 1 && (
+                <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                  {aggregatedCount} updates
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-gray-500">
+              {new Date(feedback.created_at).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+              })}
+            </p>
           </div>
           <VelocityIndicator velocity={feedback.velocity_next_week} />
         </div>
@@ -78,12 +78,18 @@ export function FeedbackCard({
         <div className="space-y-6">
           <Thermometer value={feedback.progress_percent} />
 
-          <div className="grid grid-cols-2 gap-4">
-            <HappinessIndicator value={feedback.team_happiness} type="team" />
-            <HappinessIndicator
-              value={feedback.customer_happiness}
-              type="customer"
-            />
+          <div className="grid grid-cols-2 gap-8">
+            <div className="flex flex-col items-center">
+              <HappinessIndicator value={feedback.team_happiness} type="team" />
+              <span className="text-sm text-gray-500 mt-1">Team</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <HappinessIndicator
+                value={feedback.customer_happiness}
+                type="customer"
+              />
+              <span className="text-sm text-gray-500 mt-1">Customer</span>
+            </div>
           </div>
         </div>
       </Link>
