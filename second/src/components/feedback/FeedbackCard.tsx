@@ -50,27 +50,27 @@ export function FeedbackCard({
         to={`/feedback/${relatedIds}?week=${currentWeek}`}
         className="block h-full"
       >
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
+        <div className="grid grid-cols-[2fr_1fr_2fr] items-center gap-2 mb-6 relative z-10">
+          <div className="flex items-center gap-3">
             <h3
-              className="font-medium text-gray-900 user-name"
+              className="font-medium text-white user-name truncate m-0"
               title={feedback.submitted_by}
             >
               {displayName}
             </h3>
             {shouldAggregate && aggregatedCount > 1 && (
-              <span
-                className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full relative z-1"
-                style={{ transform: "translateY(-6px)" }}
-              >
+              <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-flex items-center">
                 {aggregatedCount} updates
-              </span>
+              </div>
             )}
           </div>
-          <div
-            className="flex items-center"
-            style={{ transform: "translateY(-6px)" }}
-          >
+
+          <div></div>
+
+          <div className="flex items-center justify-end gap-4">
+            <div className="text-sm text-white">
+              {new Date(feedback.created_at).toLocaleDateString()}
+            </div>
             <VelocityIndicator velocity={feedback.velocity_next_week} />
           </div>
         </div>

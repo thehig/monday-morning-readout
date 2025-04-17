@@ -98,6 +98,9 @@ export function usePOFeedbackById(
         .in("id", Array.isArray(id) ? id : [id]);
 
       if (error) throw error;
+
+      console.log("Fetched feedback data:", data);
+
       return Array.isArray(id)
         ? (data as POFeedback[])
         : (data[0] as POFeedback);
