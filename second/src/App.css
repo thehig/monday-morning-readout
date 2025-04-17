@@ -158,7 +158,6 @@ h1 {
 .feedback-card {
   background: #ffffff;
   border-radius: 8px;
-  padding: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
   border: 1px solid #1a1a4b;
@@ -174,12 +173,17 @@ h1 {
 .feedback-card h3,
 .feedback-card .velocity-indicator,
 .feedback-card p {
-  margin: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .feedback-card h3 {
+  color: #ff7f00;
   margin: 0;
+  padding-left: 10px;
   line-height: 1.5;
+  position: relative;
+  z-index: 1;
 }
 
 .feedback-card p {

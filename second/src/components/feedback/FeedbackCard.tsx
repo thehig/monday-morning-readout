@@ -44,11 +44,11 @@ export function FeedbackCard({
       animate="animate"
       whileHover="hover"
       whileTap="tap"
-      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-lg transition-all duration-200 feedback-card"
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-0 cursor-pointer hover:shadow-lg transition-all duration-200 feedback-card"
     >
       <Link
         to={`/feedback/${relatedIds}?week=${currentWeek}`}
-        className="block h-full"
+        className="block h-full p-0"
       >
         <div className="flex items-center justify-between gap-4 bg-[#1a1a4b] p-4 relative">
           <h3
