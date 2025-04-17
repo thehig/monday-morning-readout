@@ -61,7 +61,10 @@ function AppContent() {
     setSearchParams({ week: currentWeek.toString() });
   }, [currentWeek, setSearchParams]);
 
-  const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(currentWeek);
+  const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(
+    currentWeek,
+    isDecrypted
+  );
 
   const handleDecrypt = async () => {
     try {
@@ -127,6 +130,12 @@ function AppContent() {
     );
   }
 
+  // Process the feedback data based on aggregation setting
+  const displayFeedback =
+    shouldAggregate && weeklyFeedback
+      ? aggregateFeedbackByEmail(weeklyFeedback)
+      : weeklyFeedback || [];
+
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
       <header className="border-b bg-white">
@@ -160,10 +169,7 @@ function AppContent() {
                   </div>
                 ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
                   <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min">
-                    {(shouldAggregate
-                      ? aggregateFeedbackByEmail(weeklyFeedback)
-                      : weeklyFeedback
-                    ).map((feedback: POFeedback) => (
+                    {displayFeedback.map((feedback: POFeedback) => (
                       <FeedbackCard
                         key={feedback.id}
                         feedback={feedback}
@@ -183,7 +189,12 @@ function AppContent() {
           />
           <Route
             path="/feedback/:id"
-            element={<FeedbackDetail shouldAggregate={shouldAggregate} />}
+            element={
+              <FeedbackDetail
+                shouldAggregate={shouldAggregate}
+                feedback={weeklyFeedback || []}
+              />
+            }
           />
         </Routes>
       </main>

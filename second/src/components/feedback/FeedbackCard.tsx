@@ -55,11 +55,12 @@ export function FeedbackCard({
 }: FeedbackCardProps) {
   const displayName = formatEmailDisplayName(feedback.submitted_by);
 
-  // Get all IDs for this email
-  const relatedIds = allFeedback
-    .filter((f) => f.submitted_by === feedback.submitted_by)
-    .map((f) => f.id)
-    .join(",");
+  // Get all feedback entries for this email
+  const relatedFeedback = allFeedback.filter(
+    (f) => f.submitted_by === feedback.submitted_by
+  );
+  const relatedIds = relatedFeedback.map((f) => f.id).join(",");
+  const aggregatedCount = relatedFeedback.length;
 
   return (
     <motion.div
@@ -75,19 +76,18 @@ export function FeedbackCard({
         className="block h-full"
       >
         <div className="flex justify-between items-start mb-6">
-          <div>
+          <div className="flex items-start gap-2">
             <h3
               className="font-medium text-lg text-gray-900"
               title={feedback.submitted_by}
             >
               {displayName}
             </h3>
-            <p className="text-sm text-gray-500">
-              {new Date(feedback.created_at).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-              })}
-            </p>
+            {shouldAggregate && aggregatedCount > 1 && (
+              <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                {aggregatedCount} updates
+              </span>
+            )}
           </div>
           <VelocityIndicator velocity={feedback.velocity_next_week} />
         </div>

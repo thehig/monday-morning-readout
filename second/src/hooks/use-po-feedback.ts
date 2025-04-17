@@ -41,7 +41,10 @@ function getWeekDates(weekNumber: number, year: number) {
   return { start, end };
 }
 
-export function usePOFeedbackByWeek(weekNumber: number) {
+export function usePOFeedbackByWeek(
+  weekNumber: number,
+  enabled: boolean = false
+) {
   return useQuery({
     queryKey: ["po-feedback", "week", weekNumber],
     queryFn: async () => {
@@ -73,22 +76,22 @@ export function usePOFeedbackByWeek(weekNumber: number) {
         throw error;
       }
 
-      console.log("Retrieved data:", data);
-
-      // Aggregate feedback by email before returning
-      return aggregateFeedbackByEmail(data as POFeedback[]);
+      return data as POFeedback[];
     },
+    enabled: enabled,
   });
 }
 
-export function usePOFeedbackById(id: string | undefined) {
-  const supabase = getSupabase();
-
+export function usePOFeedbackById(
+  id: string | undefined,
+  enabled: boolean = false
+) {
   return useQuery({
     queryKey: ["po-feedback", id],
     queryFn: async () => {
       if (!id) throw new Error("ID is required");
 
+      const supabase = getSupabase();
       const { data, error } = await supabase
         .from("po_feedback")
         .select("*")
@@ -96,8 +99,8 @@ export function usePOFeedbackById(id: string | undefined) {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as POFeedback;
     },
-    enabled: !!id,
+    enabled: enabled && !!id,
   });
 }
