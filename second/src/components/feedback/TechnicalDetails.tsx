@@ -1,8 +1,8 @@
-import { formatTime, formatDate } from "@/lib/date-utils";
+import { formatTime, formatDate } from "../../lib/date-utils";
 
 interface TechnicalDetailsProps {
   /** The feedback ID */
-  id: number;
+  id: string;
   /** The calendar week number */
   week: number;
   /** The submission date */

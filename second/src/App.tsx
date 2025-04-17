@@ -136,7 +136,7 @@ function Layout() {
         </div>
       </header>
       <main className="flex-1 overflow-auto">
-        <Outlet />
+        <Outlet context={{ isDecrypted: true }} />
       </main>
     </div>
   );

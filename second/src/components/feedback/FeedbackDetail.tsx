@@ -2,9 +2,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { VelocityIndicator } from "../indicators";
-import { getSupabase } from "../../lib/supabase/client";
-import { aggregateFeedbackByEmail } from "../../lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { usePOFeedbackById } from "../../hooks/use-po-feedback";
 import type { Database } from "../../types/supabase";
 import { useState } from "react";
 import { Toggle } from "../ui/toggle";
@@ -18,25 +16,7 @@ export function FeedbackDetail() {
   const week = searchParams.get("week");
   const [shouldAggregate, setShouldAggregate] = useState(true);
 
-  const {
-    data: feedback,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["feedback", id],
-    queryFn: async () => {
-      if (!id) return null;
-      const { data, error } = await getSupabase()
-        .from("po_feedback")
-        .select("*")
-        .eq("id", parseInt(id, 10))
-        .single();
-
-      if (error) throw error;
-      return data as POFeedback;
-    },
-    enabled: !!id,
-  });
+  const { data: feedback, isLoading, isError } = usePOFeedbackById(id, true);
 
   const handleBack = () => {
     navigate(week ? `/?week=${week}` : "/");

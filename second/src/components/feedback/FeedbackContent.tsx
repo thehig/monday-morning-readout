@@ -11,7 +11,7 @@ import { formatEmailDisplayName } from "../../lib/utils";
 import { getDateTimeProps } from "../../lib/date-utils";
 
 interface FeedbackData {
-  id: number;
+  id: string;
   submitted_by: string;
   created_at: string;
   progress_percent: number;

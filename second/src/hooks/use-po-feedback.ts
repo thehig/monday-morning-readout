@@ -95,7 +95,7 @@ export function usePOFeedbackById(
       const { data, error } = await supabase
         .from("po_feedback")
         .select("*")
-        .eq("id", parseInt(id))
+        .eq("id", id)
         .single();
 
       if (error) throw error;
