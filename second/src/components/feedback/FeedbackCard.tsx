@@ -65,6 +65,8 @@ export function FeedbackCard({
             </div>
           )}
 
+          <div className="flex-grow"></div>
+
           <div className="text-sm text-white">
             {new Date(feedback.created_at).toLocaleDateString()}
           </div>
