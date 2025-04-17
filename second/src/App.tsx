@@ -14,6 +14,8 @@ import {
 } from "react-router-dom";
 import { FeedbackDetail } from "./components/feedback/FeedbackDetail";
 import { FeedbackCard } from "./components/feedback/FeedbackCard";
+import { aggregateFeedbackByEmail } from "./lib/utils";
+import { Toggle } from "./components/ui/toggle";
 
 // Extend Window interface to include our custom properties
 declare global {
@@ -46,6 +48,7 @@ function AppContent() {
   const [error, setError] = useState<string | null>(null);
   const [isDecrypted, setIsDecrypted] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [shouldAggregate, setShouldAggregate] = useState(true);
 
   // Get week from URL or default to current week
   const weekParam = searchParams.get("week");
@@ -128,12 +131,20 @@ function AppContent() {
     <div className="h-screen bg-gray-50 flex flex-col">
       <header className="border-b bg-white">
         <div className="flex h-16 items-center justify-between px-4">
-          <Link
-            to={`/?week=${currentWeek}`}
-            className="text-2xl font-bold hover:text-primary"
-          >
-            Monday Morning Readout
-          </Link>
+          <div className="flex items-center space-x-8">
+            <Link
+              to={`/?week=${currentWeek}`}
+              className="text-2xl font-bold hover:text-primary"
+            >
+              Monday Morning Readout
+            </Link>
+            <Toggle
+              enabled={shouldAggregate}
+              onChange={setShouldAggregate}
+              label="Aggregate by Email"
+              className="ml-4"
+            />
+          </div>
           <WeekPicker currentWeek={currentWeek} onWeekChange={setCurrentWeek} />
         </div>
       </header>
@@ -149,11 +160,16 @@ function AppContent() {
                   </div>
                 ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
                   <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min">
-                    {weeklyFeedback.map((feedback: POFeedback) => (
+                    {(shouldAggregate
+                      ? aggregateFeedbackByEmail(weeklyFeedback)
+                      : weeklyFeedback
+                    ).map((feedback: POFeedback) => (
                       <FeedbackCard
                         key={feedback.id}
                         feedback={feedback}
                         currentWeek={currentWeek}
+                        allFeedback={weeklyFeedback}
+                        shouldAggregate={shouldAggregate}
                       />
                     ))}
                   </div>
@@ -165,7 +181,10 @@ function AppContent() {
               </div>
             }
           />
-          <Route path="/feedback/:id" element={<FeedbackDetail />} />
+          <Route
+            path="/feedback/:id"
+            element={<FeedbackDetail shouldAggregate={shouldAggregate} />}
+          />
         </Routes>
       </main>
     </div>

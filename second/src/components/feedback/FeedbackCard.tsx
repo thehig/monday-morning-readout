@@ -25,9 +25,11 @@ export interface POFeedback {
   ps_call_notes?: string;
 }
 
-interface FeedbackCardProps {
+export interface FeedbackCardProps {
   feedback: POFeedback;
   currentWeek: number;
+  allFeedback: POFeedback[];
+  shouldAggregate: boolean;
 }
 
 const cardVariants = {
@@ -45,8 +47,19 @@ const cardVariants = {
   },
 };
 
-export function FeedbackCard({ feedback, currentWeek }: FeedbackCardProps) {
+export function FeedbackCard({
+  feedback,
+  currentWeek,
+  allFeedback,
+  shouldAggregate,
+}: FeedbackCardProps) {
   const displayName = formatEmailDisplayName(feedback.submitted_by);
+
+  // Get all IDs for this email
+  const relatedIds = allFeedback
+    .filter((f) => f.submitted_by === feedback.submitted_by)
+    .map((f) => f.id)
+    .join(",");
 
   return (
     <motion.div
@@ -58,7 +71,7 @@ export function FeedbackCard({ feedback, currentWeek }: FeedbackCardProps) {
       className="bg-white rounded-xl shadow-md border border-gray-100 p-6 cursor-pointer min-h-[200px] hover:shadow-lg transition-shadow"
     >
       <Link
-        to={`/feedback/${feedback.id}?week=${currentWeek}`}
+        to={`/feedback/${relatedIds}?week=${currentWeek}`}
         className="block h-full"
       >
         <div className="flex justify-between items-start mb-6">
