@@ -60,7 +60,8 @@ export function FeedbackCard({
             </h3>
             {shouldAggregate && aggregatedCount > 1 && (
               <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-flex items-center">
-                {aggregatedCount} updates
+                {aggregatedCount}{" "}
+                <span className="hidden lg:inline">&nbsp;updates</span>
               </div>
             )}
           </div>
@@ -81,14 +82,12 @@ export function FeedbackCard({
           <div className="grid grid-cols-2 gap-8">
             <div className="flex flex-col items-center">
               <HappinessIndicator value={feedback.team_happiness} type="team" />
-              <span className="text-sm text-gray-500 mt-1">Team</span>
             </div>
             <div className="flex flex-col items-center">
               <HappinessIndicator
                 value={feedback.customer_happiness}
                 type="customer"
               />
-              <span className="text-sm text-gray-500 mt-1">Customer</span>
             </div>
           </div>
         </div>
