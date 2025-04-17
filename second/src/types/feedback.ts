@@ -2,16 +2,15 @@ export type VelocityType = "Rot" | "Gelb" | "Grün";
 
 export interface POFeedback {
   id: string;
-  submitted_by: string;
-  created_at: string;
-  progress_percent: number;
+  email: string;
+  submission_date: string;
+  all_submission_dates?: string[];
+  sprint_progress: number;
   team_happiness: number;
   customer_happiness: number;
-  velocity_next_week: VelocityType;
-  week_number: number;
-  milestones_done?: string;
-  risks?: string;
-  goals_next_week?: string;
-  ps_call_status?: string;
-  ps_call_notes?: string;
+  milestones: string;
+  risks: string;
+  goals: string;
+  ps_call_status: string;
+  formatted_text?: string;
 }

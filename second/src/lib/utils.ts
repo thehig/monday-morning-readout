@@ -30,12 +30,12 @@ export function aggregateFeedbackByEmail(
 
   // For each email, calculate averages and combine data
   return Object.entries(groupedByEmail).map(([email, feedbacks]) => {
-    // Use the most recent feedback as the base
-    const mostRecent = feedbacks.reduce((latest, current) => {
-      return new Date(current.created_at) > new Date(latest.created_at)
-        ? current
-        : latest;
-    }, feedbacks[0]);
+    // Sort feedbacks by date, most recent first
+    const sortedFeedbacks = [...feedbacks].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    const mostRecent = sortedFeedbacks[0];
 
     // Calculate averages with 2 decimal places
     const avgProgress = Number(
@@ -68,21 +68,48 @@ export function aggregateFeedbackByEmail(
       velocityCounts[a[0]] > velocityCounts[b[0]] ? a : b
     )[0] as "Rot" | "Gelb" | "Grün";
 
-    // Combine text fields with newlines
-    const combineMilestones = feedbacks
-      .map((f) => f.milestones_done)
+    // Combine text fields with bullet points and dates
+    const combineMilestones = sortedFeedbacks
+      .map(
+        (f) =>
+          f.milestones_done &&
+          `[${new Date(f.created_at).toLocaleDateString()}] ${
+            f.milestones_done
+          }`
+      )
       .filter(Boolean)
-      .join("\n");
-    const combineRisks = feedbacks
-      .map((f) => f.risks)
-      .filter(Boolean)
-      .join("\n");
-    const combineGoals = feedbacks
-      .map((f) => f.goals_next_week)
-      .filter(Boolean)
-      .join("\n");
+      .join("\n\n");
 
-    // Return aggregated feedback
+    const combineRisks = sortedFeedbacks
+      .map(
+        (f) =>
+          f.risks &&
+          `[${new Date(f.created_at).toLocaleDateString()}] ${f.risks}`
+      )
+      .filter(Boolean)
+      .join("\n\n");
+
+    const combineGoals = sortedFeedbacks
+      .map(
+        (f) =>
+          f.goals_next_week &&
+          `[${new Date(f.created_at).toLocaleDateString()}] ${
+            f.goals_next_week
+          }`
+      )
+      .filter(Boolean)
+      .join("\n\n");
+
+    const combineCallStatus = sortedFeedbacks
+      .map(
+        (f) =>
+          f.ps_call_status &&
+          `[${new Date(f.created_at).toLocaleDateString()}] ${f.ps_call_status}`
+      )
+      .filter(Boolean)
+      .join("\n\n");
+
+    // Return aggregated feedback with all submission dates
     return {
       ...mostRecent,
       progress_percent: avgProgress,
@@ -92,6 +119,9 @@ export function aggregateFeedbackByEmail(
       milestones_done: combineMilestones || undefined,
       risks: combineRisks || undefined,
       goals_next_week: combineGoals || undefined,
+      ps_call_status: combineCallStatus || undefined,
+      // Store all submission dates for display
+      all_submission_dates: sortedFeedbacks.map((f) => f.created_at),
     };
   });
 }
