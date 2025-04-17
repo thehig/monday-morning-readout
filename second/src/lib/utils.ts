@@ -50,17 +50,26 @@ export function aggregateFeedbackByEmail(
         : latest;
     }, feedbacks[0]);
 
-    // Calculate averages
-    const avgProgress = Math.round(
-      feedbacks.reduce((sum, f) => sum + f.progress_percent, 0) /
+    // Calculate averages with 2 decimal places
+    const avgProgress = Number(
+      (
+        feedbacks.reduce((sum, f) => sum + f.progress_percent, 0) /
         feedbacks.length
+      ).toFixed(2)
     );
-    const avgTeamHappiness = Math.round(
-      feedbacks.reduce((sum, f) => sum + f.team_happiness, 0) / feedbacks.length
-    );
-    const avgCustomerHappiness = Math.round(
-      feedbacks.reduce((sum, f) => sum + f.customer_happiness, 0) /
+
+    const avgTeamHappiness = Number(
+      (
+        feedbacks.reduce((sum, f) => sum + f.team_happiness, 0) /
         feedbacks.length
+      ).toFixed(2)
+    );
+
+    const avgCustomerHappiness = Number(
+      (
+        feedbacks.reduce((sum, f) => sum + f.customer_happiness, 0) /
+        feedbacks.length
+      ).toFixed(2)
     );
 
     // For velocity, use the most common value
