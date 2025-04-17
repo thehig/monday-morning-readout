@@ -28,40 +28,37 @@ export function WeekPicker({ currentWeek, onWeekChange }: WeekPickerProps) {
     >
       <button
         onClick={() => onWeekChange(Math.max(1, currentWeek - 1))}
-        className="p-1 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="p-1 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={isPreviousWeekDisabled}
         aria-label="Previous week"
       >
-        <ChevronLeftIcon className="w-4 h-4 text-gray-600" aria-hidden="true" />
+        <ChevronLeftIcon className="w-4 h-4 text-white" aria-hidden="true" />
       </button>
 
       <div className="text-center" aria-live="polite">
-        <div className="text-sm font-medium text-gray-600">
+        <div className="text-sm font-medium text-white">
           Week {currentWeek}
           {isCurrentWeek && (
             <span
-              className="ml-1 text-xs text-blue-600"
+              className="ml-1 text-xs text-[#ff7f00]"
               aria-label="Current week indicator"
             >
               (Current)
             </span>
           )}
         </div>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-300">
           {formatDate(start)} - {formatDate(end)}
         </div>
       </div>
 
       <button
         onClick={() => onWeekChange(Math.min(totalWeeks, currentWeek + 1))}
-        className="p-1 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="p-1 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={isNextWeekDisabled}
         aria-label="Next week"
       >
-        <ChevronRightIcon
-          className="w-4 h-4 text-gray-600"
-          aria-hidden="true"
-        />
+        <ChevronRightIcon className="w-4 h-4 text-white" aria-hidden="true" />
       </button>
     </div>
   );

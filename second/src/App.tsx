@@ -117,12 +117,12 @@ function Layout() {
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
-      <header className="border-b bg-white">
+      <header className="border-b bg-[#1a1a4b]">
         <div className="flex h-16 items-center justify-between px-4">
           <div className="flex items-center space-x-8">
             <Link
               to={`/?week=${currentWeek}`}
-              className="text-2xl font-bold hover:text-primary"
+              className="text-[#ff7f00] text-2xl font-bold hover:opacity-90"
             >
               Monday Morning Readout
             </Link>
