@@ -72,7 +72,7 @@ export function FeedbackCard({
           <VelocityIndicator velocity={feedback.velocity_next_week} />
         </div>
 
-        <div className="space-y-6">
+        <div className="p-6">
           <Thermometer value={feedback.progress_percent} />
 
           <div className="grid grid-cols-2 gap-8">
