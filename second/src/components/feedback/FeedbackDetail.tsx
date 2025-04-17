@@ -302,7 +302,7 @@ export function FeedbackDetail() {
         {/* Header with back button */}
         <div className="flex items-center gap-4 mb-6">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/?week=${week}`)}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             title="Return to overview"
           >

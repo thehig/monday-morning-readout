@@ -70,42 +70,22 @@ export function aggregateFeedbackByEmail(
 
     // Combine text fields with bullet points and dates
     const combineMilestones = sortedFeedbacks
-      .map(
-        (f) =>
-          f.milestones_done &&
-          `[${new Date(f.created_at).toLocaleDateString()}] ${
-            f.milestones_done
-          }`
-      )
+      .map((f) => f.milestones_done && `[ID: ${f.id}] ${f.milestones_done}`)
       .filter(Boolean)
       .join("\n\n");
 
     const combineRisks = sortedFeedbacks
-      .map(
-        (f) =>
-          f.risks &&
-          `[${new Date(f.created_at).toLocaleDateString()}] ${f.risks}`
-      )
+      .map((f) => f.risks && `[ID: ${f.id}] ${f.risks}`)
       .filter(Boolean)
       .join("\n\n");
 
     const combineGoals = sortedFeedbacks
-      .map(
-        (f) =>
-          f.goals_next_week &&
-          `[${new Date(f.created_at).toLocaleDateString()}] ${
-            f.goals_next_week
-          }`
-      )
+      .map((f) => f.goals_next_week && `[ID: ${f.id}] ${f.goals_next_week}`)
       .filter(Boolean)
       .join("\n\n");
 
     const combineCallStatus = sortedFeedbacks
-      .map(
-        (f) =>
-          f.ps_call_status &&
-          `[${new Date(f.created_at).toLocaleDateString()}] ${f.ps_call_status}`
-      )
+      .map((f) => f.ps_call_status && `[ID: ${f.id}] ${f.ps_call_status}`)
       .filter(Boolean)
       .join("\n\n");
 
