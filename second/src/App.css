@@ -171,35 +171,15 @@ h1 {
   box-shadow: 0 4px 8px rgba(26, 26, 75, 0.2);
 }
 
-.feedback-card::before {
-  content: "";
-  display: block;
-  height: 40px;
-  background-color: #1a1a4b;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  z-index: 0;
-}
-
 .feedback-card h3,
 .feedback-card .velocity-indicator,
 .feedback-card p {
-  position: relative;
-  z-index: 1;
+  margin: 0;
 }
 
 .feedback-card h3 {
-  color: #ff7f00;
   margin: 0;
-  padding-left: 10px;
   line-height: 1.5;
-  position: relative;
-  top: -5px;
-  z-index: 1;
 }
 
 .feedback-card p {

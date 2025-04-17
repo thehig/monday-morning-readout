@@ -50,30 +50,26 @@ export function FeedbackCard({
         to={`/feedback/${relatedIds}?week=${currentWeek}`}
         className="block h-full"
       >
-        <div className="grid grid-cols-[2fr_1fr_2fr] items-center gap-2 mb-6 relative z-10">
-          <div className="flex items-center gap-3">
-            <h3
-              className="font-medium text-white user-name truncate m-0"
-              title={feedback.submitted_by}
-            >
-              {displayName}
-            </h3>
-            {shouldAggregate && aggregatedCount > 1 && (
-              <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-flex items-center">
-                {aggregatedCount}{" "}
-                <span className="hidden lg:inline">&nbsp;updates</span>
-              </div>
-            )}
-          </div>
+        <div className="flex items-center justify-between gap-4 bg-[#1a1a4b] p-4 relative">
+          <h3
+            className="font-medium text-[#ff7f00] m-0 truncate"
+            title={feedback.submitted_by}
+          >
+            {displayName}
+          </h3>
 
-          <div></div>
-
-          <div className="flex items-center justify-end gap-4">
-            <div className="text-sm text-white">
-              {new Date(feedback.created_at).toLocaleDateString()}
+          {shouldAggregate && aggregatedCount > 1 && (
+            <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-flex items-center">
+              {aggregatedCount}{" "}
+              <span className="hidden lg:inline">&nbsp;updates</span>
             </div>
-            <VelocityIndicator velocity={feedback.velocity_next_week} />
+          )}
+
+          <div className="text-sm text-white">
+            {new Date(feedback.created_at).toLocaleDateString()}
           </div>
+
+          <VelocityIndicator velocity={feedback.velocity_next_week} />
         </div>
 
         <div className="space-y-6">
