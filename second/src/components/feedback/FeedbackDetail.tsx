@@ -6,6 +6,7 @@ import { usePOFeedbackById } from "../../hooks/use-po-feedback";
 import type { Database } from "../../types/supabase";
 import { useState } from "react";
 import { Toggle } from "../ui/toggle";
+import { aggregateFeedbackByEmail } from "../../lib/utils";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
@@ -16,7 +17,14 @@ export function FeedbackDetail() {
   const week = searchParams.get("week");
   const [shouldAggregate, setShouldAggregate] = useState(true);
 
-  const { data: feedback, isLoading, isError } = usePOFeedbackById(id, true);
+  // Split the ID parameter into an array if it contains commas
+  const ids = id?.includes(",") ? id.split(",") : id;
+
+  const {
+    data: feedbackData,
+    isLoading,
+    isError,
+  } = usePOFeedbackById(ids, true);
 
   const handleBack = () => {
     navigate(week ? `/?week=${week}` : "/");
@@ -30,7 +38,7 @@ export function FeedbackDetail() {
     );
   }
 
-  if (isError || !feedback) {
+  if (isError || !feedbackData) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="text-gray-600">Feedback not found</div>
@@ -42,13 +50,28 @@ export function FeedbackDetail() {
     );
   }
 
+  // If we have multiple feedback items and aggregation is enabled, aggregate them
+  const feedback =
+    Array.isArray(feedbackData) && shouldAggregate
+      ? aggregateFeedbackByEmail(feedbackData)[0]
+      : Array.isArray(feedbackData)
+      ? feedbackData[0]
+      : feedbackData;
+
   return (
     <div className="max-w-7xl mx-auto p-4">
-      <div className="mb-6">
+      <div className="mb-6 flex justify-between items-center">
         <Button onClick={handleBack} variant="outline" className="mb-4">
           <ChevronLeftIcon className="w-4 h-4 mr-2" />
           Back to Overview
         </Button>
+        {Array.isArray(feedbackData) && feedbackData.length > 1 && (
+          <Toggle
+            enabled={shouldAggregate}
+            onChange={setShouldAggregate}
+            label="Aggregate Feedback"
+          />
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6">
@@ -60,6 +83,13 @@ export function FeedbackDetail() {
             <p className="text-gray-500">
               {new Date(feedback.created_at).toLocaleDateString()}
             </p>
+            {Array.isArray(feedbackData) &&
+              feedbackData.length > 1 &&
+              !shouldAggregate && (
+                <p className="text-sm text-blue-600 mt-1">
+                  Showing 1 of {feedbackData.length} updates
+                </p>
+              )}
           </div>
           <VelocityIndicator velocity={feedback.velocity_next_week} />
         </div>

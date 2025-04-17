@@ -83,7 +83,7 @@ export function usePOFeedbackByWeek(
 }
 
 export function usePOFeedbackById(
-  id: string | undefined,
+  id: string | string[] | undefined,
   enabled: boolean = false
 ) {
   return useQuery({
@@ -95,11 +95,12 @@ export function usePOFeedbackById(
       const { data, error } = await supabase
         .from("po_feedback")
         .select("*")
-        .eq("id", id)
-        .single();
+        .in("id", Array.isArray(id) ? id : [id]);
 
       if (error) throw error;
-      return data as POFeedback;
+      return Array.isArray(id)
+        ? (data as POFeedback[])
+        : (data[0] as POFeedback);
     },
     enabled: enabled && !!id,
   });
