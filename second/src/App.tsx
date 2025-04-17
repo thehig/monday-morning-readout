@@ -124,7 +124,7 @@ function Layout() {
               to={`/?week=${currentWeek}`}
               className="text-[#ff7f00] text-2xl font-bold hover:opacity-90"
             >
-              Monday Morning Readout
+              United Signals
             </Link>
           </div>
           {location.pathname === "/" && (
