@@ -61,7 +61,7 @@ export function FeedbackCard({
           {shouldAggregate && aggregatedCount > 1 && (
             <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-flex items-center">
               {aggregatedCount}{" "}
-              <span className="hidden lg:inline">&nbsp;updates</span>
+              <span className="hidden 2xl:inline">&nbsp;updates</span>
             </div>
           )}
 
