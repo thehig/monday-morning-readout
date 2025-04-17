@@ -13,6 +13,7 @@ import {
   useSearchParams,
   Outlet,
   useLocation,
+  useOutletContext,
 } from "react-router-dom";
 import { FeedbackDetail } from "./components/feedback/FeedbackDetail";
 import { FeedbackCard } from "./components/feedback/FeedbackCard";
@@ -47,7 +48,11 @@ const queryClient = new QueryClient({
 
 function Dashboard() {
   const [searchParams] = useSearchParams();
-  const [shouldAggregate, setShouldAggregate] = useState(true);
+  const { shouldAggregate } = useOutletContext<{
+    isDecrypted: boolean;
+    shouldAggregate: boolean;
+    setShouldAggregate: (value: boolean) => void;
+  }>();
 
   // Get week from URL or default to current week
   const weekParam = searchParams.get("week");
@@ -68,13 +73,6 @@ function Dashboard() {
 
   return (
     <div className="p-4">
-      <div className="mb-4">
-        <Toggle
-          enabled={shouldAggregate}
-          onChange={setShouldAggregate}
-          label="Aggregate by Email"
-        />
-      </div>
       {isLoading ? (
         <div className="text-center text-gray-600">
           Loading feedback data...
@@ -103,6 +101,7 @@ function Dashboard() {
 function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+  const [shouldAggregate, setShouldAggregate] = useState(true);
 
   // Get week from URL or default to current week
   const weekParam = searchParams.get("week");
@@ -127,16 +126,26 @@ function Layout() {
               United Signals
             </Link>
           </div>
-          {location.pathname === "/" && (
-            <WeekPicker
-              currentWeek={currentWeek}
-              onWeekChange={setCurrentWeek}
+          <div className="flex items-center gap-6">
+            <Toggle
+              enabled={shouldAggregate}
+              onChange={setShouldAggregate}
+              label="Aggregate by Email"
+              className="text-white"
             />
-          )}
+            {location.pathname === "/" && (
+              <WeekPicker
+                currentWeek={currentWeek}
+                onWeekChange={setCurrentWeek}
+              />
+            )}
+          </div>
         </div>
       </header>
       <main className="flex-1 overflow-auto">
-        <Outlet context={{ isDecrypted: true }} />
+        <Outlet
+          context={{ isDecrypted: true, shouldAggregate, setShouldAggregate }}
+        />
       </main>
     </div>
   );

@@ -1,4 +1,9 @@
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  useParams,
+  useNavigate,
+  useSearchParams,
+  useOutletContext,
+} from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import {
@@ -13,7 +18,6 @@ import { Toggle } from "../ui/toggle";
 import { TechnicalDetails } from "./TechnicalDetails";
 import { aggregateFeedbackByEmail } from "../../lib/utils";
 import type { POFeedback } from "../../types/feedback";
-import { useState } from "react";
 
 function FeedbackContent({
   feedback,
@@ -255,7 +259,11 @@ export function FeedbackDetail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const week = parseInt(searchParams.get("week") || "1", 10);
-  const [shouldAggregate, setShouldAggregate] = useState(true);
+  const { shouldAggregate } = useOutletContext<{
+    isDecrypted: boolean;
+    shouldAggregate: boolean;
+    setShouldAggregate: (value: boolean) => void;
+  }>();
 
   // Split the ID parameter into an array if it contains commas
   const ids = id?.includes(",") ? id.split(",") : id;
@@ -313,15 +321,6 @@ export function FeedbackDetail() {
               <h1 className="text-2xl font-semibold text-gray-900">
                 Feedback Details
               </h1>
-              <div className="flex items-center gap-4">
-                {feedbackArray.length > 1 && (
-                  <Toggle
-                    enabled={shouldAggregate}
-                    onChange={setShouldAggregate}
-                    label="Aggregate Feedback"
-                  />
-                )}
-              </div>
             </div>
             <p className="text-sm text-gray-500">Calendar Week {week}</p>
           </div>

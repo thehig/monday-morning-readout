@@ -15,5 +15,4 @@ export interface POFeedback {
   ps_call_status?: string;
   all_submission_dates?: string[];
   formatted_text?: string;
-  date: string;
 }
