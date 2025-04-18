@@ -1,9 +1,6 @@
 import { HappinessIndicatorProps } from "../../../types/components";
-import {
-  getHappinessDetails,
-  HAPPINESS_COLORS,
-  HAPPINESS_LABELS,
-} from "./happiness.constants";
+import { HAPPINESS_COLORS, HAPPINESS_LABELS } from "./happiness.constants";
+import { getHappinessDetails } from "./happiness.utils";
 
 /**
  * Displays a happiness score with an appropriate emoji and color-coded value

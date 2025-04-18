@@ -11,13 +11,3 @@ export const HAPPINESS_LABELS: Record<HappinessType, string> = {
   team: "Team Happiness",
   customer: "Customer Happiness",
 } as const;
-
-export function getHappinessDetails(value: number) {
-  const emojiIndex = Math.min(
-    Math.floor(((value - 1) / 4) * (HAPPINESS_EMOJIS.length - 1)),
-    HAPPINESS_EMOJIS.length - 1
-  );
-  return {
-    emoji: HAPPINESS_EMOJIS[emojiIndex],
-  };
-}
