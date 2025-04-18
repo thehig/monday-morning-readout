@@ -1,10 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { getWeekDates, getCurrentWeek, formatDate } from "../../lib/date-utils";
-
-interface WeekPickerProps {
-  currentWeek: number;
-  onWeekChange: (week: number) => void;
-}
+import { WeekPickerProps } from "../../types/components";
 
 export function WeekPicker({ currentWeek, onWeekChange }: WeekPickerProps) {
   const now = new Date();

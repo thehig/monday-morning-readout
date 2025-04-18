@@ -1,4 +1,5 @@
-export type VelocityType = "Rot" | "Gelb" | "Grün";
+import { VelocityIndicatorProps } from "../../../types/components";
+import { VelocityType } from "../../../types/indicators";
 
 export const VELOCITY_COLORS: Record<VelocityType, string> = {
   Rot: "bg-red-500",
@@ -11,13 +12,6 @@ export const VELOCITY_LABELS: Record<VelocityType, string> = {
   Gelb: "Medium velocity expected",
   Grün: "High velocity expected",
 } as const;
-
-interface VelocityIndicatorProps {
-  /** Expected velocity for next week */
-  velocity: VelocityType;
-  /** Whether to show the label text */
-  showLabel?: boolean;
-}
 
 /**
  * Displays a traffic light style indicator for velocity prediction

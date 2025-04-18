@@ -7,13 +7,7 @@ import {
   VelocityIndicator,
 } from "../../indicators";
 import type { POFeedback } from "../../../types/feedback";
-
-export interface FeedbackCardProps {
-  feedback: POFeedback;
-  currentWeek: number;
-  allFeedback: POFeedback[];
-  shouldAggregate: boolean;
-}
+import { FeedbackCardProps } from "../../../types/components";
 
 const cardVariants = {
   initial: { opacity: 0, y: 20 },

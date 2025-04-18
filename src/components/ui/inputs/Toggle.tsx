@@ -1,31 +1,25 @@
 import { Switch } from "@headlessui/react";
 import { cn } from "../../../lib/utils";
+import { ToggleProps } from "../../../types/components";
 
-interface ToggleProps {
-  enabled: boolean;
-  onChange: (enabled: boolean) => void;
-  label?: string;
-  className?: string;
-}
-
-export function Toggle({ enabled, onChange, label, className }: ToggleProps) {
+export function Toggle({ checked, onChange, label }: ToggleProps) {
   return (
     <Switch.Group>
-      <div className={cn("flex items-center space-x-2", className)}>
+      <div className="flex items-center space-x-2">
         {label && (
           <Switch.Label className="text-sm text-white">{label}</Switch.Label>
         )}
         <Switch
-          checked={enabled}
+          checked={checked}
           onChange={onChange}
           className={cn(
-            enabled ? "bg-blue-600" : "bg-gray-200",
+            checked ? "bg-blue-600" : "bg-gray-200",
             "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           )}
         >
           <span
             className={cn(
-              enabled ? "translate-x-6" : "translate-x-1",
+              checked ? "translate-x-6" : "translate-x-1",
               "inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
             )}
           />

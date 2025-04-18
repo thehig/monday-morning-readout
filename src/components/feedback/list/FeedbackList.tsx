@@ -1,12 +1,7 @@
 import { motion } from "framer-motion";
 import { FeedbackCard } from "../cards/FeedbackCard";
 import type { POFeedback } from "../../../types/feedback";
-
-export interface FeedbackListProps {
-  feedback: POFeedback[];
-  currentWeek: number;
-  shouldAggregate: boolean;
-}
+import { FeedbackListProps } from "../../../types/components";
 
 export function FeedbackList({
   feedback,

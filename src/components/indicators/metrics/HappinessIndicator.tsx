@@ -1,4 +1,5 @@
-export type HappinessType = "team" | "customer";
+import { HappinessIndicatorProps } from "../../../types/components";
+import { HappinessType } from "../../../types/indicators";
 
 export const HAPPINESS_EMOJIS = ["😢", "😕", "😐", "🙂", "😊"] as const;
 
@@ -20,11 +21,6 @@ function getHappinessDetails(value: number) {
   return {
     emoji: HAPPINESS_EMOJIS[emojiIndex],
   };
-}
-
-interface HappinessIndicatorProps {
-  value: number;
-  type: HappinessType;
 }
 
 /**

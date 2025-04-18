@@ -1,24 +1,7 @@
 import React from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { formatTime, formatDate } from "../../../lib/date-utils";
-
-interface TechnicalDetailsProps {
-  /** The feedback ID */
-  id: string;
-  /** The calendar week number */
-  week: number;
-  /** The submission date */
-  submissionDate: Date;
-  /** The raw timestamp string */
-  createdAt: string;
-  /** The submitter's email */
-  submittedBy: string;
-  /** Relative time string (e.g. "2 days ago") */
-  relativeTime: string;
-  allSubmissionDates?: string[];
-  isAggregated?: boolean;
-  allIds?: string[];
-}
+import { TechnicalDetailsProps } from "../../../types/components";
 
 /**
  * Displays technical metadata about a feedback submission

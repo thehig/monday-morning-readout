@@ -8,17 +8,12 @@ import { formatEmailDisplayName } from "../../../lib/utils";
 import { getDateTimeProps } from "../../../lib/date-utils";
 import { TechnicalDetails } from "./TechnicalDetails";
 import type { POFeedback, AggregatedPOFeedback } from "../../../types/feedback";
+import { FeedbackContentProps } from "../../../types/components";
 
 function isAggregatedFeedback(
   feedback: POFeedback | AggregatedPOFeedback
 ): feedback is AggregatedPOFeedback {
   return "all_submission_dates" in feedback;
-}
-
-interface FeedbackContentProps {
-  feedback: POFeedback | AggregatedPOFeedback;
-  week: number;
-  allFeedbackIds?: string[];
 }
 
 export function FeedbackContent({

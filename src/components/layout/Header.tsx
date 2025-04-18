@@ -1,12 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 import { WeekPicker } from "../inputs/WeekPicker";
 import { Toggle } from "../ui/inputs/Toggle";
+import { HeaderProps } from "../../types/components";
+import { useState } from "react";
 
 interface HeaderProps {
   currentWeek: number;
   setCurrentWeek: (week: number) => void;
   shouldAggregate: boolean;
   setShouldAggregate: (value: boolean) => void;
+  title: string;
 }
 
 export function Header({
@@ -14,8 +17,11 @@ export function Header({
   setCurrentWeek,
   shouldAggregate,
   setShouldAggregate,
+  title,
 }: HeaderProps) {
   const location = useLocation();
+  const [selectedWeek, setSelectedWeek] = useState(new Date());
+  const [darkMode, setDarkMode] = useState(false);
 
   return (
     <header className="border-b bg-[#1a1a4b]">
@@ -25,19 +31,18 @@ export function Header({
             to={`/?week=${currentWeek}`}
             className="text-[#ff7f00] text-2xl font-bold hover:opacity-90"
           >
-            United Signals
+            {title}
           </Link>
         </div>
         <div className="flex items-center gap-6">
           <Toggle
-            enabled={shouldAggregate}
+            checked={shouldAggregate}
             onChange={setShouldAggregate}
             label="Aggregate by Email"
-            className="text-white"
           />
           {location.pathname === "/" && (
             <WeekPicker
-              currentWeek={currentWeek}
+              selectedWeek={currentWeek}
               onWeekChange={setCurrentWeek}
             />
           )}
