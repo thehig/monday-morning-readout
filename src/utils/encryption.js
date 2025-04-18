@@ -1,3 +1,6 @@
+/* eslint-env browser */
+import CryptoJS from "crypto-js";
+
 // Encryption configuration
 const KEY_SIZE = 256;
 const ITERATIONS = 100000;

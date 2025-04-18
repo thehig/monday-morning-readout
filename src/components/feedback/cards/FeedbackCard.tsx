@@ -6,7 +6,6 @@ import {
   HappinessIndicator,
   VelocityIndicator,
 } from "../../indicators";
-import type { POFeedback } from "../../../types/feedback";
 import { FeedbackCardProps } from "../../../types/components";
 
 const cardVariants = {

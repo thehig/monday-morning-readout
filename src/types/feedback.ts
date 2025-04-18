@@ -1,5 +1,4 @@
 import type { Database } from "./supabase";
-import { VelocityType } from "./indicators";
 
 export type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 

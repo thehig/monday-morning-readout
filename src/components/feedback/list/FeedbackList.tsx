@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { FeedbackCard } from "../cards/FeedbackCard";
-import type { POFeedback } from "../../../types/feedback";
 import { FeedbackListProps } from "../../../types/components";
 
 export function FeedbackList({

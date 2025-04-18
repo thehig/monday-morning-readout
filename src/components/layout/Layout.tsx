@@ -23,6 +23,7 @@ export function Layout() {
         setCurrentWeek={setCurrentWeek}
         shouldAggregate={shouldAggregate}
         setShouldAggregate={setShouldAggregate}
+        title="United Signals"
       />
       <main className="flex-1 overflow-auto">
         <Outlet

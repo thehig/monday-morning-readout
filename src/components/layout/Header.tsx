@@ -1,8 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { WeekPicker } from "../inputs/WeekPicker";
 import { Toggle } from "../ui/inputs/Toggle";
-import { HeaderProps } from "../../types/components";
-import { useState } from "react";
 
 interface HeaderProps {
   currentWeek: number;
@@ -20,8 +18,6 @@ export function Header({
   title,
 }: HeaderProps) {
   const location = useLocation();
-  const [selectedWeek, setSelectedWeek] = useState(new Date());
-  const [darkMode, setDarkMode] = useState(false);
 
   return (
     <header className="border-b bg-[#1a1a4b]">
@@ -42,7 +38,7 @@ export function Header({
           />
           {location.pathname === "/" && (
             <WeekPicker
-              selectedWeek={currentWeek}
+              currentWeek={currentWeek}
               onWeekChange={setCurrentWeek}
             />
           )}

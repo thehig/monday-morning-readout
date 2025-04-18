@@ -27,7 +27,7 @@ export function aggregateFeedbackByEmail(
   }, {} as Record<string, POFeedback[]>);
 
   // For each email, calculate averages and combine data
-  return Object.entries(groupedByEmail).map(([email, feedbacks]) => {
+  return Object.entries(groupedByEmail).map(([, feedbacks]) => {
     // Sort feedbacks by date, most recent first
     const sortedFeedbacks = [...feedbacks].sort(
       (a, b) =>
@@ -103,3 +103,7 @@ export function aggregateFeedbackByEmail(
     };
   });
 }
+
+export const getGravatarUrl = (hash: string): string => {
+  return `https://www.gravatar.com/avatar/${hash}?d=mp`;
+};

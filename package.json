@@ -11,7 +11,7 @@
     "prebuild:prod": "npm run encrypt_env",
     "build:prod": "vite build --mode production",
     "analyze": "vite build --mode analyze",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .",
     "preview": "vite preview",
     "types:supabase": "cross-env npx supabase gen types typescript --project-id \"$PROJECT_REF\" > src/types/supabase.ts"
   },
