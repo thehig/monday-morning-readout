@@ -20,6 +20,7 @@
     "@headlessui/react": "^2.2.1",
     "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.49.4",
+    "@tanstack/react-query": "^5.74.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.7.3",
     "react": "^18.2.0",
@@ -29,7 +30,6 @@
   },
   "devDependencies": {
     "@rollup/plugin-inject": "^5.0.0",
-    "@tanstack/react-query": "^5.74.3",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.6",
     "@types/react-router-dom": "^5.3.3",
