@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "encrypt_env": "node scripts/encrypt-env.js",
+    "prebuild:dev": "npm run encrypt_env",
     "build:dev": "vite build --mode development",
+    "prebuild:prod": "npm run encrypt_env",
     "build:prod": "vite build --mode production",
     "analyze": "vite build --mode analyze",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
