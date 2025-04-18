@@ -1,4 +1,3 @@
-import { cn } from "../../lib/utils";
 import { motion } from "framer-motion";
 
 export type VelocityType = "Rot" | "Gelb" | "Grün";
@@ -65,15 +64,6 @@ function getHappinessDetails(value: number) {
   return {
     emoji: HAPPINESS_EMOJIS[emojiIndex],
   };
-}
-
-interface HappinessIndicatorProps {
-  /** Happiness value from 1-5 */
-  value: number;
-  /** Type of happiness being measured */
-  type: HappinessType;
-  /** Additional class names for styling */
-  className?: string;
 }
 
 /**

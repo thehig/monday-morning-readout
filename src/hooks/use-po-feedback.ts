@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSupabase } from "../utils/supabase";
 import type { Database } from "../types/supabase";
-import { aggregateFeedbackByEmail } from "../lib/utils";
 
 type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
