@@ -1,24 +1,8 @@
 import { useState } from "react";
 import "./styles/components/App.css";
-import { initializeSupabase, testConnection } from "./utils/supabase";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { usePOFeedbackByWeek, getCurrentWeek } from "./hooks/use-po-feedback";
-import type { Database } from "./types/supabase";
-import { WeekPicker } from "./components/inputs/WeekPicker";
-import {
-  HashRouter,
-  Routes,
-  Route,
-  Link,
-  useSearchParams,
-  Outlet,
-  useLocation,
-  useOutletContext,
-} from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { FeedbackDetail } from "./components/feedback/details/FeedbackDetail";
-import { FeedbackCard } from "./components/feedback/cards/FeedbackCard";
-import { aggregateFeedbackByEmail } from "./lib/utils";
-import { Toggle } from "./components/ui/inputs/Toggle";
 import { Layout } from "./components/layout/Layout";
 import { Dashboard } from "./components/data-display/Dashboard";
 import { DecryptionForm } from "./components/auth/DecryptionForm";
@@ -36,8 +20,6 @@ declare global {
     };
   }
 }
-
-type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
 // Create a client
 const queryClient = new QueryClient({
