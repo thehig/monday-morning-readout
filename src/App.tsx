@@ -15,10 +15,10 @@ import {
   useLocation,
   useOutletContext,
 } from "react-router-dom";
-import { FeedbackDetail } from "./components/feedback/FeedbackDetail";
-import { FeedbackCard } from "./components/feedback/FeedbackCard";
+import { FeedbackDetail } from "./components/feedback/details/FeedbackDetail";
+import { FeedbackCard } from "./components/feedback/cards/FeedbackCard";
 import { aggregateFeedbackByEmail } from "./lib/utils";
-import { Toggle } from "./components/ui/toggle";
+import { Toggle } from "./components/ui/inputs/Toggle";
 import { Layout } from "./components/layout/Layout";
 import { Dashboard } from "./components/data-display/Dashboard";
 import { DecryptionForm } from "./components/auth/DecryptionForm";

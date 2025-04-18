@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { WeekPicker } from "../inputs/WeekPicker";
-import { Toggle } from "../ui/toggle";
+import { Toggle } from "../ui/inputs/Toggle";
 
 interface HeaderProps {
   currentWeek: number;

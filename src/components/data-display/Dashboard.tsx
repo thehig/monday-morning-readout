@@ -3,7 +3,7 @@ import {
   usePOFeedbackByWeek,
   getCurrentWeek,
 } from "../../hooks/use-po-feedback";
-import { FeedbackCard } from "../feedback/FeedbackCard";
+import { FeedbackCard } from "../feedback/cards/FeedbackCard";
 import { aggregateFeedbackByEmail } from "../../lib/utils";
 import type { Database } from "../../types/supabase";
 

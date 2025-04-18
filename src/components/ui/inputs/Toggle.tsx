@@ -1,5 +1,5 @@
 import { Switch } from "@headlessui/react";
-import { cn } from "../../lib/utils";
+import { cn } from "../../../lib/utils";
 
 interface ToggleProps {
   enabled: boolean;

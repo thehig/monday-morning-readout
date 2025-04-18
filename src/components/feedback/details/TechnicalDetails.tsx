@@ -1,6 +1,9 @@
 import React from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { formatTime, formatDate } from "../../lib/date-utils";
+import { formatTime, formatDate } from "../../../lib/date-utils";
+import type { Database } from "../../../types/supabase";
+
+type POFeedback = Database["public"]["Tables"]["po_feedback"]["Row"];
 
 interface TechnicalDetailsProps {
   /** The feedback ID */

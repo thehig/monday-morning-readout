@@ -3,27 +3,38 @@ import {
   useNavigate,
   useSearchParams,
   useOutletContext,
+  Link,
 } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import {
   VelocityIndicator,
-  Thermometer,
   HappinessIndicator,
-} from "../indicators";
-import { usePOFeedbackById } from "../../hooks/use-po-feedback";
-import { formatEmailDisplayName } from "../../lib/utils";
-import { getDateTimeProps } from "../../lib/date-utils";
+  Thermometer,
+} from "../../indicators";
+import { usePOFeedbackById } from "../../../hooks/use-po-feedback";
+import { formatEmailDisplayName } from "../../../lib/utils";
+import {
+  formatDate,
+  getWeekDates,
+  getDateTimeProps,
+} from "../../../lib/date-utils";
 import { TechnicalDetails } from "./TechnicalDetails";
-import { aggregateFeedbackByEmail } from "../../lib/utils";
-import type { POFeedback } from "../../types/feedback";
+import { aggregateFeedbackByEmail } from "../../../lib/utils";
+import type { POFeedback, AggregatedPOFeedback } from "../../../types/feedback";
+
+function isAggregatedFeedback(
+  feedback: POFeedback | AggregatedPOFeedback
+): feedback is AggregatedPOFeedback {
+  return "all_submission_dates" in feedback;
+}
 
 function FeedbackContent({
   feedback,
   week,
   allFeedbackIds,
 }: {
-  feedback: POFeedback;
+  feedback: POFeedback | AggregatedPOFeedback;
   week: number;
   allFeedbackIds?: string[];
 }) {
@@ -242,11 +253,12 @@ function FeedbackContent({
         createdAt={feedback.created_at}
         submittedBy={feedback.submitted_by}
         relativeTime={relativeTime}
-        allSubmissionDates={feedback.all_submission_dates}
-        isAggregated={Boolean(
-          feedback.all_submission_dates &&
-            feedback.all_submission_dates.length > 1
-        )}
+        allSubmissionDates={
+          isAggregatedFeedback(feedback)
+            ? feedback.all_submission_dates
+            : undefined
+        }
+        isAggregated={isAggregatedFeedback(feedback)}
         allIds={allFeedbackIds}
       />
     </motion.div>

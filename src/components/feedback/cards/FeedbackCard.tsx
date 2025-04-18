@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { formatEmailDisplayName } from "../../lib/utils";
+import { formatEmailDisplayName } from "../../../lib/utils";
 import {
   Thermometer,
   HappinessIndicator,
   VelocityIndicator,
-} from "../indicators";
-import type { POFeedback } from "../../types/feedback";
+} from "../../indicators";
+import type { POFeedback } from "../../../types/feedback";
 
 export interface FeedbackCardProps {
   feedback: POFeedback;
