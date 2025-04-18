@@ -1,5 +1,5 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { getWeekDates, getCurrentWeek, formatDate } from "../lib/date-utils";
+import { getWeekDates, getCurrentWeek, formatDate } from "../../lib/date-utils";
 
 interface WeekPickerProps {
   currentWeek: number;

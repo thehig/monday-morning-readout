@@ -1,6 +1,7 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./styles/global/index.css";
 
 // Wait for CryptoJS to be available
 const initApp = () => {
@@ -13,10 +14,10 @@ const initApp = () => {
   import("./utils/encryption.js").then(() => {
     import("./encrypted-env.js").then(() => {
       import("./App.tsx").then(({ default: App }) => {
-        createRoot(document.getElementById("root")!).render(
-          <StrictMode>
+        ReactDOM.createRoot(document.getElementById("root")!).render(
+          <React.StrictMode>
             <App />
-          </StrictMode>
+          </React.StrictMode>
         );
       });
     });

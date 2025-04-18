@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import "./App.css";
+import { useState } from "react";
+import "./styles/components/App.css";
 import { initializeSupabase, testConnection } from "./utils/supabase";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { usePOFeedbackByWeek, getCurrentWeek } from "./hooks/use-po-feedback";
 import type { Database } from "./types/supabase";
-import { WeekPicker } from "./components/WeekPicker";
+import { WeekPicker } from "./components/inputs/WeekPicker";
 import {
   HashRouter,
   Routes,
@@ -19,6 +19,9 @@ import { FeedbackDetail } from "./components/feedback/FeedbackDetail";
 import { FeedbackCard } from "./components/feedback/FeedbackCard";
 import { aggregateFeedbackByEmail } from "./lib/utils";
 import { Toggle } from "./components/ui/toggle";
+import { Layout } from "./components/layout/Layout";
+import { Dashboard } from "./components/data-display/Dashboard";
+import { DecryptionForm } from "./components/auth/DecryptionForm";
 
 // Extend Window interface to include our custom properties
 declare global {
@@ -46,201 +49,29 @@ const queryClient = new QueryClient({
   },
 });
 
-function Dashboard() {
-  const [searchParams] = useSearchParams();
-  const { shouldAggregate } = useOutletContext<{
-    isDecrypted: boolean;
-    shouldAggregate: boolean;
-    setShouldAggregate: (value: boolean) => void;
-  }>();
-
-  // Get week from URL or default to current week
-  const weekParam = searchParams.get("week");
-  const currentWeek = weekParam
-    ? parseInt(weekParam)
-    : getCurrentWeek(new Date().getFullYear());
-
-  const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(
-    currentWeek,
-    true
-  );
-
-  // Process the feedback data based on aggregation setting
-  const displayFeedback: POFeedback[] =
-    shouldAggregate && weeklyFeedback
-      ? aggregateFeedbackByEmail(weeklyFeedback)
-      : weeklyFeedback || [];
-
-  return (
-    <div className="p-4">
-      {isLoading ? (
-        <div className="text-center text-gray-600">
-          Loading feedback data...
-        </div>
-      ) : weeklyFeedback && weeklyFeedback.length > 0 ? (
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-min">
-          {displayFeedback.map((feedback) => (
-            <FeedbackCard
-              key={feedback.id}
-              feedback={feedback}
-              currentWeek={currentWeek}
-              allFeedback={weeklyFeedback}
-              shouldAggregate={shouldAggregate}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center text-gray-600">
-          No feedback found for week {currentWeek}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Layout() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
-  const [shouldAggregate, setShouldAggregate] = useState(true);
-
-  // Get week from URL or default to current week
-  const weekParam = searchParams.get("week");
-  const [currentWeek, setCurrentWeek] = useState(
-    weekParam ? parseInt(weekParam) : getCurrentWeek(new Date().getFullYear())
-  );
-
-  // Update URL when week changes
-  useEffect(() => {
-    setSearchParams({ week: currentWeek.toString() });
-  }, [currentWeek, setSearchParams]);
-
-  return (
-    <div className="h-screen bg-gray-50 flex flex-col">
-      <header className="border-b bg-[#1a1a4b]">
-        <div className="flex h-16 items-center justify-between px-4">
-          <div className="flex items-center space-x-8">
-            <Link
-              to={`/?week=${currentWeek}`}
-              className="text-[#ff7f00] text-2xl font-bold hover:opacity-90"
-            >
-              United Signals
-            </Link>
-          </div>
-          <div className="flex items-center gap-6">
-            <Toggle
-              enabled={shouldAggregate}
-              onChange={setShouldAggregate}
-              label="Aggregate by Email"
-              className="text-white"
-            />
-            {location.pathname === "/" && (
-              <WeekPicker
-                currentWeek={currentWeek}
-                onWeekChange={setCurrentWeek}
-              />
-            )}
-          </div>
-        </div>
-      </header>
-      <main className="flex-1 overflow-auto">
-        <Outlet
-          context={{ isDecrypted: true, shouldAggregate, setShouldAggregate }}
-        />
-      </main>
-    </div>
-  );
-}
-
-function AppContent() {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+function App() {
   const [isDecrypted, setIsDecrypted] = useState(false);
-
-  const handleDecrypt = async () => {
-    try {
-      console.log("Starting decryption process");
-      console.log("ENCRYPTED_ENV available:", !!window.ENCRYPTED_ENV);
-      console.log("secureEnv available:", !!window.secureEnv);
-
-      const decryptedVars = window.secureEnv.decryptEnvVars(
-        window.ENCRYPTED_ENV,
-        password
-      );
-      window.DECRYPTED_ENV = decryptedVars;
-      console.log(
-        "Decryption successful, variables available:",
-        Object.keys(decryptedVars)
-      );
-
-      // Initialize Supabase with decrypted credentials
-      initializeSupabase(
-        decryptedVars.VITE_SUPABASE_URL,
-        decryptedVars.VITE_SUPABASE_ANON_KEY
-      );
-      console.log("Supabase client initialized, testing connection...");
-
-      const result = await testConnection();
-      if (result.success) {
-        console.log(`Connected to Supabase! Server time: ${result.timestamp}`);
-        // Invalidate and refetch all queries after successful connection
-        await queryClient.invalidateQueries({ queryKey: ["po-feedback"] });
-      } else {
-        console.error(`Failed to connect: ${result.error}`);
-      }
-
-      setIsDecrypted(true);
-      setError(null);
-    } catch (err) {
-      console.error("Decryption or connection failed:", err);
-      setError(
-        "Failed to decrypt environment variables. Please check your password."
-      );
-      setIsDecrypted(false);
-    }
-  };
 
   if (!isDecrypted) {
     return (
-      <div className="container">
-        <h1>Monday Morning Readout</h1>
-        <form
-          className="decrypt-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleDecrypt();
-          }}
-        >
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter decryption password"
-            className="password-input"
-          />
-          <button type="submit" className="decrypt-button">
-            Decrypt Environment Variables
-          </button>
-          {error && <div className="error-message">{error}</div>}
-        </form>
-      </div>
+      <QueryClientProvider client={queryClient}>
+        <DecryptionForm
+          onDecryptionSuccess={() => setIsDecrypted(true)}
+          queryClient={queryClient}
+        />
+      </QueryClientProvider>
     );
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="/feedback/:id" element={<FeedbackDetail />} />
-      </Route>
-    </Routes>
-  );
-}
-
-function App() {
-  return (
     <QueryClientProvider client={queryClient}>
       <HashRouter>
-        <AppContent />
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="feedback/:id" element={<FeedbackDetail />} />
+          </Route>
+        </Routes>
       </HashRouter>
     </QueryClientProvider>
   );
