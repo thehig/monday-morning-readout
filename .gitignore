@@ -41,3 +41,6 @@ node_modules/
 # Task files
 tasks.json
 tasks/ 
+
+fast-output.log
+test-output.log

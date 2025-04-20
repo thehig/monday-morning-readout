@@ -9,4 +9,4 @@ alwaysApply: true
 Instead:
 
 - run `npm run test:fast` to have the test runner stop after one error, and direct the output to a file
-- Read the `fast-output.txt` and evaluate the contents as the test result.=
+- Read the `fast-output.log` and evaluate the contents as the test result.
