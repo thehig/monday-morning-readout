@@ -17,11 +17,12 @@
     "list": "node scripts/dev.js list",
     "generate": "node scripts/dev.js generate",
     "parse-prd": "node scripts/dev.js parse-prd",
-    "test": "vitest",
+    "test": "vitest run > test-output.log 2>&1",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ci": "jest --ci --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:fast": "vitest run --bail 1 > fast-output.txt 2>&1"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

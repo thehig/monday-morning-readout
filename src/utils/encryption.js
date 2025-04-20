@@ -141,9 +141,13 @@ function decryptEnvVars(encryptedEnv, password) {
 }
 
 // Export functions for use in build scripts and runtime
-window.secureEnv = {
+const secureEnv = {
   encryptData,
   decryptData,
   encryptEnvVars,
   decryptEnvVars,
 };
+
+window.secureEnv = secureEnv;
+
+export default secureEnv;
