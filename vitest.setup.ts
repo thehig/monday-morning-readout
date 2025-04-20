@@ -1,8 +1,10 @@
 import { TextEncoder, TextDecoder } from "util";
-import { setupServer } from "msw/node";
-import { http, HttpResponse } from "msw";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
 import "@testing-library/jest-dom";
+import { setupServer } from "msw/node";
+import { handlers } from "./src/mocks/handlers";
+
+export const server = setupServer(...handlers);
 
 declare global {
   var TextEncoder: typeof TextEncoder;
@@ -23,19 +25,8 @@ vi.mock("crypto-js", () => ({
   },
 }));
 
-// Create MSW server with initial handlers
-export const server = setupServer(
-  // Add your handlers here
-  http.get("/api/example", () => {
-    return HttpResponse.json({ message: "Hello from MSW!" });
-  })
-);
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 
-// Start server before all tests
-beforeAll(() => server.listen());
-
-// Reset handlers after each test
 afterEach(() => server.resetHandlers());
 
-// Clean up after all tests are done
 afterAll(() => server.close());
