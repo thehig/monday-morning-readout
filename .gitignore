@@ -23,6 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
+# Test runner output
+fast-output.log
+test-output.log
+coverage/
+
 .env
 .env.local
 .env.development.local
@@ -34,21 +39,20 @@ encrypted-env.js
 # Added by Claude Task Master
 dev-debug.log
 # Dependency directories
-node_modules/
+# node_modules/ # Duplicate
 # Environment variables
-.vscode
+# .vscode # Duplicate
 # OS specific
 # Task files
-tasks.json
-tasks/ 
+# tasks.json # Duplicate
+# tasks/ # Duplicate
 
-fast-output.log
-test-output.log
+
 
 # Environment Variables
-.env
-.env.*
-!.env.example
+# .env # Duplicate
+# .env.* # Duplicate
+# !.env.example # Duplicate
 
 # Encrypted Environment File
 src/encrypted-env.json

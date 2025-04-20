@@ -6,9 +6,9 @@
 - [x] Set up `msw` server integration. (Consolidated into `vitest.setup.ts`)
 - [x] Integrate `msw` server with Vitest in `vitest.setup.ts`.
 - [x] Configure `onUnhandledRequest: 'error'` in `server.listen`.
-- [x] Write integration tests for components/functions using Supabase. (Test for `testConnection` added)
+- [x] Write integration tests for **utility functions** using Supabase. (`supabase.ts` tested)
 - [x] Use `server.use()` for test-specific mock overrides. (Done in `testConnection` error test)
-- [ ] Use testing library async utilities (`waitFor`, `findBy*`). (Needed for component tests)
+- [ ] Use testing library async utilities (`waitFor`, `findBy*`). (Needed for **component** tests)
 
 ---
 
@@ -91,4 +91,56 @@
 2.  **Set up `msw` Server for Tests:**
 
     - In `src/mocks`, create a file `server.js`.
-    - Import `setupServer` from `
+    - Import `setupServer` from `msw`.
+    - Create a server instance and use the handlers defined in `handlers.js`.
+
+      ```javascript
+      import { setupServer } from "msw/node";
+
+      const server = setupServer(...handlers);
+
+      beforeAll(() => {
+        server.listen();
+      });
+
+      afterAll(() => {
+        server.close();
+      });
+      ```
+
+3.  **Write Integration Tests:**
+
+    - Use `msw` to intercept requests and return predefined responses.
+    - Write tests for utility functions using Supabase.
+    - Use `server.use()` to override responses for test-specific scenarios.
+    - Use testing library async utilities (`waitFor`, `findBy*`) for component tests.
+
+      ```javascript
+      import { waitFor } from "msw";
+
+      test("Test utility function", async () => {
+        // Arrange
+        const expectedResponse = { data: "expected data" };
+
+        // Act
+        const response = await fetch("/api/utility-function");
+        const actualResponse = await response.json();
+
+        // Assert
+        expect(actualResponse).toEqual(expectedResponse);
+      });
+
+      test("Test component", async () => {
+        // Arrange
+        const expectedResponse = { data: "expected data" };
+
+        // Act
+        const component = render(<ComponentToTest />);
+        const actualResponse = await waitFor(() =>
+          component.getByText("expected data")
+        );
+
+        // Assert
+        expect(actualResponse).toBeInTheDocument();
+      });
+      ```

@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
-import { initializeSupabase, testConnection } from "./supabase";
+import { initializeSupabase, getSupabase, testConnection } from "./supabase";
 // Import server from the setup file (adjust path relative to this file)
 import { server } from "../../vitest.setup";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 // Constants for testing
 // Use the actual URL for initialization in tests so MSW can intercept
@@ -10,17 +11,71 @@ const SUPABASE_URL = "https://kkkshnlgyqodxnclrnon.supabase.co";
 const MOCK_KEY = "mock-key"; // Key doesn't matter for MSW
 
 describe("Supabase Utility", () => {
-  // Initialize Supabase with the REAL URL before tests that need it
+  // Reset modules before each test to ensure clean state for initializeSupabase/getSupabase
   beforeEach(() => {
-    initializeSupabase(SUPABASE_URL, MOCK_KEY);
+    vi.resetModules();
+  });
+
+  // Cleanup potentially initialized client after each test
+  afterEach(() => {
+    vi.resetModules();
+  });
+
+  describe("initializeSupabase", () => {
+    it("should initialize and return a SupabaseClient instance", async () => {
+      const { initializeSupabase: init } = await import("./supabase");
+      const client = init(SUPABASE_URL, MOCK_KEY);
+      expect(client).toBeDefined();
+      expect(client).toBeInstanceOf(SupabaseClient);
+    });
+
+    it("should throw error if Supabase URL is missing", async () => {
+      const { initializeSupabase: init } = await import("./supabase");
+      expect(() => init("", MOCK_KEY)).toThrow(
+        "Supabase URL and anon key are required"
+      );
+    });
+
+    it("should throw error if Supabase anon key is missing", async () => {
+      const { initializeSupabase: init } = await import("./supabase");
+      expect(() => init(SUPABASE_URL, "")).toThrow(
+        "Supabase URL and anon key are required"
+      );
+    });
+  });
+
+  describe("getSupabase", () => {
+    it("should throw error if called before initialization", async () => {
+      const { getSupabase: get } = await import("./supabase");
+      expect(() => get()).toThrow(
+        "Supabase client not initialized. Call initializeSupabase first."
+      );
+    });
+
+    it("should return the client instance after initialization", async () => {
+      // Need to import both together after resetting modules
+      const { initializeSupabase: init, getSupabase: get } = await import(
+        "./supabase"
+      );
+      const initializedClient = init(SUPABASE_URL, MOCK_KEY);
+      const retrievedClient = get();
+      expect(retrievedClient).toBeDefined();
+      expect(retrievedClient).toBe(initializedClient);
+      expect(retrievedClient).toBeInstanceOf(SupabaseClient);
+    });
   });
 
   describe("testConnection", () => {
+    // Important: Initialize Supabase before each testConnection test
+    // This needs to happen AFTER module reset if testing initialization itself
+    beforeEach(async () => {
+      const { initializeSupabase: init } = await import("./supabase");
+      init(SUPABASE_URL, MOCK_KEY);
+    });
+
     it("should return success true and a timestamp on successful connection", async () => {
-      // No need to server.use() here as the default handler should work
-
-      const result = await testConnection();
-
+      const { testConnection: testConn } = await import("./supabase");
+      const result = await testConn();
       expect(result.success).toBe(true);
       expect(result.error).toBeUndefined();
       expect(result.timestamp).toBeDefined();
@@ -29,6 +84,7 @@ describe("Supabase Utility", () => {
     });
 
     it("should return success false and an error message on connection failure", async () => {
+      const { testConnection: testConn } = await import("./supabase");
       // Override the default handler to simulate an error
       server.use(
         http.get(`${SUPABASE_URL}/rest/v1/po_feedback`, ({ request }) => {
@@ -47,9 +103,7 @@ describe("Supabase Utility", () => {
           }
         })
       );
-
-      const result = await testConnection();
-
+      const result = await testConn();
       expect(result.success).toBe(false);
       expect(result.timestamp).toBeUndefined();
       expect(result.error).toBeDefined();
@@ -58,17 +112,15 @@ describe("Supabase Utility", () => {
       expect(result.error).toContain("Simulated DB Error");
     });
 
-    it("should throw error if Supabase is not initialized", async () => {
-      // Reset Supabase instance for this specific test
-      // This is a bit tricky, might need to adjust how Supabase is initialized/reset for testing
-      // For now, we assume it can be reset or use a different context
-      vi.resetModules(); // Vitest specific: re-evaluate modules
-      const { testConnection: testConnectionUninitialized } = await import(
+    // This test needs careful handling due to module state
+    it("should return error object if Supabase is not initialized (within testConnection's catch)", async () => {
+      // Ensure modules are reset to simulate uninitialized state
+      vi.resetModules();
+      const { testConnection: testConnUninitialized } = await import(
         "./supabase"
       );
-
-      // Expect the promise to RESOLVE with success: false and the specific error message
-      await expect(testConnectionUninitialized()).resolves.toEqual({
+      // testConnection catches the error from getSupabase and returns an object
+      await expect(testConnUninitialized()).resolves.toEqual({
         success: false,
         error:
           "Supabase client not initialized. Call initializeSupabase first.",
