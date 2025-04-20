@@ -6,7 +6,8 @@ alwaysApply: true
 
 # Stop if command is 'npm test', 'vitest' or 'npm run test'
 
-Instead:
+Instead run `npm run test:fast`
 
-- run `npm run test:fast` to have the test runner stop after one error, and direct the output to a file
-- Read the `fast-output.log` and evaluate the contents as the test result.
+- The test runner will have its output piped to file
+- The script will then echo that file
+- This circumvents a bug in Vitest that prevents the LLM agent from getting stuck waiting for the process to end, even though it has ended.

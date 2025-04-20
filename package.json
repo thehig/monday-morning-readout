@@ -22,7 +22,7 @@
     "test:coverage": "vitest run --coverage",
     "test:ci": "jest --ci --coverage",
     "test:ui": "vitest --ui",
-    "test:fast": "vitest run --bail 1 > fast-output.txt 2>&1"
+    "test:fast": "vitest run --bail 1 > fast-output.log 2>&1 & type fast-output.log"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
