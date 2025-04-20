@@ -6,7 +6,7 @@ vi.mock("crypto-js", () => {
   const mockWordArray = (value) => ({
     toString: (encoding) => {
       if (encoding === CryptoJS.enc.Hex) return value + "_hex";
-      if (encoding === CryptoJS.enc.Utf8) return value + "_utf8";
+      if (encoding === CryptoJS.enc.Utf8) return value;
       return value;
     },
   });
@@ -34,20 +34,35 @@ vi.mock("crypto-js", () => {
         toString: () =>
           `encrypted_${data}_${key.toString()}_${config.iv.toString()}`,
       }),
-      decrypt: (encryptedData, _key, _config) => {
-        // Simulate decryption based on predictable mock encryption
-        const parts = encryptedData.toString().split("_"); // Ensure it's a string
-        // Check for prefix and extract data part, ignoring other mock details
-        if (parts.length >= 2 && parts[0] === "encrypted") {
-          const originalData = parts[1];
+      decrypt: (encryptedData, key, config) => {
+        // Construct the string our mock encrypt *would* have created
+        // for *some* data, using the provided key and iv from the *real* decrypt call.
+        // The real decryptData regenerates the key and gets iv from encryptedData object.
+        // Our mock needs to simulate this based on the incoming args.
+        const ivString = config.iv.toString(); // Get the IV the real function provides
+        const keyString = key.toString(); // Get the key the real function provides
+
+        // Check if the input string LOOKS like our mock encrypted format
+        const prefix = `encrypted_`;
+        const suffix = `_${keyString}_${ivString}`;
+
+        if (
+          encryptedData.toString().startsWith(prefix) &&
+          encryptedData.toString().endsWith(suffix)
+        ) {
+          // If it matches, extract the middle part, which is our original data
+          const originalData = encryptedData
+            .toString()
+            .slice(prefix.length, -suffix.length);
           return mockWordArray(originalData); // Return the original data as a mock WordArray
         }
-        // Simulate failure if format doesn't match expected mock structure
+
+        // If the format doesn't match, it's likely invalid input or wrong password (key)
         console.error(
-          "Mock decryption failed: Input did not match expected mock format",
-          encryptedData
+          "Mock decryption failed: Input did not match expected mock structure for key/iv",
+          { encryptedData: encryptedData.toString(), keyString, ivString }
         );
-        throw new Error("Mock Decryption Failed - Input Format Error");
+        throw new Error("Mock Decryption Failed - Input Format/Key Mismatch");
       },
     },
     pad: {
@@ -89,7 +104,8 @@ describe("Encryption Utilities (with Mocks)", () => {
     const decrypted = decryptData(encryptedMockData, testPassword);
 
     // Based on the mock AES.decrypt logic returning the original data part
-    expect(decrypted).toBe("mySecretData_utf8"); // The mock returns original data + _utf8 suffix
+    // AND the updated mock toString(Utf8) behavior (no suffix)
+    expect(decrypted).toBe("mySecretData");
   });
 
   it("decryptData should throw for invalid mock data", () => {
@@ -110,5 +126,82 @@ describe("Encryption Utilities (with Mocks)", () => {
     errorSpy.mockRestore();
   });
 
-  // Add more tests for encryptEnvVars and decryptEnvVars later
+  // --- Tests for encryptEnvVars and decryptEnvVars ---
+  const { encryptEnvVars, decryptEnvVars } = secureEnv;
+  const mockEnv = {
+    VITE_SUPABASE_URL: "https://test.supabase.co",
+    VITE_SUPABASE_ANON_KEY: "anon_key_12345",
+    OTHER_VAR: "should_be_ignored", // This shouldn't be encrypted
+  };
+  const buildPassword = "superSecretBuildPassword";
+
+  it("encryptEnvVars should encrypt only specified env vars and return mocked structure", () => {
+    const result = encryptEnvVars(mockEnv, buildPassword);
+
+    // Expected input to the mocked encryptData
+    const expectedJsonString = JSON.stringify({
+      VITE_SUPABASE_URL: "https://test.supabase.co",
+      VITE_SUPABASE_ANON_KEY: "anon_key_12345",
+    });
+
+    // Assertions based on the predictable mock implementation of encryptData
+    expect(result.salt).toBe("random_16_hex");
+    expect(result.iv).toBe("random_16_hex");
+    expect(result.encrypted).toBe(
+      `encrypted_${expectedJsonString}_key_${buildPassword}_random_16_8_100000_random_16`
+    );
+  });
+
+  it("decryptEnvVars should decrypt and parse the env vars using mocked decryption", () => {
+    // Construct the input based on the mock encryptEnvVars output
+    const expectedJsonString = JSON.stringify({
+      VITE_SUPABASE_URL: "https://test.supabase.co",
+      VITE_SUPABASE_ANON_KEY: "anon_key_12345",
+    });
+    const encryptedEnvMock = {
+      iv: "random_16_hex",
+      salt: "random_16_hex",
+      encrypted: `encrypted_${expectedJsonString}_key_${buildPassword}_random_16_8_100000_random_16`,
+    };
+
+    const decryptedEnv = decryptEnvVars(encryptedEnvMock, buildPassword);
+
+    // Assert the final parsed object matches the expected part of mockEnv
+    expect(decryptedEnv).toEqual({
+      VITE_SUPABASE_URL: "https://test.supabase.co",
+      VITE_SUPABASE_ANON_KEY: "anon_key_12345",
+    });
+  });
+
+  it("decryptEnvVars should throw if decryption fails (mock throws)", () => {
+    const badEncryptedEnv = {
+      iv: "random_16_hex",
+      salt: "random_16_hex",
+      encrypted: "invalid_encrypted_string", // This will cause mock decryptData to throw
+    };
+
+    // Silence console.error for this expected failure
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(() => decryptEnvVars(badEncryptedEnv, buildPassword)).toThrow(
+      /Failed to decrypt environment variables. Invalid password./
+    );
+
+    errorSpy.mockRestore();
+  });
+
+  it("decryptEnvVars should throw if decrypted data is not valid JSON", () => {
+    // Mock decryptData to return a non-JSON string for this specific test
+    const decryptDataSpy = vi
+      .spyOn(secureEnv, "decryptData")
+      .mockReturnValue("this_is_not_json");
+
+    const anyEncryptedData = { iv: "a", salt: "b", encrypted: "c" }; // Content doesn't matter due to spy
+
+    expect(() => decryptEnvVars(anyEncryptedData, buildPassword)).toThrow(
+      /Failed to decrypt environment variables. Invalid password./ // The function catches JSON.parse error
+    );
+
+    decryptDataSpy.mockRestore(); // Clean up the spy
+  });
 });
