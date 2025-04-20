@@ -44,3 +44,11 @@ tasks/
 
 fast-output.log
 test-output.log
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Encrypted Environment File
+src/encrypted-env.json

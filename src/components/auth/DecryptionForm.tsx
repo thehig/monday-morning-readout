@@ -1,6 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { initializeSupabase, testConnection } from "../../utils/supabase";
 import { QueryClient } from "@tanstack/react-query";
+import secureEnv from "../../utils/encryption.js"; // Correct default import
+// import type { EncryptedData } from "../../utils/encryption.d.ts"; // Removed unused import
+import encryptedEnvData from "../../encrypted-env.json"; // Import JSON data
+// Removed global types dependency
 
 interface DecryptionFormProps {
   onDecryptionSuccess: () => void;
@@ -15,19 +19,42 @@ export function DecryptionForm({
   const [error, setError] = useState<string | null>(null);
 
   const handleDecrypt = async () => {
+    if (!password) {
+      setError("Password is required.");
+      return;
+    }
+
+    // Removed check for window.ENCRYPTED_ENV
+    /*
+    if (!window.ENCRYPTED_ENV) {
+      setError("Encrypted environment variables not found.");
+      return;
+    }
+    */
+
     try {
       console.log("Starting decryption process");
-      console.log("ENCRYPTED_ENV available:", !!window.ENCRYPTED_ENV);
-      console.log("secureEnv available:", !!window.secureEnv);
+      // console.log("ENCRYPTED_ENV available:", !!window.ENCRYPTED_ENV); // Removed check
+      // console.log("secureEnv available:", !!window.secureEnv); // Removed check
 
-      const decryptedVars = window.secureEnv.decryptEnvVars(
-        window.ENCRYPTED_ENV,
+      // Removed check for window.ENCRYPTED_ENV existence
+      /*
+      if (!window.ENCRYPTED_ENV) {
+        throw new Error(
+          "Encrypted environment variables not found on window object."
+        );
+      }
+      */
+
+      // Use imported JSON data - type should be inferred
+      const decryptedVars = secureEnv.decryptEnvVars(
+        encryptedEnvData, // Remove cast
         password
       );
-      window.DECRYPTED_ENV = decryptedVars;
+      // window.DECRYPTED_ENV = decryptedVars as any; // Removed assignment to window
       console.log(
         "Decryption successful, variables available:",
-        Object.keys(decryptedVars)
+        Object.keys(decryptedVars).join(", ")
       );
 
       initializeSupabase(

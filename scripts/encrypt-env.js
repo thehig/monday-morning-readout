@@ -50,13 +50,11 @@ const encryptedEnv = secureEnv.encryptData(
 );
 console.groupEnd();
 
-// Write encrypted environment variables to a JavaScript file
-const outputPath = path.resolve(__dirname, "../src/encrypted-env.js");
+// Write encrypted environment variables to a JSON file
+const outputPath = path.resolve(__dirname, "../src/encrypted-env.json");
 console.log("📦 Writing encrypted data to:", outputPath);
 
-const outputContent = `// This file is auto-generated. Do not edit manually.
-window.ENCRYPTED_ENV = ${JSON.stringify(encryptedEnv, null, 2)};
-`;
+const outputContent = JSON.stringify(encryptedEnv, null, 2);
 
 fs.writeFileSync(outputPath, outputContent);
 console.log("✨ Environment variables encrypted successfully!");
