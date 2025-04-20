@@ -148,6 +148,6 @@ const secureEnv = {
   decryptEnvVars,
 };
 
-window.secureEnv = secureEnv;
+// window.secureEnv = secureEnv; // Removed browser-specific code
 
 export default secureEnv;

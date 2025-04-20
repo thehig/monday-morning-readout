@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import CryptoJS from "crypto-js";
+import secureEnv from "../src/utils/encryption.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,43 +35,6 @@ if (missingVars.length > 0) {
 
 console.log("✅ All required environment variables found");
 
-// Configuration
-const KEY_SIZE = 256;
-const ITERATIONS = 100000;
-
-console.group("⚙️ Encryption Configuration");
-console.log(`Key Size: ${KEY_SIZE} bits`);
-console.log(`Iterations: ${ITERATIONS}`);
-console.groupEnd();
-
-function encryptData(data, password) {
-  console.group("🔒 Encrypting Data");
-  console.log("Generating salt and IV...");
-
-  const salt = CryptoJS.lib.WordArray.random(128 / 8);
-  const key = CryptoJS.PBKDF2(password, salt, {
-    keySize: KEY_SIZE / 32,
-    iterations: ITERATIONS,
-  });
-  const iv = CryptoJS.lib.WordArray.random(128 / 8);
-
-  console.log("Performing AES encryption...");
-  const encrypted = CryptoJS.AES.encrypt(data, key, {
-    iv: iv,
-    padding: CryptoJS.pad.Pkcs7,
-    mode: CryptoJS.mode.CBC,
-  });
-
-  console.log("✅ Encryption complete");
-  console.groupEnd();
-
-  return {
-    iv: iv.toString(CryptoJS.enc.Hex),
-    salt: salt.toString(CryptoJS.enc.Hex),
-    encrypted: encrypted.toString(),
-  };
-}
-
 // Encrypt environment variables
 const envToEncrypt = {
   VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL,
@@ -81,7 +44,7 @@ const envToEncrypt = {
 console.group("📝 Processing Environment Variables");
 console.log("Variables being encrypted:", Object.keys(envToEncrypt).join(", "));
 
-const encryptedEnv = encryptData(
+const encryptedEnv = secureEnv.encryptData(
   JSON.stringify(envToEncrypt),
   process.env.BUILD_PASSWORD
 );
