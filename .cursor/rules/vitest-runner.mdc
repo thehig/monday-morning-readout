@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Stop if command is 'npm test', 'vitest' or 'npm run test'
+
+Instead:
+
+- run `npm run test:fast` to have the test runner stop after one error, and direct the output to a file
+- Read the `fast-output.txt` and evaluate the contents as the test result.=
