@@ -7,69 +7,7 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-type EncryptedEnv = {
-  readonly VITE_SUPABASE_URL: string;
-  readonly VITE_SUPABASE_ANON_KEY: string;
-};
-
-type EncryptionConfig = {
-  keySize: number;
-  iterations: number;
-};
-
-type EncryptionResult = {
-  salt: string;
-  iv: string;
-  encrypted: string;
-};
-
-type DecryptionResult = {
-  decrypted: string;
-  error?: string;
-};
-
-type EncryptionUtils = {
-  encrypt: (data: string, key: string) => EncryptionResult;
-  decrypt: (data: EncryptionResult, key: string) => DecryptionResult;
-  generateKey: (
-    password: string,
-    salt: string,
-    config: EncryptionConfig
-  ) => string;
-  encryptEnvFile: (envData: Record<string, string>, key: string) => string;
-  decryptEnvFile: (
-    encryptedData: string,
-    key: string
-  ) => Record<string, string>;
-  encryptEnvVars: (envVars: Record<string, string>, key: string) => string;
-  decryptEnvVars: (
-    encryptedData: string,
-    key: string
-  ) => Record<string, string>;
-};
-
-interface EncryptedEnv {
-  ENCRYPTED_ENV: {
-    iv: string;
-    salt: string;
-    encrypted: string;
-  };
-}
-
-interface DecryptedEnv {
-  DECRYPTED_ENV: {
-    VITE_SUPABASE_URL: string;
-    VITE_SUPABASE_ANON_KEY: string;
-  };
-  secureEnv: {
-    decryptEnvVars: (
-      encryptedEnv: EncryptedEnv["ENCRYPTED_ENV"],
-      password: string
-    ) => DecryptedEnv["DECRYPTED_ENV"];
-  };
-}
-
-interface Window extends EncryptedEnv, DecryptedEnv {
+interface Window {
   CryptoJS: {
     lib: {
       WordArray: {
