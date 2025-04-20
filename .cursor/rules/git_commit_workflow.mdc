@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+ - **Problem:** Constructing multi-line Git commit messages directly on the command line using multiple `-m` flags can be error-prone due to shell quoting inconsistencies, especially across different operating systems (Windows cmd vs. Bash) and when generated programmatically.
+
+- **Recommended Workflow (for complex/multi-line messages):**
+    1.  **Generate Message:** Determine the full, multi-line commit message content.
+    2.  **Create Temporary File:** Use the `edit_file` tool to write the complete commit message content into a temporary file (e.g., `commit_msg.tmp`). Ensure the first line is the subject, followed by a blank line, then the body.
+    3.  **Stage Files:** Use `git add .` (or add specific files) to stage the changes for the commit.
+    4.  **Commit Using File:** Execute the commit command using the `-F` flag, pointing to the temporary file:
+        ```sh
+        git commit -F commit_msg.tmp
+        ```
+    5.  **Verify (Optional but Recommended):** Run `git log -1` to check that the commit was created successfully with the correct message. Note that terminal output might be truncated.
+    6.  **Clean Up:** Use the `delete_file` tool to remove the temporary commit message file (e.g., `delete_file commit_msg.tmp`).
+
+- **When to Use:** Apply this workflow when the commit message is longer than a single line or when requested by the user to ensure robust commit creation.
+
+- **Simple Commits:** For very simple, single-line commits, using `git commit -m "Subject line"` is still acceptable. 
