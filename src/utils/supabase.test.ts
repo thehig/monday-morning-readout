@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
-import { initializeSupabase, getSupabase, testConnection } from "./supabase";
 // Import server from the setup file (adjust path relative to this file)
 import { server } from "../../vitest.setup";
 import { SupabaseClient } from "@supabase/supabase-js";
