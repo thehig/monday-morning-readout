@@ -9,9 +9,29 @@
 - [x] Write integration tests for **utility functions** using Supabase. (`supabase.ts` tested)
 - [x] Use `server.use()` for test-specific mock overrides. (Done in `testConnection` error test)
 - [x] Use testing library async utilities (`waitFor`, `findBy*`). (Needed for **component** tests)
-- [x] Add comprehensive tests for Dashboard component (loading, data display, URL params)
-- [x] Add comprehensive tests for HappinessIndicator component (values, emojis, styling, accessibility)
+- [x] Add comprehensive tests for Dashboard component (loading, data display, URL params) - 6 tests
+- [x] Add comprehensive tests for HappinessIndicator component (values, emojis, styling, accessibility) - 24 tests
+- [x] Add comprehensive tests for VelocityIndicator component (all states, labels, animations) - 24 tests
+- [x] Add comprehensive tests for Thermometer component (progress values, styling, accessibility) - 28 tests
+- [x] Add comprehensive tests for FeedbackCard component (rendering, navigation, data handling) - 32 tests
 - [x] Fix failing WeekPicker accessibility test (aria-live region)
+
+## Current Test Coverage Status (198 total tests):
+
+- **Indicators**: 100% coverage - HappinessIndicator, VelocityIndicator, Thermometer all fully tested
+- **FeedbackCard**: 100% coverage - comprehensive testing including mocking, routing, data handling
+- **WeekPicker**: 100% coverage - all functionality and accessibility tested
+- **Dashboard**: 64.51% coverage - basic rendering tests added, needs more edge case testing
+- **Utilities**: 98.34% coverage - comprehensive lib utils and date utils testing
+
+## Components Still Needing Tests:
+
+- [ ] DecryptionForm (0% coverage) - authentication component
+- [ ] FeedbackContent (0% coverage) - feedback detail display
+- [ ] FeedbackDetail (0% coverage) - feedback detail page
+- [ ] TechnicalDetails (0% coverage) - metadata display
+- [ ] FeedbackList (0% coverage) - feedback listing component
+- [ ] Hooks (0% coverage) - use-po-feedback hook testing
 
 ---
 

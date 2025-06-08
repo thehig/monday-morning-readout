@@ -29,7 +29,7 @@ export const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({
           <div className="text-xs text-gray-400">
             Feedback ID{isAggregated && allIds && allIds.length > 1 ? "s" : ""}
           </div>
-          {isAggregated && allIds ? (
+          {isAggregated && allIds && allIds.length > 0 ? (
             <div className="font-mono text-gray-600 space-y-1">
               {allIds.map((feedbackId, index) => (
                 <div key={feedbackId}>
@@ -47,7 +47,7 @@ export const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({
           <div className="font-mono text-gray-600">{week}</div>
         </div>
 
-        {isAggregated && allSubmissionDates ? (
+        {isAggregated && allSubmissionDates && allSubmissionDates.length > 0 ? (
           <div className="space-y-1">
             <div className="text-xs text-gray-400">Submission Dates</div>
             <div className="font-mono text-gray-600 space-y-1">
