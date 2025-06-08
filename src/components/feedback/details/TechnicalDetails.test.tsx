@@ -134,7 +134,7 @@ describe("TechnicalDetails", () => {
       expect(screen.getByText("Submission Dates")).toBeInTheDocument();
       // All dates should be formatted as 2024-01-15 by the mock
       expect(screen.getAllByText(/2024-01-15/)).toHaveLength(3);
-      expect(screen.getByText(/\(Latest\)/)).toBeInTheDocument();
+      expect(screen.getAllByText(/\(Latest\)/)).toHaveLength(2); // One for IDs, one for dates
     });
 
     it("does not show individual submission time/date fields for aggregated feedback", () => {

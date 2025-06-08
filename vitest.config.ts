@@ -17,6 +17,19 @@ export default defineConfig({
         "**/*.{test,spec}.{js,jsx,ts,tsx}",
         "**/node_modules/**",
         "**/dist/**",
+        // Type definition files
+        "**/*.d.ts",
+        // Main entry points and configuration
+        "src/main.tsx",
+        "src/App.tsx",
+        "src/encrypted-env.js",
+        "src/vite-env.d.ts",
+        // Simple index files that only export other modules
+        "src/components/indicators/index.ts",
+        // Type definition files that don't need coverage
+        "src/types/**/*",
+        // Test utilities
+        "src/test-utils.tsx",
       ],
       thresholds: {
         // Set higher threshold for utility functions

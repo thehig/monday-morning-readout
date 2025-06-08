@@ -1,4 +1,4 @@
-import { render, screen } from "../../../test-utils";
+import { render, screen, act } from "../../../test-utils";
 import { Toggle } from "./Toggle";
 import { vi } from "vitest";
 
@@ -38,12 +38,15 @@ describe("Toggle", () => {
     expect(toggle).toBeChecked();
   });
 
-  it("calls onChange when clicked", () => {
+  it("calls onChange when clicked", async () => {
     const mockOnChange = vi.fn();
     render(<Toggle {...defaultProps} onChange={mockOnChange} />);
 
     const toggle = screen.getByRole("switch");
-    toggle.click();
+
+    await act(async () => {
+      toggle.click();
+    });
 
     expect(mockOnChange).toHaveBeenCalledWith(true);
   });
@@ -72,7 +75,7 @@ describe("Toggle", () => {
     expect(label).toBeInTheDocument();
   });
 
-  it("toggles state correctly", () => {
+  it("toggles state correctly", async () => {
     const mockOnChange = vi.fn();
     const { rerender } = render(
       <Toggle checked={false} onChange={mockOnChange} />
@@ -81,15 +84,22 @@ describe("Toggle", () => {
     const toggle = screen.getByRole("switch");
 
     // First click should call onChange with true
-    toggle.click();
+    await act(async () => {
+      toggle.click();
+    });
     expect(mockOnChange).toHaveBeenCalledWith(true);
 
     // Re-render with checked=true to simulate state change
     mockOnChange.mockClear();
-    rerender(<Toggle checked={true} onChange={mockOnChange} />);
+
+    await act(async () => {
+      rerender(<Toggle checked={true} onChange={mockOnChange} />);
+    });
 
     const checkedToggle = screen.getByRole("switch");
-    checkedToggle.click();
+    await act(async () => {
+      checkedToggle.click();
+    });
     expect(mockOnChange).toHaveBeenCalledWith(false);
   });
 });

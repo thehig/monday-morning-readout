@@ -1,4 +1,4 @@
-import { render, screen } from "../../test-utils";
+import { render, screen, act } from "../../test-utils";
 import { Layout } from "./Layout";
 import { vi } from "vitest";
 
@@ -104,7 +104,10 @@ describe("Layout", () => {
     render(<Layout />);
 
     const changeWeekButton = screen.getByText("Change Week");
-    changeWeekButton.click();
+
+    await act(async () => {
+      changeWeekButton.click();
+    });
 
     // Should update search params when week changes
     expect(mockSetSearchParams).toHaveBeenCalled();
