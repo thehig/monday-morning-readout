@@ -8,7 +8,10 @@
 - [x] Configure `onUnhandledRequest: 'error'` in `server.listen`.
 - [x] Write integration tests for **utility functions** using Supabase. (`supabase.ts` tested)
 - [x] Use `server.use()` for test-specific mock overrides. (Done in `testConnection` error test)
-- [ ] Use testing library async utilities (`waitFor`, `findBy*`). (Needed for **component** tests)
+- [x] Use testing library async utilities (`waitFor`, `findBy*`). (Needed for **component** tests)
+- [x] Add comprehensive tests for Dashboard component (loading, data display, URL params)
+- [x] Add comprehensive tests for HappinessIndicator component (values, emojis, styling, accessibility)
+- [x] Fix failing WeekPicker accessibility test (aria-live region)
 
 ---
 
