@@ -9,8 +9,8 @@ export interface ToggleProps {
 
 export interface HeaderProps {
   title: string;
-  shouldAggregate: boolean;
-  setShouldAggregate: (value: boolean) => void;
+  currentWeek: number;
+  setCurrentWeek: (week: number) => void;
 }
 
 export interface WeekPickerProps {
@@ -39,7 +39,6 @@ export interface HappinessIndicatorProps {
 export interface FeedbackListProps {
   feedback: POFeedback[];
   currentWeek: number;
-  shouldAggregate: boolean;
 }
 
 export interface TechnicalDetailsProps {
@@ -63,8 +62,6 @@ export interface FeedbackContentProps {
 export interface FeedbackCardProps {
   feedback: POFeedback;
   currentWeek: number;
-  allFeedback: POFeedback[];
-  shouldAggregate: boolean;
 }
 
 export interface DecryptionFormProps {

@@ -107,3 +107,14 @@ export function aggregateFeedbackByEmail(
 export const getGravatarUrl = (hash: string): string => {
   return `https://www.gravatar.com/avatar/${hash}?d=mp`;
 };
+
+export function formatAmount(amount: string | undefined): string {
+  if (!amount) return "N/A";
+
+  try {
+    const parsed = parseFloat(amount);
+    return isNaN(parsed) ? amount : `€${parsed.toFixed(2)}`;
+  } catch {
+    return amount;
+  }
+}

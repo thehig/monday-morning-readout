@@ -1,22 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { WeekPicker } from "../inputs/WeekPicker";
-import { Toggle } from "../ui/inputs/Toggle";
+import { HeaderProps } from "../../types/components";
 
-interface HeaderProps {
-  currentWeek: number;
-  setCurrentWeek: (week: number) => void;
-  shouldAggregate: boolean;
-  setShouldAggregate: (value: boolean) => void;
-  title: string;
-}
-
-export function Header({
-  currentWeek,
-  setCurrentWeek,
-  shouldAggregate,
-  setShouldAggregate,
-  title,
-}: HeaderProps) {
+export function Header({ currentWeek, setCurrentWeek, title }: HeaderProps) {
   const location = useLocation();
 
   return (
@@ -31,11 +17,6 @@ export function Header({
           </Link>
         </div>
         <div className="flex items-center gap-6">
-          <Toggle
-            checked={shouldAggregate}
-            onChange={setShouldAggregate}
-            label="Aggregate by Email"
-          />
           {location.pathname === "/" && (
             <WeekPicker
               currentWeek={currentWeek}

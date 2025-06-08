@@ -1,12 +1,6 @@
-import {
-  useParams,
-  useNavigate,
-  useSearchParams,
-  useOutletContext,
-} from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePOFeedbackById } from "../../../hooks/use-po-feedback";
-import { aggregateFeedbackByEmail } from "../../../lib/utils";
 import { FeedbackContent } from "./FeedbackContent";
 
 export function FeedbackDetail() {
@@ -14,20 +8,12 @@ export function FeedbackDetail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const week = parseInt(searchParams.get("week") || "1", 10);
-  const { shouldAggregate } = useOutletContext<{
-    isDecrypted: boolean;
-    shouldAggregate: boolean;
-    setShouldAggregate: (value: boolean) => void;
-  }>();
-
-  // Split the ID parameter into an array if it contains commas
-  const ids = id?.includes(",") ? id.split(",") : id;
 
   const {
     data: feedbackData,
     isLoading,
     isError,
-  } = usePOFeedbackById(ids, true);
+  } = usePOFeedbackById(id, true);
 
   if (isLoading) {
     return (
@@ -52,13 +38,6 @@ export function FeedbackDetail() {
     );
   }
 
-  const feedbackArray = Array.isArray(feedbackData)
-    ? feedbackData
-    : [feedbackData];
-  const aggregatedFeedback = shouldAggregate
-    ? aggregateFeedbackByEmail(feedbackArray)[0]
-    : null;
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto p-4 lg:p-6">
@@ -82,22 +61,13 @@ export function FeedbackDetail() {
         </div>
 
         {/* Feedback Content */}
-        {shouldAggregate && aggregatedFeedback ? (
-          <FeedbackContent
-            feedback={aggregatedFeedback}
-            week={week}
-            allFeedbackIds={feedbackArray.map((f) => f.id)}
-          />
-        ) : (
-          feedbackArray.map((feedback) => (
-            <FeedbackContent
-              key={feedback.id}
-              feedback={feedback}
-              week={week}
-              allFeedbackIds={undefined}
-            />
-          ))
-        )}
+        <FeedbackContent
+          feedback={
+            Array.isArray(feedbackData) ? feedbackData[0] : feedbackData
+          }
+          week={week}
+          allFeedbackIds={undefined}
+        />
       </div>
     </div>
   );

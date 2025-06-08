@@ -23,6 +23,8 @@ export interface Database {
           risks?: string;
           goals_next_week?: string;
           ps_call_status?: string;
+          customer?: string;
+          amount_charged?: string;
         };
         Insert: {
           id?: string;
@@ -37,6 +39,8 @@ export interface Database {
           risks?: string;
           goals_next_week?: string;
           ps_call_status?: string;
+          customer?: string;
+          amount_charged?: string;
         };
         Update: {
           id?: string;
@@ -51,6 +55,8 @@ export interface Database {
           risks?: string;
           goals_next_week?: string;
           ps_call_status?: string;
+          customer?: string;
+          amount_charged?: string;
         };
       };
     };

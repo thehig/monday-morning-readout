@@ -5,7 +5,6 @@ import { Header } from "./Header";
 
 export function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [shouldAggregate, setShouldAggregate] = useState(true);
 
   const weekParam = searchParams.get("week");
   const [currentWeek, setCurrentWeek] = useState(
@@ -21,14 +20,10 @@ export function Layout() {
       <Header
         currentWeek={currentWeek}
         setCurrentWeek={setCurrentWeek}
-        shouldAggregate={shouldAggregate}
-        setShouldAggregate={setShouldAggregate}
         title="United Signals"
       />
       <main className="flex-1 overflow-auto">
-        <Outlet
-          context={{ isDecrypted: true, shouldAggregate, setShouldAggregate }}
-        />
+        <Outlet context={{ isDecrypted: true }} />
       </main>
     </div>
   );

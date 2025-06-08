@@ -4,7 +4,7 @@ import {
   HappinessIndicator,
   Thermometer,
 } from "../../indicators";
-import { formatEmailDisplayName } from "../../../lib/utils";
+import { formatEmailDisplayName, formatAmount } from "../../../lib/utils";
 import { getDateTimeProps } from "../../../lib/date-utils";
 import { TechnicalDetails } from "./TechnicalDetails";
 import type { POFeedback, AggregatedPOFeedback } from "../../../types/feedback";
@@ -22,6 +22,7 @@ export function FeedbackContent({
   allFeedbackIds,
 }: FeedbackContentProps) {
   const displayName = formatEmailDisplayName(feedback.submitted_by);
+  const customerName = feedback.customer || "Unknown Customer";
   const submissionDate = new Date(feedback.created_at);
   const { dateTime, title, relativeTime } = getDateTimeProps(submissionDate);
 
@@ -35,38 +36,79 @@ export function FeedbackContent({
       <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
         {/* Left Column - Status & Progress */}
         <div className="space-y-6">
-          {/* Submitter Info */}
+          {/* Customer & Submitter Info */}
           <div>
             <h2 className="text-lg font-medium text-gray-900 mb-2">
-              Submitted by
+              Customer & Submission Details
             </h2>
-            <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
-              <div
-                className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0"
-                title={feedback.submitted_by}
-              >
-                <span className="text-blue-600 font-medium">
-                  {displayName
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </span>
-              </div>
-              <div className="min-w-0">
-                <div className="font-medium text-gray-900">{displayName}</div>
-                <div className="text-sm text-gray-500 break-all">
-                  {feedback.submitted_by}
+            <div className="space-y-3">
+              {/* Customer Info */}
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    <span className="text-blue-600 font-medium text-sm">
+                      {customerName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      Customer: {customerName}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500 mt-1">
-                  <time dateTime={dateTime} title={title}>
-                    {title}
-                  </time>
-                  <span className="text-gray-400"> · </span>
-                  <span title={title}>{relativeTime}</span>
+              </div>
+
+              {/* Submitter Info */}
+              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                <div
+                  className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center shrink-0"
+                  title={feedback.submitted_by}
+                >
+                  <span className="text-gray-600 font-medium">
+                    {displayName
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <div className="font-medium text-gray-900">{displayName}</div>
+                  <div className="text-sm text-gray-500 break-all">
+                    {feedback.submitted_by}
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    <time dateTime={dateTime} title={title}>
+                      {title}
+                    </time>
+                    <span className="text-gray-400"> · </span>
+                    <span title={title}>{relativeTime}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Amount Charged */}
+          {feedback.amount_charged && (
+            <div>
+              <h2 className="text-lg font-medium text-gray-900 mb-2">
+                Amount Charged This Week
+              </h2>
+              <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-green-600">
+                    {formatAmount(feedback.amount_charged)}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    Invoiced for week {feedback.week_number}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Progress Section */}
           <div>
