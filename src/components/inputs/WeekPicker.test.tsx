@@ -11,12 +11,12 @@ interface MockIconProps {
 vi.mock("../../lib/date-utils", () => ({
   getWeekDates: vi.fn(() => ({
     start: new Date(2024, 2, 4), // March 4, 2024 (Monday)
-    end: new Date(2024, 2, 9), // March 9, 2024 (Saturday)
+    end: new Date(2024, 2, 10), // March 10, 2024 (Sunday)
   })),
   getCurrentWeek: vi.fn(() => 5),
   formatDate: vi.fn((date: Date) => {
     if (date.getDate() === 4 && date.getMonth() === 2) return "Mar 4";
-    if (date.getDate() === 9 && date.getMonth() === 2) return "Mar 9";
+    if (date.getDate() === 10 && date.getMonth() === 2) return "Mar 10";
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }),
 }));
@@ -80,7 +80,7 @@ describe("WeekPicker", () => {
   it("displays week date range", () => {
     render(<WeekPicker {...defaultProps} />);
 
-    const dateRange = screen.getByText("Mar 4 - Mar 9");
+    const dateRange = screen.getByText("Mar 4 - Mar 10");
     expect(dateRange).toBeInTheDocument();
   });
 

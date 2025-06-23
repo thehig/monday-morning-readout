@@ -21,17 +21,17 @@ describe("Date Utils", () => {
       expect(start.getMonth()).toBe(0); // January
       expect(start.getDate()).toBe(1);
 
-      // End should be Saturday of the same week
-      expect(end.getDay()).toBe(6); // Saturday
-      expect(end.getDate()).toBe(start.getDate() + 5);
+      // End should be Sunday of the same week
+      expect(end.getDay()).toBe(0); // Sunday
+      expect(end.getDate()).toBe(start.getDate() + 6);
     });
 
     it("should return correct dates for week 10 of 2024", () => {
       const { start, end } = getWeekDates(10, 2024);
 
       expect(start.getDay()).toBe(1); // Monday
-      expect(end.getDay()).toBe(6); // Saturday
-      expect(end.getDate()).toBe(start.getDate() + 5);
+      expect(end.getDay()).toBe(0); // Sunday
+      expect(end.getDate()).toBe(start.getDate() + 6);
     });
 
     it("should handle year starting on different days", () => {
@@ -39,7 +39,7 @@ describe("Date Utils", () => {
       const { start, end } = getWeekDates(1, 2023);
 
       expect(start.getDay()).toBe(1); // Should still start on Monday
-      expect(end.getDay()).toBe(6); // Should still end on Saturday
+      expect(end.getDay()).toBe(0); // Should still end on Sunday
     });
   });
 

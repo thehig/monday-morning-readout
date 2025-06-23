@@ -14,9 +14,9 @@ export function getWeekDates(
   const start = new Date(yearStart);
   start.setDate(yearStart.getDate() + daysToFirstMonday + (week - 1) * 7);
 
-  // End date is Saturday (5 days after Monday)
+  // End date is Sunday (6 days after Monday)
   const end = new Date(start);
-  end.setDate(end.getDate() + 5);
+  end.setDate(end.getDate() + 6);
 
   return { start, end };
 }
