@@ -86,16 +86,16 @@ describe("HappinessIndicator", () => {
 
   describe("Type-specific Styling", () => {
     it("applies team happiness color (red)", () => {
-      render(<HappinessIndicator value={4} type="team" />);
+      render(<HappinessIndicator value={1} type="team" />);
 
-      const scoreElement = screen.getByText("4/5");
+      const scoreElement = screen.getByText("1/5");
       expect(scoreElement).toHaveClass("text-red-500");
     });
 
     it("applies customer happiness color (green)", () => {
-      render(<HappinessIndicator value={4} type="customer" />);
+      render(<HappinessIndicator value={5} type="customer" />);
 
-      const scoreElement = screen.getByText("4/5");
+      const scoreElement = screen.getByText("5/5");
       expect(scoreElement).toHaveClass("text-green-500");
     });
 
@@ -158,14 +158,14 @@ describe("HappinessIndicator", () => {
     });
 
     it("maintains readable contrast with color choices", () => {
-      const { rerender } = render(<HappinessIndicator value={4} type="team" />);
+      const { rerender } = render(<HappinessIndicator value={1} type="team" />);
 
-      const score = screen.getByText("4/5");
+      const score = screen.getByText("1/5");
       expect(score).toHaveClass("text-red-500"); // Red should have good contrast
 
-      rerender(<HappinessIndicator value={4} type="customer" />);
+      rerender(<HappinessIndicator value={5} type="customer" />);
 
-      const customerScore = screen.getByText("4/5");
+      const customerScore = screen.getByText("5/5");
       expect(customerScore).toHaveClass("text-green-500"); // Green should have good contrast
     });
   });

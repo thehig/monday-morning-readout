@@ -33,28 +33,27 @@ export function FeedbackCard({ feedback, currentWeek }: FeedbackCardProps) {
         className="block h-full p-0"
       >
         <div className="flex items-center justify-between gap-4 bg-[#1a1a4b] p-4 relative">
-          <div className="flex flex-col">
+          <div className="flex flex-col items-start min-w-0 flex-1">
             <h3
-              className="font-medium text-[#ff7f00] m-0 truncate"
+              className="font-medium text-[#ff7f00] m-0 truncate w-full text-left"
               title={`Customer: ${customerName}`}
             >
               Customer: {customerName}
             </h3>
             <p
-              className="text-sm text-gray-300 m-0 truncate"
+              className="text-sm text-white m-0 truncate w-full text-left"
               title={feedback.submitted_by}
             >
               {emailDisplayName}
             </p>
           </div>
 
-          <div className="flex-grow"></div>
-
-          <div className="text-sm text-white">
-            {new Date(feedback.created_at).toLocaleDateString()}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="text-sm text-white">
+              {new Date(feedback.created_at).toLocaleDateString()}
+            </div>
+            <VelocityIndicator velocity={feedback.velocity_next_week} />
           </div>
-
-          <VelocityIndicator velocity={feedback.velocity_next_week} />
         </div>
 
         <div className="p-6">

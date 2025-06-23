@@ -26,11 +26,27 @@ vi.mock("framer-motion", () => ({
       children,
       className,
       ...props
-    }: React.HTMLAttributes<HTMLDivElement>) => (
-      <div className={className} {...props}>
-        {children}
-      </div>
-    ),
+    }: {
+      children?: React.ReactNode;
+      className?: string;
+      [key: string]: unknown;
+    }) => {
+      // Filter out motion-specific props
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {
+        variants: _variants,
+        initial: _initial,
+        animate: _animate,
+        whileHover: _whileHover,
+        whileTap: _whileTap,
+        ...domProps
+      } = props;
+      return (
+        <div className={className} {...domProps}>
+          {children}
+        </div>
+      );
+    },
   },
 }));
 
@@ -98,7 +114,7 @@ describe("FeedbackCard", () => {
     it("displays 'Unknown Customer' when customer is null", () => {
       const feedbackWithoutCustomer = {
         ...mockFeedback,
-        customer: null as POFeedback["customer"],
+        customer: null as unknown as POFeedback["customer"],
       };
 
       renderWithRouter(
@@ -255,12 +271,7 @@ describe("FeedbackCard", () => {
       renderWithRouter(<FeedbackCard {...defaultProps} />);
 
       const emailText = screen.getByText("John Doe");
-      expect(emailText).toHaveClass(
-        "text-sm",
-        "text-gray-300",
-        "m-0",
-        "truncate"
-      );
+      expect(emailText).toHaveClass("text-sm", "text-white", "m-0", "truncate");
     });
   });
 

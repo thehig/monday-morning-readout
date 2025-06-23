@@ -33,7 +33,7 @@ function getWeekDates(weekNumber: number, year: number) {
   const start = new Date(yearStart);
   start.setDate(yearStart.getDate() + daysToFirstMonday + (weekNumber - 1) * 7);
 
-  // End date is set to the start of Saturday (which means it includes all of Friday)
+  // End date is Saturday (5 days after Monday)
   const end = new Date(start);
   end.setDate(end.getDate() + 5);
 

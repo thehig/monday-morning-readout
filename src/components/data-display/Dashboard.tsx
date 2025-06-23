@@ -1,8 +1,6 @@
 import { useSearchParams } from "react-router-dom";
-import {
-  usePOFeedbackByWeek,
-  getCurrentWeek,
-} from "../../hooks/use-po-feedback";
+import { usePOFeedbackByWeek } from "../../hooks/use-po-feedback";
+import { getPreviousWeek } from "../../lib/date-utils";
 import { FeedbackCard } from "../feedback/cards/FeedbackCard";
 
 export function Dashboard() {
@@ -11,7 +9,7 @@ export function Dashboard() {
   const weekParam = searchParams.get("week");
   const currentWeek = weekParam
     ? parseInt(weekParam)
-    : getCurrentWeek(new Date().getFullYear());
+    : getPreviousWeek(new Date().getFullYear());
 
   const { data: weeklyFeedback, isLoading } = usePOFeedbackByWeek(
     currentWeek,

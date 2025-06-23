@@ -9,3 +9,15 @@ export function getHappinessDetails(value: number) {
     emoji: HAPPINESS_EMOJIS[emojiIndex],
   };
 }
+
+export function getHappinessColor(value: number): string {
+  if (value === 1) {
+    return "text-red-500";
+  } else if (value >= 2 && value <= 4) {
+    return "text-yellow-500";
+  } else if (value === 5) {
+    return "text-green-500";
+  }
+  // Default fallback for edge cases
+  return "text-gray-500";
+}

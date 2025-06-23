@@ -114,7 +114,7 @@ export function FeedbackContent({
           <div>
             <div className="flex items-baseline justify-between mb-4">
               <h2 className="text-lg font-medium text-gray-900">
-                Sprint Progress
+                Cycle Progress
               </h2>
               <div
                 className="text-sm text-gray-500"
@@ -249,11 +249,9 @@ export function FeedbackContent({
           <div>
             <div className="flex items-baseline justify-between mb-4">
               <h2 className="text-lg font-medium text-gray-900">
-                PS Call Status
+                PS Call Requirement
               </h2>
-              <div className="text-sm text-purple-600">
-                Professional Services Support
-              </div>
+              <div className="text-sm text-purple-600">Problem Solving</div>
             </div>
             <div className="p-4 bg-purple-50/50 rounded-lg border border-purple-100">
               {feedback.ps_call_status ? (

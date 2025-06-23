@@ -10,14 +10,14 @@ interface MockIconProps {
 // Mock the date-utils functions
 vi.mock("../../lib/date-utils", () => ({
   getWeekDates: vi.fn(() => ({
-    start: new Date(2024, 0, 15), // January 15, 2024 (Monday)
-    end: new Date(2024, 0, 20), // January 20, 2024 (Saturday)
+    start: new Date(2024, 2, 4), // March 4, 2024 (Monday)
+    end: new Date(2024, 2, 9), // March 9, 2024 (Saturday)
   })),
   getCurrentWeek: vi.fn(() => 5),
-  formatDate: vi.fn((date) => {
-    if (date.getDate() === 15) return "Jan 15";
-    if (date.getDate() === 19) return "Jan 19"; // Friday is day before Saturday
-    return "Jan 15";
+  formatDate: vi.fn((date: Date) => {
+    if (date.getDate() === 4 && date.getMonth() === 2) return "Mar 4";
+    if (date.getDate() === 9 && date.getMonth() === 2) return "Mar 9";
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }),
 }));
 
@@ -57,8 +57,6 @@ describe("WeekPicker", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock the current year to be 2024
-    vi.spyOn(Date.prototype, "getFullYear").mockReturnValue(2024);
   });
 
   afterEach(() => {
@@ -82,7 +80,7 @@ describe("WeekPicker", () => {
   it("displays week date range", () => {
     render(<WeekPicker {...defaultProps} />);
 
-    const dateRange = screen.getByText("Jan 15 - Jan 19");
+    const dateRange = screen.getByText("Mar 4 - Mar 9");
     expect(dateRange).toBeInTheDocument();
   });
 

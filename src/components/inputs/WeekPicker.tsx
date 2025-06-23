@@ -7,10 +7,7 @@ export function WeekPicker({ currentWeek, onWeekChange }: WeekPickerProps) {
   const currentYear = now.getFullYear();
   const totalWeeks = 52;
 
-  const { start, end: endSaturday } = getWeekDates(currentWeek, currentYear);
-  // Create a new date for Friday by subtracting one day from Saturday
-  const end = new Date(endSaturday);
-  end.setDate(end.getDate() - 1);
+  const { start, end } = getWeekDates(currentWeek, currentYear);
 
   const isCurrentWeek = currentWeek === getCurrentWeek(currentYear);
   const isPreviousWeekDisabled = currentWeek <= 1;

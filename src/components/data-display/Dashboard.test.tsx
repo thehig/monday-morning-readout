@@ -27,7 +27,11 @@ vi.mock("../../hooks/use-po-feedback", () => ({
     error: null,
     isError: false,
   }),
-  getCurrentWeek: () => 10,
+}));
+
+// Mock the date utils to return predictable values
+vi.mock("../../lib/date-utils", () => ({
+  getPreviousWeek: () => 24,
 }));
 
 function createTestWrapper(initialEntries: string[] = ["/?"]) {
@@ -51,7 +55,7 @@ describe("Dashboard", () => {
     render(<Dashboard />, { wrapper: createTestWrapper() });
 
     const container = screen
-      .getByText("No feedback found for week 10")
+      .getByText(/No feedback found for week \d+/)
       .closest(".p-4");
     expect(container).toBeInTheDocument();
   });
@@ -66,9 +70,9 @@ describe("Dashboard", () => {
     render(<Dashboard />, { wrapper: createTestWrapper() });
 
     expect(
-      screen.getByText("No feedback found for week 10")
+      screen.getByText("No feedback found for week 24")
     ).toBeInTheDocument();
-    expect(screen.getByText("No feedback found for week 10")).toHaveClass(
+    expect(screen.getByText("No feedback found for week 24")).toHaveClass(
       "text-center",
       "text-gray-600"
     );
@@ -86,7 +90,7 @@ describe("Dashboard", () => {
     render(<Dashboard />, { wrapper: createTestWrapper() });
 
     const container = screen
-      .getByText("No feedback found for week 10")
+      .getByText("No feedback found for week 24")
       .closest(".p-4");
     expect(container).toHaveClass("p-4");
   });
@@ -94,7 +98,7 @@ describe("Dashboard", () => {
   it("has semantic structure", () => {
     render(<Dashboard />, { wrapper: createTestWrapper() });
 
-    const message = screen.getByText("No feedback found for week 10");
+    const message = screen.getByText("No feedback found for week 24");
     expect(message).toHaveClass("text-center", "text-gray-600");
   });
 });

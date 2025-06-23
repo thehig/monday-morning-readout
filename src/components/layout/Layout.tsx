@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Outlet } from "react-router-dom";
-import { getCurrentWeek } from "../../hooks/use-po-feedback";
+import { getPreviousWeek } from "../../lib/date-utils";
 import { Header } from "./Header";
 
 export function Layout() {
@@ -8,7 +8,7 @@ export function Layout() {
 
   const weekParam = searchParams.get("week");
   const [currentWeek, setCurrentWeek] = useState(
-    weekParam ? parseInt(weekParam) : getCurrentWeek(new Date().getFullYear())
+    weekParam ? parseInt(weekParam) : getPreviousWeek(new Date().getFullYear())
   );
 
   useEffect(() => {

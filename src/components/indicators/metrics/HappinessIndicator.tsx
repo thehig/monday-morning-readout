@@ -1,6 +1,6 @@
 import { HappinessIndicatorProps } from "../../../types/components";
-import { HAPPINESS_COLORS, HAPPINESS_LABELS } from "./happiness.constants";
-import { getHappinessDetails } from "./happiness.utils";
+import { HAPPINESS_LABELS } from "./happiness.constants";
+import { getHappinessDetails, getHappinessColor } from "./happiness.utils";
 
 /**
  * Displays a happiness score with an appropriate emoji and color-coded value
@@ -12,14 +12,13 @@ import { getHappinessDetails } from "./happiness.utils";
  */
 export function HappinessIndicator({ value, type }: HappinessIndicatorProps) {
   const scoreText = `${value}/5`;
+  const colorClass = getHappinessColor(value);
 
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="text-sm text-gray-600">{HAPPINESS_LABELS[type]}</div>
       <div className="text-2xl">{getHappinessDetails(value).emoji}</div>
-      <div className={`text-lg font-bold ${HAPPINESS_COLORS[type]}`}>
-        {scoreText}
-      </div>
+      <div className={`text-lg font-bold ${colorClass}`}>{scoreText}</div>
     </div>
   );
 }

@@ -14,7 +14,7 @@ export function getWeekDates(
   const start = new Date(yearStart);
   start.setDate(yearStart.getDate() + daysToFirstMonday + (week - 1) * 7);
 
-  // End date is set to the start of Saturday (which means it includes all of Friday)
+  // End date is Saturday (5 days after Monday)
   const end = new Date(start);
   end.setDate(end.getDate() + 5);
 
@@ -33,6 +33,11 @@ export function getCurrentWeek(year: number): number {
   const diff = now.getTime() - firstMonday.getTime();
   const oneWeek = 1000 * 60 * 60 * 24 * 7;
   return Math.ceil(diff / oneWeek);
+}
+
+export function getPreviousWeek(year: number): number {
+  const currentWeek = getCurrentWeek(year);
+  return Math.max(1, currentWeek - 1);
 }
 
 export const DATE_FORMAT_OPTIONS = {

@@ -409,6 +409,9 @@ describe("FeedbackList", () => {
         { ...mockFeedback[0] }, // Same ID
       ];
 
+      // Mock console.warn since React will warn about duplicate keys
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
       renderWithRouter(
         <FeedbackList feedback={duplicateFeedback} currentWeek={10} />
       );
@@ -416,6 +419,8 @@ describe("FeedbackList", () => {
       // Should still render both items (React will show a warning about duplicate keys)
       const cards = screen.getAllByTestId("feedback-card-feedback-1");
       expect(cards).toHaveLength(2);
+
+      warnSpy.mockRestore();
     });
 
     it("handles feedback with special characters in customer names", () => {

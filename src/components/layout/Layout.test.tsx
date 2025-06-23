@@ -44,6 +44,11 @@ vi.mock("../../hooks/use-po-feedback", () => ({
   getCurrentWeek: vi.fn(() => 5),
 }));
 
+// Mock the date utils
+vi.mock("../../lib/date-utils", () => ({
+  getPreviousWeek: vi.fn(() => 24),
+}));
+
 describe("Layout", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -123,7 +128,7 @@ describe("Layout", () => {
     render(<Layout />);
 
     const week = screen.getByTestId("header-week");
-    expect(week).toHaveTextContent("5"); // From mocked getCurrentWeek
+    expect(week).toHaveTextContent("24"); // From mocked getPreviousWeek
   });
 
   it("parses week param correctly when provided", async () => {

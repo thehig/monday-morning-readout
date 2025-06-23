@@ -30,25 +30,43 @@ describe("Supabase Utility", () => {
 
     it("should throw error if Supabase URL is missing", async () => {
       const { initializeSupabase: init } = await import("./supabase");
+
+      // Mock console.error since this test expects an error
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
       expect(() => init("", MOCK_KEY)).toThrow(
         "Supabase URL and anon key are required"
       );
+
+      errorSpy.mockRestore();
     });
 
     it("should throw error if Supabase anon key is missing", async () => {
       const { initializeSupabase: init } = await import("./supabase");
+
+      // Mock console.error since this test expects an error
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
       expect(() => init(SUPABASE_URL, "")).toThrow(
         "Supabase URL and anon key are required"
       );
+
+      errorSpy.mockRestore();
     });
   });
 
   describe("getSupabase", () => {
     it("should throw error if called before initialization", async () => {
       const { getSupabase: get } = await import("./supabase");
+
+      // Mock console.error since this test expects an error
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
       expect(() => get()).toThrow(
         "Supabase client not initialized. Call initializeSupabase first."
       );
+
+      errorSpy.mockRestore();
     });
 
     it("should return the client instance after initialization", async () => {
@@ -84,6 +102,10 @@ describe("Supabase Utility", () => {
 
     it("should return success false and an error message on connection failure", async () => {
       const { testConnection: testConn } = await import("./supabase");
+
+      // Mock console.error since this test expects an error
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
       // Override the default handler to simulate an error
       server.use(
         http.get(`${SUPABASE_URL}/rest/v1/po_feedback`, ({ request }) => {
@@ -109,10 +131,15 @@ describe("Supabase Utility", () => {
       // Check for the specific message returned by the mock or Supabase client error wrapping
       // In this case, the Supabase client likely includes the mocked message in its error
       expect(result.error).toContain("Simulated DB Error");
+
+      errorSpy.mockRestore();
     });
 
     // This test needs careful handling due to module state
     it("should return error object if Supabase is not initialized (within testConnection's catch)", async () => {
+      // Mock console.error since this test expects an error
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
       // Ensure modules are reset to simulate uninitialized state
       vi.resetModules();
       const { testConnection: testConnUninitialized } = await import(
@@ -124,6 +151,8 @@ describe("Supabase Utility", () => {
         error:
           "Supabase client not initialized. Call initializeSupabase first.",
       });
+
+      errorSpy.mockRestore();
     });
   });
 
