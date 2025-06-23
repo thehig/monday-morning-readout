@@ -190,18 +190,12 @@ export function FeedbackContent({
             </div>
             <div className="grid grid-cols-2 gap-8 p-4 bg-gray-50 rounded-lg">
               <div>
-                <div className="text-sm text-gray-500 text-center mb-2">
-                  Team Satisfaction
-                </div>
                 <HappinessIndicator
                   value={feedback.team_happiness}
                   type="team"
                 />
               </div>
               <div>
-                <div className="text-sm text-gray-500 text-center mb-2">
-                  Customer Satisfaction
-                </div>
                 <HappinessIndicator
                   value={feedback.customer_happiness}
                   type="customer"
