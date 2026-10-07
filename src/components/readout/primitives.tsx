@@ -81,6 +81,18 @@ export function Meter({ value, max = 5 }: { value: number; max?: number }) {
   );
 }
 
+/** The traffic light alone, for when the label is already in the sentence. */
+export function VelocityDot({ velocity }: { velocity: VelocityType | null }) {
+  if (!velocity) return null;
+
+  return (
+    <span
+      className={`h-[15px] w-[15px] shrink-0 rounded-full ${VELOCITY_DOT[velocity]}`}
+      title={VELOCITY_LABELS[velocity]}
+    />
+  );
+}
+
 /** Traffic light for next week's velocity, with the English label beside it. */
 export function VelocityLight({ velocity }: { velocity: VelocityType | null }) {
   if (!velocity) {

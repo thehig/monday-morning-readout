@@ -1,68 +1,41 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePOFeedbackById } from "../../../hooks/use-po-feedback";
-import { FeedbackContent } from "./FeedbackContent";
+import { toEngagement } from "../../../lib/engagements";
+import { Stop } from "../../readout/stop/Stop";
 
+/** Route wrapper: loads one submission and hands it to the Stop screen. */
 export function FeedbackDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const week = parseInt(searchParams.get("week") || "1", 10);
 
-  const {
-    data: feedbackData,
-    isLoading,
-    isError,
-  } = usePOFeedbackById(id, true);
+  const { data, isLoading, isError } = usePOFeedbackById(id, true);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-500">Loading feedback...</div>
+      <div className="flex h-full items-center justify-center text-xl text-ink-3">
+        Loading…
       </div>
     );
   }
 
-  if (isError || !feedbackData) {
+  if (isError || !data) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-4">
-        <div className="text-red-500">Error loading feedback</div>
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <p className="text-xl text-late-ink">That submission could not be loaded.</p>
         <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          type="button"
+          onClick={() => navigate(`/?week=${week}`)}
+          className="flex items-center gap-2 rounded border-2 border-sheet-rule bg-sheet-card px-4 py-2 text-lg font-medium text-ink-2"
         >
-          <ChevronLeftIcon className="w-4 h-4" />
-          Go Back
+          <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+          Back to the wall
         </button>
       </div>
     );
   }
 
-  return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto p-4 lg:p-6">
-        {/* Header with back button */}
-        <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => navigate(`/?week=${week}`)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            title="Return to overview"
-          >
-            <ChevronLeftIcon className="w-5 h-5" />
-          </button>
-          <div className="flex-1">
-            <div className="flex items-baseline justify-between">
-              <h1 className="text-2xl font-semibold text-gray-900">
-                Feedback Details
-              </h1>
-            </div>
-            <p className="text-sm text-gray-500">Calendar Week {week}</p>
-          </div>
-        </div>
-
-        {/* Feedback Content */}
-        <FeedbackContent feedback={feedbackData} week={week} />
-      </div>
-    </div>
-  );
+  return <Stop engagement={toEngagement(data)} currentWeek={week} />;
 }

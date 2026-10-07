@@ -1,4 +1,5 @@
 import {
+  cleanText,
   isTestRow,
   parseCommitments,
   scheduleState,
@@ -44,6 +45,23 @@ describe("engagements", () => {
     it("treats a missing customer as unusable", () => {
       expect(isTestRow(null)).toBe(true);
       expect(isTestRow("")).toBe(true);
+    });
+  });
+
+  describe("cleanText", () => {
+    it("reads a lone dash as nothing written", () => {
+      expect(cleanText("-")).toBeNull();
+      expect(cleanText("--")).toBeNull();
+      expect(cleanText(" — ")).toBeNull();
+      expect(cleanText("   ")).toBeNull();
+      expect(cleanText(null)).toBeNull();
+    });
+
+    it("keeps real text, including text that merely starts with a dash", () => {
+      expect(cleanText("keine")).toBe("keine");
+      expect(cleanText("- Cycle 5 started on Tuesday")).toBe(
+        "- Cycle 5 started on Tuesday"
+      );
     });
   });
 
@@ -165,6 +183,13 @@ describe("engagements", () => {
 
       expect(e.slipDays).toBe(35);
       expect(e.contradicts).toBe(false);
+    });
+
+    it("treats a placeholder risks field as nothing recorded", () => {
+      const e = toEngagement(row({ risks: "-", goals_next_week: "--" }), TODAY);
+
+      expect(e.risks).toBeNull();
+      expect(e.goals).toBeNull();
     });
 
     it("carries no schedule at all for rows filed before the columns existed", () => {

@@ -98,6 +98,9 @@ export const DATE_FORMAT_OPTIONS = {
     month: "short",
     day: "numeric",
   } as const,
+  monthOnly: {
+    month: "short",
+  } as const,
 } as const;
 
 /**

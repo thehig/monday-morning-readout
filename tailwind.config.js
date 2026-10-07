@@ -49,6 +49,11 @@ export default {
           foreground: "var(--card-foreground)",
         },
       },
+      fontFamily: {
+        // Reserved for text a person typed, so a sentence never looks like a
+        // measurement.
+        serif: ['"Literata"', "Georgia", "serif"],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

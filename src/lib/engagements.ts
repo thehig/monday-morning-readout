@@ -79,6 +79,18 @@ function daysBetween(from: Date, to: Date): number {
   return Math.round((b.getTime() - a.getTime()) / DAY);
 }
 
+/**
+ * Free-text fields as the owners actually fill them.
+ *
+ * A lone dash is how they write "nothing this week", so it is emptiness rather
+ * than content - rendering it leaves a bare "-" sitting under a heading.
+ */
+export function cleanText(value: string | null | undefined): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed && !/^[-–—]{1,3}$/.test(trimmed) ? trimmed : null;
+}
+
 export function isTestRow(customer: string | null | undefined): boolean {
   return !customer || TEST_CUSTOMER.test(customer);
 }
@@ -133,10 +145,7 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
       ? /^(ja|yes|y)$/i.test(row.ps_call_needed.trim())
       : null;
 
-  const delayReason =
-    typeof row.delay_reason === "string" && row.delay_reason.trim()
-      ? row.delay_reason.trim()
-      : null;
+  const delayReason = cleanText(row.delay_reason);
 
   return {
     id: row.id,
@@ -152,9 +161,9 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
     velocity,
     velocityLabel: velocity ? VELOCITY_LABELS[velocity] ?? null : null,
 
-    milestones: row.milestones_done?.trim() || null,
-    risks: row.risks?.trim() || null,
-    goals: row.goals_next_week?.trim() || null,
+    milestones: cleanText(row.milestones_done),
+    risks: cleanText(row.risks),
+    goals: cleanText(row.goals_next_week),
     commitments: parseCommitments(row.goals_next_week),
 
     psCallRequested,
@@ -164,7 +173,7 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
         : psCallRequested
         ? "Requested"
         : "Not requested",
-    psCallContext: row.ps_call_context?.trim() || null,
+    psCallContext: cleanText(row.ps_call_context),
 
     amountCharged: formatAmount(row.amount_charged ?? undefined),
 
