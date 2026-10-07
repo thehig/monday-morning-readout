@@ -1,4 +1,12 @@
-import { buildLadder, buildField, FIELD_FLOOR_DAYS } from "./wall-view";
+import {
+  buildLadder,
+  buildField,
+  fitColumns,
+  CARD_MIN_WIDTH,
+  GRID_GAP,
+  GRID_PADDING,
+  FIELD_FLOOR_DAYS,
+} from "./wall-view";
 import { toEngagements } from "./engagements";
 import type { POFeedback } from "../types/feedback";
 
@@ -194,5 +202,42 @@ describe("buildField", () => {
 
   it("returns nothing when no engagement has a deadline", () => {
     expect(buildField(toEngagements([row({ id: 1 })], TODAY), TODAY)).toBeNull();
+  });
+});
+
+describe("fitColumns", () => {
+  it("draws ten engagements as five across, which is two rows", () => {
+    expect(fitColumns(1920, 10)).toBe(5);
+  });
+
+  it("drops a column rather than narrowing the tiles", () => {
+    // Four columns need 4*360 + 3*14 + 32 = 1514, so 1600 holds them and
+    // 1500 does not.
+    expect(fitColumns(1600, 10)).toBe(4);
+    expect(fitColumns(1500, 10)).toBe(3);
+    expect(fitColumns(1280, 10)).toBe(3);
+  });
+
+  it("never drops below one, however narrow the window", () => {
+    expect(fitColumns(320, 10)).toBe(1);
+    expect(fitColumns(0, 10)).toBe(1);
+  });
+
+  it("keeps two rows for a short week rather than one wide row", () => {
+    expect(fitColumns(1920, 4)).toBe(2);
+    expect(fitColumns(1920, 1)).toBe(1);
+  });
+
+  it("caps at five even when the week is long", () => {
+    expect(fitColumns(1920, 20)).toBe(5);
+  });
+
+  it("never returns more columns than the width can hold", () => {
+    for (const width of [600, 900, 1100, 1400, 1700, 1920, 2560]) {
+      const columns = fitColumns(width, 10);
+      const needed =
+        columns * CARD_MIN_WIDTH + (columns - 1) * GRID_GAP + GRID_PADDING;
+      if (columns > 1) expect(needed).toBeLessThanOrEqual(width);
+    }
   });
 });

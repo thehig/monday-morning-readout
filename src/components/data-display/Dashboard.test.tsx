@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { TopBarSlotContext } from "../readout/top-bar-slot";
 import { Dashboard } from "./Dashboard";
 
 // Mock the Wall's grid so these tests stay about the Dashboard's own wiring
@@ -69,11 +71,23 @@ function createTestWrapper(initialEntries: string[] = ["/?"]) {
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
-    </QueryClientProvider>
-  );
+  // The Dashboard renders its layout switcher into the navy bar, which the
+  // Layout owns, so the wrapper has to stand in for it or the switcher has
+  // nowhere to go and never appears.
+  return ({ children }: { children: React.ReactNode }) => {
+    const [slot, setSlot] = useState<HTMLDivElement | null>(null);
+
+    return (
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={initialEntries}>
+          <div ref={setSlot} />
+          <TopBarSlotContext.Provider value={slot}>
+            {children}
+          </TopBarSlotContext.Provider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+  };
 }
 
 describe("Dashboard", () => {

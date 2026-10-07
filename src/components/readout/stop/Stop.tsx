@@ -289,7 +289,12 @@ export function Stop({
         </div>
       </div>
 
-      <footer className="flex h-[56px] shrink-0 items-center gap-7 border-t-2 border-sheet-rule bg-sheet-card px-8 text-[18px] text-ink-3">
+      {/*
+        Pinned like the banner: the step counter and the keys that move between
+        engagements are what the operator is working from, so they stay on
+        screen in a window too short to show the whole frame.
+      */}
+      <footer className="sticky bottom-0 z-20 flex h-[56px] shrink-0 items-center gap-7 border-t-2 border-sheet-rule bg-sheet-card px-8 text-[18px] text-ink-3">
         <span className="flex items-center gap-5">
           {step?.previousId !== null && step !== null && (
             <span>

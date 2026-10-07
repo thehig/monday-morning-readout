@@ -202,3 +202,31 @@ export function buildField(
     danger: { widthPct: xOf(0), heightPct: 45 },
   };
 }
+
+/**
+ * What one tile needs to hold its text on the lines it was drawn for.
+ *
+ * Inline styles never reach the Tailwind compiler, so the grid cannot read the
+ * `minWidth.card` token and this repeats its value. Change both together.
+ */
+export const CARD_MIN_WIDTH = 360;
+
+/** `gap-3.5` and `p-4` on the grid, in the numbers the arithmetic needs. */
+export const GRID_GAP = 14;
+export const GRID_PADDING = 32;
+
+/**
+ * How many tiles fit across, at the drawn width or any narrower one.
+ *
+ * The drawn shape is two rows, which is what halving the count gives - ten
+ * engagements across five columns. A window too narrow for that many tiles at
+ * their working width drops a column and takes another row instead, so the
+ * tiles keep the size they were drawn at and the page never scrolls sideways.
+ */
+export function fitColumns(width: number, count: number): number {
+  const drawn = Math.min(5, Math.max(1, Math.ceil(count / 2)));
+  const fit = Math.floor(
+    (width - GRID_PADDING + GRID_GAP) / (CARD_MIN_WIDTH + GRID_GAP)
+  );
+  return Math.max(1, Math.min(drawn, fit));
+}

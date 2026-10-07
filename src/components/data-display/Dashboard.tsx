@@ -6,14 +6,15 @@ import { toEngagements, summarise } from "../../lib/engagements";
 import { RankedGrid } from "../readout/wall/RankedGrid";
 import { Ladder } from "../readout/wall/Ladder";
 import { Field } from "../readout/wall/Field";
+import { Segmented, TopBarActions } from "../readout/chrome";
 import { isTypingTarget } from "../readout/useReadoutKeys";
 
 type WallLayout = "grid" | "ladder" | "field";
 
-const LAYOUTS: { key: WallLayout; label: string; digit: string }[] = [
-  { key: "grid", label: "Ranked grid", digit: "1" },
-  { key: "ladder", label: "Ladder", digit: "2" },
-  { key: "field", label: "Field", digit: "3" },
+const LAYOUTS: { value: WallLayout; label: string; digit: string }[] = [
+  { value: "grid", label: "Ranked grid", digit: "1" },
+  { value: "ladder", label: "Ladder", digit: "2" },
+  { value: "field", label: "Field", digit: "3" },
 ];
 
 /**
@@ -47,7 +48,7 @@ export function Dashboard() {
 
       const picked = LAYOUTS.find((l) => l.digit === event.key);
       if (picked) {
-        setLayout(picked.key);
+        setLayout(picked.value);
         return;
       }
 
@@ -84,30 +85,14 @@ export function Dashboard() {
           </span>
         )}
 
-        <div className="ml-auto flex overflow-hidden rounded border-2 border-navy">
-          {LAYOUTS.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              onClick={() => setLayout(option.key)}
-              aria-pressed={layout === option.key}
-              className={`px-3.5 py-1.5 text-[17px] font-semibold transition-colors ${
-                layout === option.key
-                  ? "bg-navy text-white"
-                  : "bg-sheet-card text-ink-2 hover:bg-sheet"
-              }`}
-            >
-              <span
-                className={`mr-1.5 text-[17px] ${
-                  layout === option.key ? "text-white/60" : "text-ink-3"
-                }`}
-              >
-                {option.digit}
-              </span>
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <TopBarActions>
+          <Segmented
+            label="Wall layout"
+            options={LAYOUTS}
+            value={layout}
+            onChange={setLayout}
+          />
+        </TopBarActions>
       </div>
 
       {engagements.length === 0 ? (

@@ -4,8 +4,8 @@ import { getWeekRange, formatDate, getCurrentWeek } from "../../lib/date-utils";
 interface ReadoutTopBarProps {
   currentWeek: number;
   onWeekChange: (week: number) => void;
-  /** Counts for the right-hand side, e.g. "10 engagements · 5 need a decision". */
-  summary?: React.ReactNode;
+  /** Receives the node the current state renders its view switcher into. */
+  onActionsSlot: (slot: HTMLDivElement | null) => void;
 }
 
 const TOTAL_WEEKS = 52;
@@ -17,7 +17,7 @@ const TOTAL_WEEKS = 52;
 export function ReadoutTopBar({
   currentWeek,
   onWeekChange,
-  summary,
+  onActionsSlot,
 }: ReadoutTopBarProps) {
   const year = new Date().getFullYear();
   const { start, end } = getWeekRange(currentWeek, year);
@@ -65,9 +65,11 @@ export function ReadoutTopBar({
         </button>
       </div>
 
-      <div className="min-w-[280px] text-right text-lg tabular-nums text-white/75">
-        {summary}
-      </div>
+      {/* The current state fills this with its own view switcher. */}
+      <div
+        ref={onActionsSlot}
+        className="flex min-w-[280px] items-center justify-end gap-4"
+      />
     </header>
   );
 }

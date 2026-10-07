@@ -11,7 +11,10 @@ interface LadderProps {
   today?: Date;
 }
 
-const GRID = "grid-cols-[44px_340px_1fr_124px_166px_148px_148px_160px]";
+// Drawn at the width after each comma; the width before it is how far the
+// column will give before the page would have to scroll sideways instead.
+const GRID =
+  "grid-cols-[44px_minmax(200px,340px)_minmax(160px,1fr)_minmax(92px,124px)_minmax(118px,166px)_minmax(108px,148px)_minmax(108px,148px)_minmax(120px,160px)]";
 
 /**
  * One row per engagement on a shared calendar.

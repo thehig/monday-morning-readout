@@ -55,8 +55,9 @@ describe("Layout", () => {
 
     const container = screen.getByRole("main");
     expect(container).toBeInTheDocument();
-    // The readout never scrolls: each state fits one screen.
-    expect(container).toHaveClass("flex-1", "overflow-hidden");
+    // Main takes the space under the bar and grows with whatever a state
+    // needs; nothing is clipped, so what does not fit scrolls the page.
+    expect(container).toHaveClass("flex", "flex-1", "flex-col");
   });
 
   it("renders the top bar with the current week", () => {
@@ -85,11 +86,11 @@ describe("Layout", () => {
     const main = screen.getByRole("main");
     const container = header.parentElement;
 
-    // h-dvh follows the window; min-h-frame stops it shrinking past the size
-    // the states were drawn at, so a short window scrolls instead of crushing
-    // the Wall. Dropping min-h-frame is what this guards against.
-    expect(container).toHaveClass("h-dvh", "min-h-frame", "bg-sheet", "flex", "flex-col");
-    expect(main).toHaveClass("flex-1", "overflow-hidden");
+    // min-h-frame is max(100dvh, 1080px): the window, floored at the height
+    // the states were drawn for. Dropping it is what this guards against -
+    // without it a short window crushes the Wall instead of scrolling.
+    expect(container).toHaveClass("min-h-frame", "bg-sheet", "flex", "flex-col");
+    expect(main).toHaveClass("flex", "flex-1", "flex-col");
   });
 
   it("handles week change correctly", async () => {

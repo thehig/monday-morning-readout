@@ -3,41 +3,21 @@ import { useSearchParams } from "react-router-dom";
 import { usePOFeedbackByWeek } from "../../../hooks/use-po-feedback";
 import { getPreviousWeek } from "../../../lib/date-utils";
 import { toEngagements, summarise } from "../../../lib/engagements";
+import {
+  Segmented,
+  TopBarActions,
+  type SegmentedOption,
+} from "../chrome";
 import { ByOwner } from "./ByOwner";
 import { CommitmentList } from "./CommitmentList";
 
 type PlanView = "owner" | "list";
 
 /** The two views of the same commitments: grouped by person, or flattened by risk. */
-function Toggle({
-  view,
-  onChange,
-}: {
-  view: PlanView;
-  onChange: (view: PlanView) => void;
-}) {
-  const option = (value: PlanView, label: string) => (
-    <button
-      type="button"
-      onClick={() => onChange(value)}
-      aria-pressed={view === value}
-      className={`px-4 py-1.5 text-[17px] font-semibold transition-colors ${
-        view === value
-          ? "bg-navy text-white"
-          : "bg-sheet-card text-ink-2 hover:bg-sheet"
-      }`}
-    >
-      {label}
-    </button>
-  );
-
-  return (
-    <div className="flex overflow-hidden rounded border-2 border-navy">
-      {option("owner", "By owner")}
-      {option("list", "Commitment list")}
-    </div>
-  );
-}
+const PLAN_VIEWS: SegmentedOption<PlanView>[] = [
+  { value: "owner", label: "By owner" },
+  { value: "list", label: "Commitment list" },
+];
 
 /**
  * The Plan: what the week ahead has been committed to.
@@ -97,15 +77,20 @@ export function Plan() {
           )}
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-[17px] text-ink-3">
-            <kbd className="mr-1.5 rounded border-2 border-sheet-rule bg-sheet px-1.5 font-bold text-ink-2">
+        <TopBarActions>
+          <span className="text-[17px] text-white/70">
+            <kbd className="mr-1.5 rounded border border-navy-line px-1.5 font-bold text-white">
               T
             </kbd>
             toggle
           </span>
-          <Toggle view={view} onChange={setView} />
-        </div>
+          <Segmented
+            label="Plan view"
+            options={PLAN_VIEWS}
+            value={view}
+            onChange={setView}
+          />
+        </TopBarActions>
       </div>
 
       {engagements.length === 0 ? (

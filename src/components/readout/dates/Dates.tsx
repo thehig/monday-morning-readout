@@ -4,40 +4,21 @@ import { usePOFeedbackByWeek } from "../../../hooks/use-po-feedback";
 import { getPreviousWeek } from "../../../lib/date-utils";
 import { toEngagements } from "../../../lib/engagements";
 import { landingWeeks, buildRunway } from "../../../lib/dates-view";
+import {
+  Segmented,
+  TopBarActions,
+  type SegmentedOption,
+} from "../chrome";
 import { LandingWeeks } from "./LandingWeeks";
 import { OwnerRunway } from "./OwnerRunway";
 
 type DatesView = "weeks" | "runway";
 
-function Toggle({
-  view,
-  onChange,
-}: {
-  view: DatesView;
-  onChange: (view: DatesView) => void;
-}) {
-  const option = (value: DatesView, label: string) => (
-    <button
-      type="button"
-      onClick={() => onChange(value)}
-      aria-pressed={view === value}
-      className={`px-4 py-1.5 text-[17px] font-semibold transition-colors ${
-        view === value
-          ? "bg-navy text-white"
-          : "bg-sheet-card text-ink-2 hover:bg-sheet"
-      }`}
-    >
-      {label}
-    </button>
-  );
-
-  return (
-    <div className="flex overflow-hidden rounded border-2 border-navy">
-      {option("weeks", "Landing weeks")}
-      {option("runway", "Owner runway")}
-    </div>
-  );
-}
+/** Two axes on one dataset: load per week, or collisions per person. */
+const DATES_VIEWS: SegmentedOption<DatesView>[] = [
+  { value: "weeks", label: "Landing weeks" },
+  { value: "runway", label: "Owner runway" },
+];
 
 function Stat({
   value,
@@ -130,15 +111,20 @@ export function Dates() {
           )}
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-[17px] text-ink-3">
-            <kbd className="mr-1.5 rounded border-2 border-sheet-rule bg-sheet px-1.5 font-bold text-ink-2">
+        <TopBarActions>
+          <span className="text-[17px] text-white/70">
+            <kbd className="mr-1.5 rounded border border-navy-line px-1.5 font-bold text-white">
               T
             </kbd>
             toggle
           </span>
-          <Toggle view={view} onChange={setView} />
-        </div>
+          <Segmented
+            label="Dates view"
+            options={DATES_VIEWS}
+            value={view}
+            onChange={setView}
+          />
+        </TopBarActions>
       </div>
 
       {engagements.length === 0 ? (

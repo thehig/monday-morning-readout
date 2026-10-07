@@ -55,27 +55,20 @@ export default {
         serif: ['"Literata"', "Georgia", "serif"],
       },
       minHeight: {
-        // Every state is drawn for a 1920x1080 screen share, and the Wall's
-        // ranked grid uses the full height of it - ten tiles in two rows have a
-        // floor of their own that no amount of flexing gets under.
+        // The readout's frame: the window, but never under the 1080px every
+        // state was drawn for, and free to grow past either when a state needs
+        // the room - the Wall reflows to more rows as the window narrows.
         //
-        // So the frame never shrinks past the size it was drawn at. In a window
-        // shorter than this the page scrolls, which costs the operator a
-        // scroll but keeps every layout at its designed proportions. The
-        // alternative - letting the frame shrink - crushes the grid instead,
-        // and a crushed tile loses the bottom row of facts silently.
-        frame: "1080px",
+        // Height is floored because the Wall's tiles have a min-content height
+        // that no amount of flexing gets under, so a short window used to crush
+        // them and drop the bottom row of facts with nothing on screen to say
+        // so. Width is not floored: the tiles reflow instead, which keeps the
+        // page off a horizontal scrollbar.
+        frame: "max(100dvh, 1080px)",
       },
       minWidth: {
-        // The other half of the frame. Narrow the window and a tile's text
-        // reflows rather than shrinking: a name that fitted one line takes two,
-        // the header grows, and every row below it slides out of line with the
-        // neighbouring tiles. The grid stops reading as one object, which is
-        // the whole point of it.
-        frame: "1920px",
-        // What one tile needs to hold its text without reflowing, which five
-        // across the frame comfortably clear. Stated on the grid as well, so
-        // the guarantee survives a change to the column count.
+        // What one tile needs to hold its text on the lines it was drawn for.
+        // The Wall fits as many columns as clear this and no more.
         card: "360px",
       },
       borderRadius: {

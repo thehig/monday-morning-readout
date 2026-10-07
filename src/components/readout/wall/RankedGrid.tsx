@@ -1,21 +1,15 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Engagement } from "../../../lib/engagements";
 import { showDate } from "../../../lib/engagements";
 import { Labelled, Meter, ProgressBar, VelocityLight } from "../primitives";
+import { fitColumns, GRID_PADDING } from "../../../lib/wall-view";
 import { STATE_EDGE, STATE_TEXT } from "../state-styles";
 
 interface RankedGridProps {
   engagements: Engagement[];
   currentWeek: number;
 }
-
-/**
- * What one tile needs to hold its text on the lines it was drawn for.
- *
- * Inline styles never reach the Tailwind compiler, so this cannot read the
- * `minWidth.card` token and has to repeat its value. Change both together.
- */
-const CARD_MIN_WIDTH = "360px";
 
 /** "Behind deadline by +145 days", or "Due in 9 days" when nothing has slipped. */
 function Hero({ engagement }: { engagement: Engagement }) {
@@ -119,16 +113,14 @@ function Card({
       }`}
     >
       {/*
-        The name gets two lines whether it needs them or not, so the owner - and
-        every row under it - sits at the same height on all ten tiles. A longer
-        name than that is cut rather than given a third line: the row of tiles
-        reading as one object is worth more than the tail of a name, which the
-        Stop shows in full anyway.
+        One line each, cut if they have to be, which keeps the header the same
+        height on every tile so the owner and every row under it line up across
+        the grid. A cut name is shown in full on the Stop and on hover.
       */}
       <div className="bg-navy px-4 py-2.5 text-white">
         <b
           title={engagement.customer}
-          className="line-clamp-2 min-h-[56px] text-[22px] font-bold leading-tight tracking-tight"
+          className="block truncate text-[22px] font-bold leading-tight tracking-tight"
         >
           {engagement.customer}
         </b>
@@ -193,6 +185,24 @@ function Card({
  * every value labelled in place so the board needs no key.
  */
 export function RankedGrid({ engagements, currentWeek }: RankedGridProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver(([entry]) =>
+      setWidth(entry.contentRect.width + GRID_PADDING)
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Before the first measurement, assume the drawn width rather than one
+  // column, so the grid does not land wrong and then jump.
+  const columns = fitColumns(width || 1920, engagements.length);
+
   if (!engagements.length) {
     return (
       <p className="p-8 text-xl text-ink-3">
@@ -203,14 +213,13 @@ export function RankedGrid({ engagements, currentWeek }: RankedGridProps) {
 
   return (
     <div
+      ref={ref}
       className="grid flex-1 gap-3.5 p-4"
       style={{
-        // Columns share the frame evenly but never go under a tile's working
-        // width; below that the text reflows and the rows stop lining up.
-        gridTemplateColumns: `repeat(${Math.min(
-          5,
-          Math.max(1, Math.ceil(engagements.length / 2))
-        )}, minmax(${CARD_MIN_WIDTH}, 1fr))`,
+        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+        // Rows take their content's height and share anything left over, so
+        // reflowing to a third row grows the page rather than squashing two.
+        gridAutoRows: "minmax(min-content, 1fr)",
       }}
     >
       {engagements.map((engagement) => (
