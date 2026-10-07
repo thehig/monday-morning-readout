@@ -1,4 +1,4 @@
-import { formatEmailDisplayName, formatAmount, cn } from "./utils";
+import { formatEmailDisplayName, formatAmount } from "./utils";
 
 describe("Utils", () => {
   describe("formatEmailDisplayName", () => {
@@ -27,20 +27,6 @@ describe("Utils", () => {
       expect(formatEmailDisplayName("raunaq.inam+fivv@united-signals.com")).toBe(
         "Raunaq Inam"
       );
-    });
-  });
-
-  describe("cn", () => {
-    it("merges class names correctly", () => {
-      expect(cn("bg-red-500", "text-white")).toBeTruthy();
-      expect(cn("p-4", undefined, "text-center")).toBeTruthy();
-    });
-
-    it("handles conflicting Tailwind classes", () => {
-      // The exact result depends on tailwind-merge behavior, so we just test that it returns a string
-      const result = cn("p-4", "p-6");
-      expect(typeof result).toBe("string");
-      expect(result.length).toBeGreaterThan(0);
     });
   });
 

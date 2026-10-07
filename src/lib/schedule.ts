@@ -1,4 +1,3 @@
-import { formatDate, parseDateOnly } from "./date-utils";
 import type { TargetDiff } from "../types/supabase";
 
 /**
@@ -98,67 +97,4 @@ export function describeTargetDiff(value: unknown): TargetDiffSummary | null {
   };
 }
 
-/** Formats a `yyyy-MM-dd` column for display, e.g. "Sep 30, 2026". */
-export function formatScheduleDate(value: unknown): string | null {
-  const date = parseDateOnly(value);
-  return date ? formatDate(date, "dayMonthYear") : null;
-}
 
-/**
- * `project_on_track` is self-reported and may contradict the dates, so it is
- * rendered as its own statement rather than derived from `target_diff`.
- */
-export function describeOnTrack(value: unknown): string | null {
-  if (typeof value !== "boolean") return null;
-  return value
-    ? "Project is on track to meet the deadline"
-    : "Project is not on track to meet the deadline";
-}
-
-export interface ScheduleSummary {
-  deadline: string | null;
-  estimatedCompletion: string | null;
-  diff: TargetDiffSummary | null;
-  onTrack: boolean | null;
-  onTrackText: string | null;
-  delayReason: string | null;
-  /** False when the row predates these columns, so the UI can skip the section. */
-  hasAny: boolean;
-}
-
-export interface ScheduleFields {
-  target_date?: string | null;
-  estimated_completion_date?: string | null;
-  target_diff?: unknown;
-  project_on_track?: boolean | null;
-  delay_reason?: string | null;
-}
-
-/** Single entry point for the UI: everything already safe to render. */
-export function getScheduleSummary(feedback: ScheduleFields): ScheduleSummary {
-  const deadline = formatScheduleDate(feedback?.target_date);
-  const estimatedCompletion = formatScheduleDate(
-    feedback?.estimated_completion_date
-  );
-  const diff = describeTargetDiff(feedback?.target_diff);
-  const onTrack =
-    typeof feedback?.project_on_track === "boolean"
-      ? feedback.project_on_track
-      : null;
-  const delayReason =
-    typeof feedback?.delay_reason === "string" && feedback.delay_reason.trim()
-      ? feedback.delay_reason.trim()
-      : null;
-
-  return {
-    deadline,
-    estimatedCompletion,
-    diff,
-    onTrack,
-    onTrackText: describeOnTrack(feedback?.project_on_track),
-    delayReason,
-    hasAny: Boolean(
-      deadline || estimatedCompletion || diff || onTrack !== null || delayReason
-    ),
-  };
-}

@@ -14,40 +14,6 @@ export default {
         watch: { ink: "#6E4A00", wash: "#FAEED2", mark: "#BC8A14" },
         fine: { ink: "#1C5B46", wash: "#E3EFE9", mark: "#2E7D63" },
         meter: { DEFAULT: "#3B3B87", track: "#E2E3EC" },
-
-        border: "var(--border)",
-        input: "var(--input)",
-        ring: "var(--ring)",
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
-        },
-        secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
-        },
-        destructive: {
-          DEFAULT: "var(--destructive)",
-          foreground: "var(--destructive-foreground)",
-        },
-        muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
-        },
-        accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-foreground)",
-        },
-        popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
-        },
-        card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--card-foreground)",
-        },
       },
       fontFamily: {
         // Reserved for text a person typed, so a sentence never looks like a
@@ -70,11 +36,6 @@ export default {
         // What one tile needs to hold its text on the lines it was drawn for.
         // The Wall fits as many columns as clear this and no more.
         card: "360px",
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
       },
     },
   },

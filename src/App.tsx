@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "./styles/components/App.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { FeedbackDetail } from "./components/feedback/details/FeedbackDetail";

@@ -1,9 +1,6 @@
 import {
   parseTargetDiff,
   describeTargetDiff,
-  formatScheduleDate,
-  describeOnTrack,
-  getScheduleSummary,
 } from "./schedule";
 
 describe("schedule", () => {
@@ -113,107 +110,4 @@ describe("schedule", () => {
     });
   });
 
-  describe("formatScheduleDate", () => {
-    it("formats a yyyy-MM-dd column", () => {
-      expect(formatScheduleDate("2026-09-30")).toBe("Sep 30, 2026");
-    });
-
-    it("does not shift the day across the timezone boundary", () => {
-      expect(formatScheduleDate("2026-01-01")).toBe("Jan 1, 2026");
-    });
-
-    it("returns null for empty or malformed values", () => {
-      expect(formatScheduleDate(null)).toBeNull();
-      expect(formatScheduleDate(undefined)).toBeNull();
-      expect(formatScheduleDate("")).toBeNull();
-      expect(formatScheduleDate("30-09-2026")).toBeNull();
-      expect(formatScheduleDate("2026-02-31")).toBeNull();
-      expect(formatScheduleDate(20260930)).toBeNull();
-    });
-  });
-
-  describe("describeOnTrack", () => {
-    it("states both outcomes", () => {
-      expect(describeOnTrack(true)).toBe(
-        "Project is on track to meet the deadline"
-      );
-      expect(describeOnTrack(false)).toBe(
-        "Project is not on track to meet the deadline"
-      );
-    });
-
-    it("returns null when the column is empty", () => {
-      expect(describeOnTrack(null)).toBeNull();
-      expect(describeOnTrack(undefined)).toBeNull();
-      expect(describeOnTrack("true")).toBeNull();
-    });
-  });
-
-  describe("getScheduleSummary", () => {
-    it("reports nothing for feedback submitted before these fields existed", () => {
-      const summary = getScheduleSummary({});
-
-      expect(summary.hasAny).toBe(false);
-      expect(summary.deadline).toBeNull();
-      expect(summary.estimatedCompletion).toBeNull();
-      expect(summary.diff).toBeNull();
-      expect(summary.onTrack).toBeNull();
-      expect(summary.onTrackText).toBeNull();
-      expect(summary.delayReason).toBeNull();
-    });
-
-    it("reports nothing when every column is null", () => {
-      expect(
-        getScheduleSummary({
-          target_date: null,
-          estimated_completion_date: null,
-          target_diff: null,
-          project_on_track: null,
-          delay_reason: null,
-        }).hasAny
-      ).toBe(false);
-    });
-
-    it("summarises a fully populated row", () => {
-      const summary = getScheduleSummary({
-        target_date: "2026-09-08",
-        estimated_completion_date: "2026-10-13",
-        target_diff: { years: 0, months: 0, days: 23 },
-        project_on_track: false,
-        delay_reason: "Testumgebung instabil",
-      });
-
-      expect(summary.hasAny).toBe(true);
-      expect(summary.deadline).toBe("Sep 8, 2026");
-      expect(summary.estimatedCompletion).toBe("Oct 13, 2026");
-      expect(summary.diff).toEqual({
-        direction: "overdue",
-        label: "Overdue by",
-        text: "23 days",
-      });
-      expect(summary.onTrack).toBe(false);
-      expect(summary.onTrackText).toBe(
-        "Project is not on track to meet the deadline"
-      );
-      expect(summary.delayReason).toBe("Testumgebung instabil");
-    });
-
-    it("reports a partially populated row", () => {
-      const summary = getScheduleSummary({ target_date: "2026-11-05" });
-
-      expect(summary.hasAny).toBe(true);
-      expect(summary.deadline).toBe("Nov 5, 2026");
-      expect(summary.diff).toBeNull();
-      expect(summary.onTrackText).toBeNull();
-    });
-
-    it("treats a blank delay reason as absent", () => {
-      expect(getScheduleSummary({ delay_reason: "   " }).delayReason).toBeNull();
-      expect(getScheduleSummary({ delay_reason: "   " }).hasAny).toBe(false);
-    });
-
-    it("counts on_track false as present", () => {
-      expect(getScheduleSummary({ project_on_track: false }).hasAny).toBe(true);
-    });
-  });
 });

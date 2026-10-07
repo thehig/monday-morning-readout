@@ -6,8 +6,6 @@ import {
   formatDate,
   formatTime,
   formatDateTime,
-  getRelativeTime,
-  getDateTimeProps,
   DATE_FORMAT_OPTIONS,
 } from "./date-utils";
 
@@ -182,65 +180,6 @@ describe("Date Utils", () => {
     it("should format date and time with short date format", () => {
       const formatted = formatDateTime(testDate, "short");
       expect(formatted).toBe("Jan 15 at 02:30 PM");
-    });
-  });
-
-  describe("getRelativeTime", () => {
-    beforeEach(() => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date(2024, 0, 15, 12, 0, 0)); // January 15, 2024, noon
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
-    it('should return "today" for current date', () => {
-      const testDate = new Date(2024, 0, 15, 10, 0, 0); // Same day, earlier time
-      const relative = getRelativeTime(testDate);
-      expect(relative).toBe("today");
-    });
-
-    it('should return "yesterday" for previous day', () => {
-      const testDate = new Date(2024, 0, 14, 12, 0, 0); // Previous day
-      const relative = getRelativeTime(testDate);
-      expect(relative).toBe("yesterday");
-    });
-
-    it("should return number of days ago for older dates", () => {
-      const testDate = new Date(2024, 0, 10, 12, 0, 0); // 5 days ago
-      const relative = getRelativeTime(testDate);
-      expect(relative).toBe("5 days ago");
-    });
-  });
-
-  describe("getDateTimeProps", () => {
-    const testDate = new Date(2024, 0, 15, 14, 30); // January 15, 2024, 2:30 PM
-
-    beforeEach(() => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date(2024, 0, 16, 12, 0, 0)); // Next day for relative time
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
-    it("should return correct props for Date object", () => {
-      const props = getDateTimeProps(testDate);
-
-      expect(props.dateTime).toBe(testDate.toISOString());
-      expect(props.title).toBe("Monday, January 15, 2024 at 02:30 PM");
-      expect(props.relativeTime).toBe("today"); // Fixed expectation
-    });
-
-    it("should return correct props for date string", () => {
-      const dateString = testDate.toISOString();
-      const props = getDateTimeProps(dateString);
-
-      expect(props.dateTime).toBe(dateString);
-      expect(props.title).toBe("Monday, January 15, 2024 at 02:30 PM");
-      expect(props.relativeTime).toBe("today"); // Fixed expectation
     });
   });
 

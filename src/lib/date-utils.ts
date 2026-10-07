@@ -156,24 +156,3 @@ export function formatDateTime(
   const formattedTime = formatTime(date);
   return `${formattedDate} at ${formattedTime}`;
 }
-
-export function getRelativeTime(date: Date): string {
-  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-  const daysAgo = Math.floor(
-    (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  return rtf.format(-daysAgo, "day");
-}
-
-export function getDateTimeProps(date: Date | string): {
-  dateTime: string;
-  title: string;
-  relativeTime: string;
-} {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  return {
-    dateTime: dateObj.toISOString(),
-    title: formatDateTime(dateObj),
-    relativeTime: getRelativeTime(dateObj),
-  };
-}
