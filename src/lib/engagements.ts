@@ -23,6 +23,8 @@ export interface Engagement {
   customer: string;
   owner: string;
   ownerEmail: string;
+  /** The submitter with plus-addressing removed, so one person groups as one. */
+  ownerKey: string;
   filedAt: Date;
 
   progress: number;
@@ -91,6 +93,19 @@ export function cleanText(value: string | null | undefined): string | null {
   return trimmed && !/^[-–—]{1,3}$/.test(trimmed) ? trimmed : null;
 }
 
+/**
+ * One person, however they addressed the submission.
+ *
+ * Owners use plus-addressing as a per-engagement tag - david.siegel+vbk,
+ * david.siegel+pa, david.siegel+redesign are all David. Unlike the customer
+ * names, this is a deterministic email convention rather than free text, so
+ * collapsing it is safe. It identifies the person, not the engagement.
+ */
+export function personKey(email: string): string {
+  const [local, domain = ""] = email.trim().toLowerCase().split("@");
+  return `${local.split("+")[0]}@${domain}`;
+}
+
 export function isTestRow(customer: string | null | undefined): boolean {
   return !customer || TEST_CUSTOMER.test(customer);
 }
@@ -152,6 +167,7 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
     customer: row.customer?.trim() || "Unknown customer",
     owner: formatEmailDisplayName(row.submitted_by),
     ownerEmail: row.submitted_by,
+    ownerKey: personKey(row.submitted_by),
     filedAt: new Date(row.created_at),
 
     progress: row.progress_percent ?? 0,
@@ -235,7 +251,7 @@ export function summarise(engagements: Engagement[]): ReadoutTotals {
     ).length,
     contradicting: engagements.filter((e) => e.contradicts).length,
     commitments: engagements.reduce((n, e) => n + e.commitments.length, 0),
-    owners: new Set(engagements.map((e) => e.ownerEmail)).size,
+    owners: new Set(engagements.map((e) => e.ownerKey)).size,
     slipDaysTotal: engagements.reduce(
       (n, e) => n + Math.max(0, e.slipDays ?? 0),
       0
@@ -250,9 +266,9 @@ export function groupByOwner(
   const groups = new Map<string, Engagement[]>();
 
   for (const engagement of engagements) {
-    const existing = groups.get(engagement.ownerEmail);
+    const existing = groups.get(engagement.ownerKey);
     if (existing) existing.push(engagement);
-    else groups.set(engagement.ownerEmail, [engagement]);
+    else groups.set(engagement.ownerKey, [engagement]);
   }
 
   return [...groups.entries()]
@@ -263,6 +279,38 @@ export function groupByOwner(
       commitments: list.reduce((n, e) => n + e.commitments.length, 0),
     }))
     .sort((a, b) => b.engagements.length - a.engagements.length);
+}
+
+export interface Commitment {
+  /** Position in the week's list, 1-based, in schedule-risk order. */
+  index: number;
+  text: string;
+  engagement: Engagement;
+}
+
+/**
+ * Every commitment the week promises, flattened in the engagements' own order
+ * so the worst schedule's promises come first.
+ */
+export function flattenCommitments(engagements: Engagement[]): Commitment[] {
+  return engagements.flatMap((engagement) =>
+    engagement.commitments.map((text) => ({ index: 0, text, engagement }))
+  ).map((commitment, i) => ({ ...commitment, index: i + 1 }));
+}
+
+/** The short schedule phrase used wherever an engagement is named in passing. */
+export function scheduleNote(engagement: Engagement): string {
+  const { state, slipDays, estimate, deadline } = engagement;
+
+  if (state === "late" && slipDays !== null && slipDays > 0) {
+    return `${slipDays} days past deadline`;
+  }
+  if (state === "late") return "past its deadline";
+  if (state === "watch" && slipDays !== null && slipDays > 0) {
+    return `estimate overruns by ${slipDays} days`;
+  }
+  if (estimate || deadline) return `due ${showDate(estimate ?? deadline)}`;
+  return "no deadline recorded";
 }
 
 /** "Sep 30, 2026", or a dash when the column is empty. */

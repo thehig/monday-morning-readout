@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import type { Engagement } from "../../../lib/engagements";
@@ -96,15 +95,6 @@ export function Stop({ engagement, currentWeek, today = new Date() }: StopProps)
   const navigate = useNavigate();
   const statement = buildStatement(engagement);
 
-  // The operator drives this one-handed while talking, so Escape is the way
-  // back rather than a small target to aim at.
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") navigate(`/?week=${currentWeek}`);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [navigate, currentWeek]);
 
   const timeline = buildTimeline(engagement.deadline, engagement.estimate, today);
 

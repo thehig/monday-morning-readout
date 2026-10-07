@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, Outlet } from "react-router-dom";
 import { getPreviousWeek } from "../../lib/date-utils";
 import { ReadoutTopBar } from "../readout/ReadoutTopBar";
+import { useReadoutKeys } from "../readout/useReadoutKeys";
 
 export function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -10,6 +11,8 @@ export function Layout() {
   const [currentWeek, setCurrentWeek] = useState(
     weekParam ? parseInt(weekParam) : getPreviousWeek(new Date().getFullYear())
   );
+
+  useReadoutKeys(currentWeek);
 
   useEffect(() => {
     setSearchParams({ week: currentWeek.toString() });
