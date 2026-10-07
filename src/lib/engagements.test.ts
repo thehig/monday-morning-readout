@@ -282,6 +282,7 @@ describe("engagements", () => {
 
       expect(summarise(engagements)).toEqual({
         engagements: 2,
+        scheduled: 2,
         needingDecision: 1,
         contradicting: 1,
         commitments: 3,
@@ -310,5 +311,39 @@ describe("engagements", () => {
       expect(groups[0].commitments).toBe(3);
       expect(groups[1].owner).toBe("Adwait Sompura");
     });
+  });
+});
+
+describe("summarise counts what can be compared", () => {
+  it("counts only engagements that recorded a schedule", () => {
+    // Week 38's rows predate the schedule columns entirely: nothing is late
+    // because nothing was recorded, which is not the same as being on time.
+    const engagements = toEngagements(
+      [
+        row({ id: 1, customer: "No dates" }),
+        row({
+          id: 2,
+          customer: "FIDUS",
+          target_date: "2026-05-31",
+          estimated_completion_date: "2026-10-23",
+        }),
+      ],
+      new Date(2026, 9, 7)
+    );
+
+    const totals = summarise(engagements);
+
+    expect(totals.engagements).toBe(2);
+    expect(totals.scheduled).toBe(1);
+    expect(totals.needingDecision).toBe(1);
+  });
+
+  it("reports no schedules at all for a week that recorded none", () => {
+    const engagements = toEngagements(
+      [row({ id: 1, customer: "A" }), row({ id: 2, customer: "B" })],
+      new Date(2026, 9, 7)
+    );
+
+    expect(summarise(engagements).scheduled).toBe(0);
   });
 });

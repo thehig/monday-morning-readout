@@ -204,8 +204,11 @@ describe("Dashboard", () => {
     ];
     render(<Dashboard />, { wrapper: createTestWrapper() });
 
-    expect(
-      screen.getByText(/1 report themselves on track with an estimate past the deadline/)
-    ).toBeInTheDocument();
+    // Drawn as a chip rather than a sentence: the count and the claim are
+    // separate elements inside one object, so assert on the object.
+    const chip = screen.getByText(/own estimate says otherwise/).parentElement;
+
+    expect(chip).toHaveTextContent("1");
+    expect(chip).toHaveTextContent(/say on track/);
   });
 });

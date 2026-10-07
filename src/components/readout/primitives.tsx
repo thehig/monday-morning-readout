@@ -138,3 +138,40 @@ export function VelocityLight({
     </span>
   );
 }
+
+/**
+ * How a count moved since last week.
+ *
+ * Only drawn when there is a baseline and the number actually changed, so an
+ * unchanged week stays quiet rather than filling the strip with zeroes. The
+ * direction that is bad depends on the count - more commitments is good, more
+ * overruns is not - so the caller says which way is worse.
+ */
+export function Delta({
+  now,
+  before,
+  worseWhen = "up",
+}: {
+  now: number;
+  before: number | null | undefined;
+  worseWhen?: "up" | "down";
+}) {
+  if (before === null || before === undefined) return null;
+
+  const change = now - before;
+  if (change === 0) return null;
+
+  const worse = worseWhen === "up" ? change > 0 : change < 0;
+
+  return (
+    <span
+      className={`ml-1.5 text-[17px] font-bold tabular-nums ${
+        worse ? "text-late-ink" : "text-fine-ink"
+      }`}
+      title={`${before} last week`}
+    >
+      {change > 0 ? "+" : "−"}
+      {Math.abs(change)}
+    </span>
+  );
+}

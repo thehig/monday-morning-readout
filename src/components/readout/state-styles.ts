@@ -1,4 +1,4 @@
-import type { ScheduleState } from "../../lib/engagements";
+import type { ScheduleState, SlipSeverity } from "../../lib/engagements";
 import type { VelocityType } from "../../types/indicators";
 
 /**
@@ -31,6 +31,34 @@ export const STATE_FILL: Record<ScheduleState, string> = {
   fine: "border-fine-mark bg-fine-wash",
   unknown: "border-sheet-rule bg-sheet-card",
 };
+
+/**
+ * The same fill, deepened by how far behind the engagement is.
+ *
+ * Only the two states that can be behind have a ramp; on the date is on the
+ * date. The step is in lightness, which is the channel a video call keeps, so
+ * the three tiers stay apart after compression.
+ */
+const RAMP: Record<"late" | "watch", Record<SlipSeverity, string>> = {
+  late: {
+    1: "border-late-mark bg-late-wash",
+    2: "border-late-mark bg-late-wash2",
+    3: "border-late-mark bg-late-wash3",
+  },
+  watch: {
+    1: "border-watch-mark bg-watch-wash",
+    2: "border-watch-mark bg-watch-wash2",
+    3: "border-watch-mark bg-watch-wash3",
+  },
+};
+
+export function stateFill(
+  state: ScheduleState,
+  severity: SlipSeverity
+): string {
+  if (state === "late" || state === "watch") return RAMP[state][severity];
+  return STATE_FILL[state];
+}
 
 /**
  * Quieter text on a washed surface.

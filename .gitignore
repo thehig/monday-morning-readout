@@ -28,3 +28,10 @@ coverage/
 
 # Generated at build time by scripts/encrypt-env.js
 src/encrypted-env.json
+
+# Scratch renders from local Playwright checks
+.shot*.png
+p[0-9].png
+w.png
+d.png
+pl.png

@@ -133,6 +133,25 @@ export function parseCommitments(goals: string | null | undefined): string[] {
  * Red once the committed date has passed; amber while it is still ahead but
  * the estimate already overruns it.
  */
+/**
+ * How badly, not just whether.
+ *
+ * FIDUS at 145 days over and Plutos at 30 are both "late" and drew the same
+ * colour, leaving the room to compare two numbers to find the worse one. The
+ * thresholds are calendar meaning rather than a split of this week's figures:
+ * inside a fortnight is a slip, up to two months is a problem, past two months
+ * is a different kind of conversation.
+ */
+export type SlipSeverity = 1 | 2 | 3;
+
+const SEVERE_DAYS = 60;
+const MODERATE_DAYS = 14;
+
+export function slipSeverity(slipDays: number | null): SlipSeverity {
+  if (slipDays === null || slipDays < MODERATE_DAYS) return 1;
+  return slipDays >= SEVERE_DAYS ? 3 : 2;
+}
+
 export function scheduleState(
   deadline: Date | null,
   slipDays: number | null,
@@ -239,6 +258,16 @@ export function toEngagements(
 
 export interface ReadoutTotals {
   engagements: number;
+  /**
+   * How many have a schedule at all.
+   *
+   * The schedule columns were added to `po_feedback` long after most rows
+   * existed, so a week before they were filled in reports nothing late - not
+   * because nothing was late, but because nothing was recorded. Any count
+   * derived from the schedule is only comparable against a week where this is
+   * above zero.
+   */
+  scheduled: number;
   needingDecision: number;
   contradicting: number;
   commitments: number;
@@ -249,6 +278,7 @@ export interface ReadoutTotals {
 export function summarise(engagements: Engagement[]): ReadoutTotals {
   return {
     engagements: engagements.length,
+    scheduled: engagements.filter((e) => e.state !== "unknown").length,
     needingDecision: engagements.filter(
       (e) => e.state === "late" || e.state === "watch"
     ).length,

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Engagement } from "../../../lib/engagements";
-import { showDate } from "../../../lib/engagements";
+import { showDate, slipSeverity } from "../../../lib/engagements";
 import { Labelled, Meter, ProgressBar, VelocityLight } from "../primitives";
 import { fitColumns, GRID_PADDING } from "../../../lib/wall-view";
 import {
-  STATE_FILL,
+  stateFill,
   STATE_LABEL,
   STATE_RULE,
   STATE_TEXT,
@@ -117,7 +117,7 @@ function Card({
     <Link
       to={`/feedback/${engagement.id}?week=${currentWeek}`}
       className={`flex flex-col overflow-hidden rounded-md border-2 transition-shadow hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-        STATE_FILL[engagement.state]
+        stateFill(engagement.state, slipSeverity(engagement.slipDays))
       }`}
     >
       {/*

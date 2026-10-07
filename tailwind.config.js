@@ -10,8 +10,22 @@ export default {
         brand: "#FF7F00",
         ink: { DEFAULT: "#15171F", 2: "#474B5C", 3: "#6E7384" },
         sheet: { DEFAULT: "#F4F5F8", card: "#FFFFFF", rule: "#D8DAE3" },
-        late: { ink: "#7E2A1E", wash: "#F8E2DD", mark: "#B8442F" },
-        watch: { ink: "#6E4A00", wash: "#FAEED2", mark: "#BC8A14" },
+        // wash2 and wash3 deepen the same wash with the overrun, so how far
+        // behind reads before the number does. Each keeps its ink above 5:1.
+        late: {
+          ink: "#7E2A1E",
+          wash: "#F8E2DD",
+          wash2: "#F2D2CA",
+          wash3: "#E9BDB2",
+          mark: "#B8442F",
+        },
+        watch: {
+          ink: "#6E4A00",
+          wash: "#FAEED2",
+          wash2: "#F6E3B6",
+          wash3: "#F0D492",
+          mark: "#BC8A14",
+        },
         fine: { ink: "#1C5B46", wash: "#E3EFE9", mark: "#2E7D63" },
         // The meter fill only. Its unfilled track is a tint of the ink
         // underneath, so it works on white and on a state wash alike.

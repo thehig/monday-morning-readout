@@ -9,6 +9,11 @@ import {
   type Engagement,
 } from "../../../lib/engagements";
 import { planExceptions } from "../../../lib/plan-view";
+import {
+  usePreviousWeekTotals,
+  scheduleBaseline,
+} from "../../../hooks/use-week-comparison";
+import { Delta } from "../primitives";
 import { STATE_TEXT } from "../state-styles";
 import {
   FooterActions,
@@ -47,6 +52,7 @@ export function Plan() {
   const engagements = toEngagements(data);
   const totals = summarise(engagements);
   const silent = engagements.filter((e) => e.commitments.length === 0).length;
+  const lastWeek = usePreviousWeekTotals(currentWeek);
 
   // One operator drives this while talking, so the toggle has a key.
   useEffect(() => {
@@ -73,13 +79,23 @@ export function Plan() {
         </h2>
 
         <div className="flex gap-7">
-          <Stat value={totals.commitments} label="commitments" />
+          <Stat
+            value={totals.commitments}
+            label="commitments"
+            delta={<Delta now={totals.commitments} before={lastWeek?.commitments} worseWhen="down" />}
+          />
           <Stat value={totals.engagements} label="engagements" />
           <Stat value={totals.owners} label="product owners" />
           <Stat
             value={totals.needingDecision}
             label="past or overrunning their deadline"
             alarm={totals.needingDecision > 0}
+            delta={
+              <Delta
+                now={totals.needingDecision}
+                before={scheduleBaseline(lastWeek, (t) => t.needingDecision)}
+              />
+            }
           />
           {silent > 0 && (
             <Stat value={silent} label="committed nothing" alarm />
@@ -203,10 +219,12 @@ function Stat({
   value,
   label,
   alarm,
+  delta,
 }: {
   value: number;
   label: string;
   alarm?: boolean;
+  delta?: React.ReactNode;
 }) {
   return (
     <div className="grid gap-0.5">
@@ -216,6 +234,7 @@ function Stat({
         }`}
       >
         {value}
+        {delta}
       </span>
       <span className="text-[17px] text-ink-3">{label}</span>
     </div>

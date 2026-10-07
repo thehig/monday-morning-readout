@@ -3,6 +3,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { usePOFeedbackByWeek } from "../../hooks/use-po-feedback";
 import { getPreviousWeek } from "../../lib/date-utils";
 import { toEngagements, summarise } from "../../lib/engagements";
+import {
+  usePreviousWeekTotals,
+  scheduleBaseline,
+} from "../../hooks/use-week-comparison";
+import { Delta } from "../readout/primitives";
 import { RankedGrid } from "../readout/wall/RankedGrid";
 import { Ladder } from "../readout/wall/Ladder";
 import { Field } from "../readout/wall/Field";
@@ -44,6 +49,7 @@ export function Dashboard() {
   const { data, isLoading } = usePOFeedbackByWeek(currentWeek, true);
   const engagements = toEngagements(data);
   const totals = summarise(engagements);
+  const lastWeek = usePreviousWeekTotals(currentWeek);
 
   const firstId = engagements[0]?.id;
 
@@ -82,11 +88,28 @@ export function Dashboard() {
         </h2>
         <span className="text-lg tabular-nums text-ink-3">
           {totals.needingDecision} of {totals.engagements}
+          <Delta
+            now={totals.needingDecision}
+            before={scheduleBaseline(lastWeek, (t) => t.needingDecision)}
+          />
         </span>
+
+        {/*
+          The loudest thing the readout can say, drawn as something rather
+          than set at the weight of a caption.
+        */}
         {totals.contradicting > 0 && (
-          <span className="text-lg text-late-ink">
-            &middot; {totals.contradicting} report themselves on track with an
-            estimate past the deadline
+          <span className="flex items-center gap-2 rounded bg-late-mark px-3 py-0.5 text-white">
+            <b className="text-xl font-extrabold leading-none tabular-nums">
+              {totals.contradicting}
+            </b>
+            {/*
+              One line: the Wall's grid uses the whole frame, so a second line
+              here comes straight off the tiles below it.
+            */}
+            <span className="whitespace-nowrap text-[17px] font-semibold">
+              say on track, own estimate says otherwise
+            </span>
           </span>
         )}
 
