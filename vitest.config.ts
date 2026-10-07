@@ -27,8 +27,6 @@ export default defineConfig({
         "src/main.tsx",
         "src/App.tsx",
         "src/vite-env.d.ts",
-        // Simple index files that only export other modules
-        "src/components/indicators/index.ts",
         // Type definition files that don't need coverage
         "src/types/**/*",
         // Test utilities

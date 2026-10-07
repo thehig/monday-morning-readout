@@ -1,7 +1,7 @@
 import { getWeekNumber, parseDateOnly, formatDate } from "./date-utils";
 import { formatAmount, formatEmailDisplayName } from "./utils";
 import { describeTargetDiff, type TargetDiffSummary } from "./schedule";
-import { VELOCITY_LABELS } from "../components/indicators/metrics/velocity.constants";
+import { VELOCITY_LABELS } from "./velocity";
 import type { POFeedback } from "../types/feedback";
 import type { VelocityType } from "../types/indicators";
 

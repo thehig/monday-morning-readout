@@ -1,5 +1,5 @@
 import type { VelocityType } from "../../types/indicators";
-import { VELOCITY_LABELS } from "../indicators/metrics/velocity.constants";
+import { VELOCITY_LABELS } from "../../lib/velocity";
 import { VELOCITY_DOT } from "./state-styles";
 
 /**
