@@ -18,11 +18,11 @@ export function Layout() {
     setSearchParams({ week: currentWeek.toString() });
   }, [currentWeek, setSearchParams]);
 
-  // The frame is the viewport, but never shorter than the size the states were
-  // drawn at. A taller window stretches it; a shorter one scrolls the page
+  // The frame is the viewport, but never smaller than the size the states were
+  // drawn at. A bigger window stretches it; a smaller one scrolls the page
   // rather than squeezing the layout inside it.
   return (
-    <div className="flex h-dvh min-h-frame flex-col bg-sheet">
+    <div className="flex h-dvh min-h-frame min-w-frame flex-col bg-sheet">
       <ReadoutTopBar
         currentWeek={currentWeek}
         onWeekChange={setCurrentWeek}

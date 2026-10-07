@@ -66,6 +66,18 @@ export default {
         // and a crushed tile loses the bottom row of facts silently.
         frame: "1080px",
       },
+      minWidth: {
+        // The other half of the frame. Narrow the window and a tile's text
+        // reflows rather than shrinking: a name that fitted one line takes two,
+        // the header grows, and every row below it slides out of line with the
+        // neighbouring tiles. The grid stops reading as one object, which is
+        // the whole point of it.
+        frame: "1920px",
+        // What one tile needs to hold its text without reflowing, which five
+        // across the frame comfortably clear. Stated on the grid as well, so
+        // the guarantee survives a change to the column count.
+        card: "360px",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

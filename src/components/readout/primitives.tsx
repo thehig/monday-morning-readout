@@ -18,11 +18,17 @@ interface LabelledProps {
   labelWidth?: string;
 }
 
-/** A label-and-value row. The label is quiet, the value is not. */
+/**
+ * A label-and-value row. The label is quiet, the value is not.
+ *
+ * The column is as narrow as the longest label allows - "Next week" - because
+ * the widest value, "Medium velocity expected", clears a tile by only a few
+ * pixels. Widen this and that value starts being cut instead.
+ */
 export function Labelled({
   label,
   children,
-  labelWidth = "w-[92px]",
+  labelWidth = "w-[84px]",
 }: LabelledProps) {
   return (
     <div className="flex items-center gap-2 text-[17px]">
@@ -99,12 +105,21 @@ export function VelocityLight({ velocity }: { velocity: VelocityType | null }) {
     return <span className="text-ink-3">Not reported</span>;
   }
 
+  const label = VELOCITY_LABELS[velocity];
+
   return (
-    <span className="flex items-center gap-2">
+    <span className="flex min-w-0 items-center gap-2">
       <span
         className={`h-[15px] w-[15px] shrink-0 rounded-full ${VELOCITY_DOT[velocity]}`}
       />
-      <span className="font-semibold">{VELOCITY_LABELS[velocity]}</span>
+      {/*
+        One line, cut if it has to be. The dot carries the same reading, so a
+        clipped tail costs nothing, where a second line would push the rows
+        below it out of step with the neighbouring tiles.
+      */}
+      <span className="truncate font-semibold" title={label}>
+        {label}
+      </span>
     </span>
   );
 }

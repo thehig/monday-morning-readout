@@ -9,6 +9,14 @@ interface RankedGridProps {
   currentWeek: number;
 }
 
+/**
+ * What one tile needs to hold its text on the lines it was drawn for.
+ *
+ * Inline styles never reach the Tailwind compiler, so this cannot read the
+ * `minWidth.card` token and has to repeat its value. Change both together.
+ */
+const CARD_MIN_WIDTH = "360px";
+
 /** "Behind deadline by +145 days", or "Due in 9 days" when nothing has slipped. */
 function Hero({ engagement }: { engagement: Engagement }) {
   const { state, slipDays, landsInDays } = engagement;
@@ -110,11 +118,23 @@ function Card({
         STATE_EDGE[engagement.state]
       }`}
     >
-      <div className="min-h-[68px] bg-navy px-4 py-2.5 text-white">
-        <b className="block text-[22px] font-bold leading-tight tracking-tight">
+      {/*
+        The name gets two lines whether it needs them or not, so the owner - and
+        every row under it - sits at the same height on all ten tiles. A longer
+        name than that is cut rather than given a third line: the row of tiles
+        reading as one object is worth more than the tail of a name, which the
+        Stop shows in full anyway.
+      */}
+      <div className="bg-navy px-4 py-2.5 text-white">
+        <b
+          title={engagement.customer}
+          className="line-clamp-2 min-h-[56px] text-[22px] font-bold leading-tight tracking-tight"
+        >
           {engagement.customer}
         </b>
-        <span className="text-[17px] text-white/70">{engagement.owner}</span>
+        <span className="block truncate text-[17px] text-white/70">
+          {engagement.owner}
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col gap-1.5 px-4 pb-3 pt-2.5">
@@ -185,10 +205,12 @@ export function RankedGrid({ engagements, currentWeek }: RankedGridProps) {
     <div
       className="grid flex-1 gap-3.5 p-4"
       style={{
+        // Columns share the frame evenly but never go under a tile's working
+        // width; below that the text reflows and the rows stop lining up.
         gridTemplateColumns: `repeat(${Math.min(
           5,
           Math.max(1, Math.ceil(engagements.length / 2))
-        )}, minmax(0, 1fr))`,
+        )}, minmax(${CARD_MIN_WIDTH}, 1fr))`,
       }}
     >
       {engagements.map((engagement) => (
