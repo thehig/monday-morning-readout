@@ -49,7 +49,13 @@ export function ProgressBar({ value }: { value: number }) {
 
   return (
     <>
-      <span className="h-[13px] flex-1 overflow-hidden rounded-full bg-meter-track">
+      {/*
+        A floor as well as a share. The track fills the row it is given, but in
+        a container that is only as wide as its contents - the Stop's header -
+        a bare flex-1 has nothing to take a share of and the bar disappears,
+        leaving the percentage sitting on its own.
+      */}
+      <span className="h-[13px] min-w-[132px] flex-1 overflow-hidden rounded-full bg-meter-track">
         {pct > 0 && (
           <span
             className="block h-full min-w-[7px] rounded-full bg-meter"

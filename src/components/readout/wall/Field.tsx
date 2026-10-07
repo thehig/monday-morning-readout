@@ -45,7 +45,7 @@ export function Field({ engagements, currentWeek, today = new Date() }: FieldPro
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6 pb-2 pt-3">
-      <div className="flex min-h-0 flex-1 gap-3">
+      <div className="flex min-h-0 flex-1 gap-12">
         <div className="flex w-[26px] shrink-0 items-center justify-center">
           <span className="whitespace-nowrap text-[18px] font-semibold text-ink-3 [writing-mode:vertical-rl] [transform:rotate(180deg)]">
             Cycle progress
@@ -54,15 +54,21 @@ export function Field({ engagements, currentWeek, today = new Date() }: FieldPro
 
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="relative min-h-0 flex-1 border-b-[3px] border-l-[3px] border-ink-3 bg-sheet-card">
+            {/*
+              The caption sits at the top of its own zone, not the bottom.
+              The bottom-left is where the engagements this zone is about
+              actually land, and the caption was being written over them.
+            */}
             <span
               className="absolute bottom-0 left-0 bg-late-wash"
               style={{
                 width: `${field.danger.widthPct}%`,
                 height: `${field.danger.heightPct}%`,
               }}
-            />
-            <span className="absolute bottom-3 left-4 text-[18px] font-bold text-late-ink">
-              Deadline gone, little done
+            >
+              <span className="absolute left-4 top-2 text-[18px] font-bold text-late-ink">
+                Deadline gone, little done
+              </span>
             </span>
 
             {[25, 50, 75].map((y) => (
@@ -71,7 +77,7 @@ export function Field({ engagements, currentWeek, today = new Date() }: FieldPro
                 className="absolute inset-x-0 h-0.5 bg-sheet-rule"
                 style={{ bottom: `${y}%` }}
               >
-                <span className="absolute -left-[46px] -translate-y-1/2 text-[17px] tabular-nums text-ink-3">
+                <span className="absolute right-full mr-2 -translate-y-1/2 text-[17px] tabular-nums text-ink-3">
                   {y}%
                 </span>
               </span>

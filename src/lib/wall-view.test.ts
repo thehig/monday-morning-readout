@@ -10,6 +10,9 @@ import {
 import { toEngagements } from "./engagements";
 import type { POFeedback } from "../types/feedback";
 
+/** What one label measures on screen; see LABEL_STACK_PX in wall-view.ts. */
+const RENDERED_LABEL_PX = 49;
+
 const TODAY = new Date(2026, 9, 7); // 7 Oct 2026
 
 function row(over: Partial<POFeedback> = {}): POFeedback {
@@ -157,8 +160,14 @@ describe("buildField", () => {
       TODAY
     )!;
 
-    expect(crowded.points.map((p) => p.labelOffset)).toEqual([0, 44]);
-    expect(crowded.points[1].labelSide).toBe("above");
+    // The gap has to clear a rendered label - a name over a line of detail,
+    // 49px - or the two run into each other. Asserting the invariant rather
+    // than the number, because the number existed at 44 and was too small.
+    const [first, second] = crowded.points;
+
+    expect(first.labelOffset).toBe(0);
+    expect(second.labelOffset).toBeGreaterThanOrEqual(RENDERED_LABEL_PX);
+    expect(second.labelSide).toBe("above");
   });
 
   it("separates two points that sort apart but overlap on the plot", () => {
@@ -239,5 +248,45 @@ describe("fitColumns", () => {
         columns * CARD_MIN_WIDTH + (columns - 1) * GRID_GAP + GRID_PADDING;
       if (columns > 1) expect(needed).toBeLessThanOrEqual(width);
     }
+  });
+});
+
+describe("buildField label placement", () => {
+  const row = (over: Partial<POFeedback> = {}): POFeedback =>
+    ({
+      id: 1,
+      created_at: "2026-10-02T09:00:00Z",
+      submitted_by: "a@united-signals.com",
+      customer: "A",
+      progress_percent: 50,
+      target_date: "2026-10-10",
+      ...over,
+    }) as POFeedback;
+
+  const build = (rows: POFeedback[]) =>
+    buildField(toEngagements(rows), new Date("2026-10-05T09:00:00Z"));
+
+  it("puts a label above its point when the point sits on the date axis", () => {
+    // 0% done lands the dot on the axis; centred, its label would hang into
+    // the dates underneath it.
+    const field = build([row({ progress_percent: 0 })]);
+
+    expect(field?.points[0].labelSide).toBe("above");
+  });
+
+  it("still places a mid-height point to the side", () => {
+    // Two points so the x-scale has a real range: the earlier deadline sits
+    // left of centre and takes its label on the right, and vice versa.
+    const field = build([
+      row({ id: 1, customer: "Early", target_date: "2026-09-01" }),
+      row({ id: 2, customer: "Late", target_date: "2026-11-28" }),
+    ]);
+
+    const byName = Object.fromEntries(
+      (field?.points ?? []).map((p) => [p.engagement.customer, p.labelSide])
+    );
+
+    expect(byName.Early).toBe("right");
+    expect(byName.Late).toBe("left");
   });
 });

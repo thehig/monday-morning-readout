@@ -91,7 +91,22 @@ export function buildLadder(
 /** Deadlines further past than this pin to the left edge and are marked. */
 export const FIELD_FLOOR_DAYS = -45;
 /** Vertical step when two labels would land on each other. */
-const LABEL_STACK_PX = 44;
+/**
+ * How far apart stacked labels sit.
+ *
+ * A label is a name over a line of detail, which renders 49px tall, so this
+ * has to clear that or consecutive labels in a stack overlap by the
+ * difference. Measured, not guessed: at 44 the Suissebank and UBS labels on
+ * week 39 ran into each other.
+ */
+const LABEL_STACK_PX = 56;
+
+/**
+ * Below this, a label centred on its point would hang off the bottom of the
+ * plot and land in the date axis. Those go above the point instead - the same
+ * placement a crowded point already gets.
+ */
+const LOW_POINT_PCT = 8;
 
 export type LabelSide = "left" | "right" | "above";
 
@@ -180,11 +195,12 @@ export function buildField(
 
     return {
       ...point,
-      labelSide: labelOffset
-        ? "above"
-        : point.xPct >= 72
-        ? "left"
-        : "right",
+      labelSide:
+        labelOffset || point.yPct < LOW_POINT_PCT
+          ? "above"
+          : point.xPct >= 72
+          ? "left"
+          : "right",
       labelOffset,
     };
   });
