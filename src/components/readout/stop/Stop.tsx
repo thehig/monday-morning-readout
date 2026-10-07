@@ -1,17 +1,31 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import type { Engagement } from "../../../lib/engagements";
 import { buildStatement } from "../../../lib/statement";
 import { buildTimeline } from "../../../lib/timeline";
 import { formatDateTime } from "../../../lib/date-utils";
+import { describeStep, type StepPosition } from "../../../lib/stepping";
 import { Meter, ProgressBar, VelocityDot } from "../primitives";
 import { STATE_TEXT } from "../state-styles";
+import { isTypingTarget } from "../useReadoutKeys";
 import { MiniCalendar } from "./MiniCalendar";
 
 interface StopProps {
   engagement: Engagement;
   currentWeek: number;
+  /** Where this sits in the week's running order; null when linked in alone. */
+  step?: StepPosition | null;
   today?: Date;
+}
+
+/** A keycap in the footer hints. */
+function Key({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="mr-1.5 rounded border-2 border-sheet-rule bg-sheet px-2 font-bold text-ink-2">
+      {children}
+    </kbd>
+  );
 }
 
 /** A labelled figure in the header, e.g. "Progress / 75%". */
@@ -91,10 +105,39 @@ function Wrote({
  * reads the conclusion before the detail. Every one of the table's columns
  * appears somewhere on this screen.
  */
-export function Stop({ engagement, currentWeek, today = new Date() }: StopProps) {
+export function Stop({
+  engagement,
+  currentWeek,
+  step = null,
+  today = new Date(),
+}: StopProps) {
   const navigate = useNavigate();
   const statement = buildStatement(engagement);
 
+  // The operator steps through the week one-handed while talking, so the arrows
+  // walk the Wall's own order: the exceptions first, then a pass of the rest.
+  useEffect(() => {
+    if (!step) return;
+
+    const onKey = (event: KeyboardEvent) => {
+      if (isTypingTarget(event)) return;
+
+      const target =
+        event.key === "ArrowRight"
+          ? step.nextId
+          : event.key === "ArrowLeft"
+          ? step.previousId
+          : null;
+
+      if (target !== null) {
+        event.preventDefault();
+        navigate(`/feedback/${target}?week=${currentWeek}`);
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navigate, currentWeek, step]);
 
   const timeline = buildTimeline(engagement.deadline, engagement.estimate, today);
 
@@ -193,7 +236,7 @@ export function Stop({ engagement, currentWeek, today = new Date() }: StopProps)
       </section>
 
       <div className="grid min-h-0 flex-1 grid-cols-3">
-        <div className="overflow-hidden border-r-2 border-sheet-rule px-7 py-4">
+        <div className="overflow-y-auto border-r-2 border-sheet-rule px-7 py-4">
           <Wrote
             heading="Completed milestones"
             sub="what got done this week"
@@ -201,7 +244,7 @@ export function Stop({ engagement, currentWeek, today = new Date() }: StopProps)
           />
         </div>
 
-        <div className="grid gap-4 overflow-hidden border-r-2 border-sheet-rule bg-sheet-card px-7 py-4">
+        <div className="grid content-start gap-4 overflow-y-auto border-r-2 border-sheet-rule bg-sheet-card px-7 py-4">
           <Wrote
             heading="Identified risks"
             sub="what is in the way"
@@ -237,7 +280,7 @@ export function Stop({ engagement, currentWeek, today = new Date() }: StopProps)
           </div>
         </div>
 
-        <div className="overflow-hidden px-7 py-4">
+        <div className="overflow-y-auto px-7 py-4">
           <Wrote
             heading={`Goals for week ${currentWeek + 1}`}
             sub="what happens next week"
@@ -246,14 +289,34 @@ export function Stop({ engagement, currentWeek, today = new Date() }: StopProps)
         </div>
       </div>
 
-      <footer className="flex h-[56px] shrink-0 items-center justify-between border-t-2 border-sheet-rule bg-sheet-card px-8 text-[18px] text-ink-3">
-        <span>
-          <kbd className="mr-1.5 rounded border-2 border-sheet-rule bg-sheet px-2 font-bold text-ink-2">
-            Esc
-          </kbd>
-          back to the wall
+      <footer className="flex h-[56px] shrink-0 items-center gap-7 border-t-2 border-sheet-rule bg-sheet-card px-8 text-[18px] text-ink-3">
+        <span className="flex items-center gap-5">
+          {step?.previousId !== null && step !== null && (
+            <span>
+              <Key>&larr;</Key>previous
+            </span>
+          )}
+          {step?.nextId != null && (
+            <span>
+              <Key>&rarr;</Key>
+              {step.nextStartsFastPass ? "start the fast pass" : "next"}
+            </span>
+          )}
+          <span>
+            <Key>Esc</Key>back to the wall
+          </span>
         </span>
-        <span>
+
+        {step && (
+          <span className="font-semibold text-ink-2">
+            {step.position} of {step.total}
+            <span className="ml-2 font-normal text-ink-3">
+              &middot; {describeStep(step)}
+            </span>
+          </span>
+        )}
+
+        <span className="ml-auto">
           Feedback {engagement.id} &middot; filed{" "}
           {formatDateTime(engagement.filedAt, "long")} &middot; stored velocity{" "}
           {engagement.velocity ?? "none"}

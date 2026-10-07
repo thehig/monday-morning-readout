@@ -8,21 +8,29 @@ import { useNavigate } from "react-router-dom";
  * states is a keystroke rather than a small target to aim at. Keys are ignored
  * while a field has focus, so typing never navigates.
  */
+/**
+ * True while a keystroke belongs to a field rather than to navigation.
+ *
+ * Shared with the per-view keys - the Wall's layout digits and the Stop's
+ * arrows - so none of them can fire while someone is typing.
+ */
+export function isTypingTarget(event: KeyboardEvent): boolean {
+  if (event.metaKey || event.ctrlKey || event.altKey) return true;
+
+  const target = event.target as HTMLElement | null;
+  return Boolean(
+    target &&
+      (target.isContentEditable ||
+        ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+  );
+}
+
 export function useReadoutKeys(currentWeek: number) {
   const navigate = useNavigate();
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
-
-      const target = event.target as HTMLElement | null;
-      if (
-        target &&
-        (target.isContentEditable ||
-          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
-      ) {
-        return;
-      }
+      if (isTypingTarget(event)) return;
 
       switch (event.key) {
         case "Escape":

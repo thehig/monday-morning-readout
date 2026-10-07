@@ -1,19 +1,42 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-import { usePOFeedbackById } from "../../../hooks/use-po-feedback";
-import { toEngagement } from "../../../lib/engagements";
+import {
+  usePOFeedbackById,
+  usePOFeedbackByWeek,
+} from "../../../hooks/use-po-feedback";
+import { toEngagement, toEngagements } from "../../../lib/engagements";
+import { stepPosition } from "../../../lib/stepping";
 import { Stop } from "../../readout/stop/Stop";
 
-/** Route wrapper: loads one submission and hands it to the Stop screen. */
+/**
+ * Route wrapper for the Stop.
+ *
+ * Loads the whole week rather than the single submission, so the arrow keys
+ * step in exactly the order the Wall shows. React Query has already cached that
+ * query from the Wall, so it costs nothing and guarantees the two screens
+ * agree. A link to an engagement outside the week still works: it falls back to
+ * fetching that one row, without stepping.
+ */
 export function FeedbackDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const week = parseInt(searchParams.get("week") || "1", 10);
+  const wanted = Number(id);
 
-  const { data, isLoading, isError } = usePOFeedbackById(id, true);
+  const { data: weekRows, isLoading: weekLoading } = usePOFeedbackByWeek(
+    week,
+    true
+  );
+  const engagements = toEngagements(weekRows);
+  const fromWeek = engagements.find((e) => e.id === wanted);
 
-  if (isLoading) {
+  const { data: single, isLoading: singleLoading } = usePOFeedbackById(
+    id,
+    !weekLoading && !fromWeek
+  );
+
+  if (weekLoading || (!fromWeek && singleLoading)) {
     return (
       <div className="flex h-full items-center justify-center text-xl text-ink-3">
         Loading…
@@ -21,10 +44,14 @@ export function FeedbackDetail() {
     );
   }
 
-  if (isError || !data) {
+  const engagement = fromWeek ?? (single ? toEngagement(single) : null);
+
+  if (!engagement) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
-        <p className="text-xl text-late-ink">That submission could not be loaded.</p>
+        <p className="text-xl text-late-ink">
+          That submission could not be loaded.
+        </p>
         <button
           type="button"
           onClick={() => navigate(`/?week=${week}`)}
@@ -37,5 +64,11 @@ export function FeedbackDetail() {
     );
   }
 
-  return <Stop engagement={toEngagement(data)} currentWeek={week} />;
+  return (
+    <Stop
+      engagement={engagement}
+      currentWeek={week}
+      step={fromWeek ? stepPosition(engagements, wanted) : null}
+    />
+  );
 }

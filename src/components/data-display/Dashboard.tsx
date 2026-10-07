@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { usePOFeedbackByWeek } from "../../hooks/use-po-feedback";
 import { getPreviousWeek } from "../../lib/date-utils";
 import { toEngagements, summarise } from "../../lib/engagements";
 import { RankedGrid } from "../readout/wall/RankedGrid";
 import { Ladder } from "../readout/wall/Ladder";
 import { Field } from "../readout/wall/Field";
+import { isTypingTarget } from "../readout/useReadoutKeys";
 
 type WallLayout = "grid" | "ladder" | "field";
 
@@ -27,6 +28,8 @@ export function Dashboard() {
   const [layout, setLayout] = useState<WallLayout>("grid");
   const today = new Date();
 
+  const navigate = useNavigate();
+
   const weekParam = searchParams.get("week");
   const currentWeek = weekParam
     ? parseInt(weekParam)
@@ -36,14 +39,28 @@ export function Dashboard() {
   const engagements = toEngagements(data);
   const totals = summarise(engagements);
 
+  const firstId = engagements[0]?.id;
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (isTypingTarget(event)) return;
+
       const picked = LAYOUTS.find((l) => l.digit === event.key);
-      if (picked) setLayout(picked.key);
+      if (picked) {
+        setLayout(picked.key);
+        return;
+      }
+
+      // The call opens by stepping into whatever needs a decision first.
+      if (event.key === "ArrowRight" && firstId !== undefined) {
+        event.preventDefault();
+        navigate(`/feedback/${firstId}?week=${currentWeek}`);
+      }
     };
+
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [navigate, currentWeek, firstId]);
 
   if (isLoading) {
     return (
