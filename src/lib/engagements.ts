@@ -59,7 +59,10 @@ export interface Engagement {
   slipDays: number | null;
   /** Estimated completion minus today, in whole days. */
   landsInDays: number | null;
-  /** Calendar week the estimate falls in, on the app's own week scheme. */
+  /**
+   * Calendar week the estimate falls in, counted from the readout year's first
+   * Monday. Runs past 52 for dates in the following year, so it stays ordered.
+   */
   landingWeek: number | null;
   /** The stored `target_diff`, humanised: how overdue it was when filed. */
   sinceDeadline: TargetDiffSummary | null;
@@ -197,7 +200,7 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
     estimate,
     slipDays,
     landsInDays: estimate ? daysBetween(today, estimate) : null,
-    landingWeek: estimate ? getWeekNumber(estimate) : null,
+    landingWeek: estimate ? getWeekNumber(estimate, today.getFullYear()) : null,
     sinceDeadline: describeTargetDiff(row.target_diff),
 
     ownerSaysOnTrack,

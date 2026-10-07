@@ -32,6 +32,10 @@ export function useReadoutKeys(currentWeek: number) {
         case "P":
           navigate(`/plan?week=${currentWeek}`);
           break;
+        case "d":
+        case "D":
+          navigate(`/dates?week=${currentWeek}`);
+          break;
         default:
       }
     };

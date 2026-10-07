@@ -6,6 +6,7 @@ import { FeedbackDetail } from "./components/feedback/details/FeedbackDetail";
 import { Layout } from "./components/layout/Layout";
 import { Dashboard } from "./components/data-display/Dashboard";
 import { Plan } from "./components/readout/plan/Plan";
+import { Dates } from "./components/readout/dates/Dates";
 import { DecryptionForm } from "./components/auth/DecryptionForm";
 
 // Create a client
@@ -39,6 +40,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="plan" element={<Plan />} />
+            <Route path="dates" element={<Dates />} />
             <Route path="feedback/:id" element={<FeedbackDetail />} />
           </Route>
         </Routes>

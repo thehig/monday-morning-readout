@@ -38,6 +38,30 @@ function clampPct(value: number): number {
 }
 
 /**
+ * One tick per month start inside the range, thinned to at most `maxTicks`.
+ * Halving once leaves a multi-year axis still crowded, so the step scales.
+ */
+export function monthTicks(
+  rangeStart: Date,
+  rangeEnd: Date,
+  pct: (date: Date) => number,
+  maxTicks = MAX_TICKS
+): TimelineTick[] {
+  const months: TimelineTick[] = [];
+  const cursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+  if (cursor.getTime() < rangeStart.getTime()) {
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  while (cursor.getTime() <= rangeEnd.getTime()) {
+    months.push({ label: formatDate(cursor, "monthOnly"), pct: pct(cursor) });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  const step = Math.ceil(months.length / maxTicks);
+  return step > 1 ? months.filter((_, i) => i % step === 0) : months;
+}
+
+/**
  * @param deadline committed date, or null
  * @param estimate estimated completion, or null
  * @param today    the day the readout is being given
@@ -67,19 +91,7 @@ export function buildTimeline(
   const pct = (date: Date) =>
     clampPct(((date.getTime() - rangeStart.getTime()) / total) * 100);
 
-  // One tick per month start inside the range, thinned out when the span is
-  // long enough that every month would crowd.
-  const months: TimelineTick[] = [];
-  const cursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
-  if (cursor.getTime() < rangeStart.getTime()) cursor.setMonth(cursor.getMonth() + 1);
-  while (cursor.getTime() <= rangeEnd.getTime()) {
-    months.push({ label: formatDate(cursor, "monthOnly"), pct: pct(cursor) });
-    cursor.setMonth(cursor.getMonth() + 1);
-  }
-  // Thin to at most MAX_TICKS however long the span is; halving once leaves a
-  // multi-year axis still crowded.
-  const step = Math.ceil(months.length / MAX_TICKS);
-  const thinned = step > 1 ? months.filter((_, i) => i % step === 0) : months;
+  const thinned = monthTicks(rangeStart, rangeEnd, pct);
 
   const todayPct = pct(today);
   const spaced = thinned.filter(
