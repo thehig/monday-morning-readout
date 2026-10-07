@@ -77,7 +77,7 @@ describe("Layout", () => {
     expect(context.isDecrypted).toBe(true);
   });
 
-  it("has correct CSS classes for layout structure", () => {
+  it("frames the readout at the viewport, but never below the drawn height", () => {
     render(<Layout />);
 
     // Find the main container div (parent of header and main)
@@ -85,7 +85,10 @@ describe("Layout", () => {
     const main = screen.getByRole("main");
     const container = header.parentElement;
 
-    expect(container).toHaveClass("h-screen", "bg-sheet", "flex", "flex-col");
+    // h-dvh follows the window; min-h-frame stops it shrinking past the size
+    // the states were drawn at, so a short window scrolls instead of crushing
+    // the Wall. Dropping min-h-frame is what this guards against.
+    expect(container).toHaveClass("h-dvh", "min-h-frame", "bg-sheet", "flex", "flex-col");
     expect(main).toHaveClass("flex-1", "overflow-hidden");
   });
 

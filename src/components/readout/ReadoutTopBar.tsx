@@ -24,7 +24,9 @@ export function ReadoutTopBar({
   const isCurrent = currentWeek === getCurrentWeek(year);
 
   return (
-    <header className="flex h-[72px] shrink-0 items-center justify-between gap-6 bg-navy px-8 text-white">
+    // Sticky because in a window short enough to scroll, the week being read
+    // out is the one piece of context the room needs kept on screen.
+    <header className="sticky top-0 z-20 flex h-[72px] shrink-0 items-center justify-between gap-6 bg-navy px-8 text-white">
       <span className="text-2xl font-extrabold tracking-tight text-brand">
         United Signals
       </span>

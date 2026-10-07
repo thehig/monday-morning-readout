@@ -18,13 +18,16 @@ export function Layout() {
     setSearchParams({ week: currentWeek.toString() });
   }, [currentWeek, setSearchParams]);
 
+  // The frame is the viewport, but never shorter than the size the states were
+  // drawn at. A taller window stretches it; a shorter one scrolls the page
+  // rather than squeezing the layout inside it.
   return (
-    <div className="h-screen bg-sheet flex flex-col">
+    <div className="flex h-dvh min-h-frame flex-col bg-sheet">
       <ReadoutTopBar
         currentWeek={currentWeek}
         onWeekChange={setCurrentWeek}
       />
-      <main className="flex-1 overflow-hidden">
+      <main className="min-h-0 flex-1 overflow-hidden">
         <Outlet context={{ isDecrypted: true }} />
       </main>
     </div>

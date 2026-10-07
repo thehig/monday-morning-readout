@@ -54,6 +54,18 @@ export default {
         // measurement.
         serif: ['"Literata"', "Georgia", "serif"],
       },
+      minHeight: {
+        // Every state is drawn for a 1920x1080 screen share, and the Wall's
+        // ranked grid uses the full height of it - ten tiles in two rows have a
+        // floor of their own that no amount of flexing gets under.
+        //
+        // So the frame never shrinks past the size it was drawn at. In a window
+        // shorter than this the page scrolls, which costs the operator a
+        // scroll but keeps every layout at its designed proportions. The
+        // alternative - letting the frame shrink - crushes the grid instead,
+        // and a crushed tile loses the bottom row of facts silently.
+        frame: "1080px",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
