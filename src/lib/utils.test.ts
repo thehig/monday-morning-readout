@@ -19,6 +19,15 @@ describe("Utils", () => {
         "John Doe Smith Jones"
       );
     });
+
+    it("drops plus-addressing from the local part", () => {
+      expect(formatEmailDisplayName("david.siegel+vbk@united-signals.com")).toBe(
+        "David Siegel"
+      );
+      expect(formatEmailDisplayName("raunaq.inam+fivv@united-signals.com")).toBe(
+        "Raunaq Inam"
+      );
+    });
   });
 
   describe("cn", () => {

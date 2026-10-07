@@ -42,8 +42,11 @@ export function getWeekRange(
   return { start, end };
 }
 
-export function getCurrentWeek(year: number): number {
-  const now = new Date();
+/**
+ * Which week of `year` a date falls in, on the same scheme as `getWeekDates`:
+ * week 1 begins on the first Monday of the year.
+ */
+export function getWeekNumber(date: Date, year = date.getFullYear()): number {
   const yearStart = new Date(year, 0, 1);
   const startDayOfWeek = yearStart.getDay();
   const daysToFirstMonday =
@@ -51,9 +54,13 @@ export function getCurrentWeek(year: number): number {
   const firstMonday = new Date(yearStart);
   firstMonday.setDate(yearStart.getDate() + daysToFirstMonday);
 
-  const diff = now.getTime() - firstMonday.getTime();
+  const diff = date.getTime() - firstMonday.getTime();
   const oneWeek = 1000 * 60 * 60 * 24 * 7;
   return Math.ceil(diff / oneWeek);
+}
+
+export function getCurrentWeek(year: number): number {
+  return getWeekNumber(new Date(), year);
 }
 
 export function getPreviousWeek(year: number): number {

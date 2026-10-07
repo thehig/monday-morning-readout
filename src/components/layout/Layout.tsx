@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Outlet } from "react-router-dom";
 import { getPreviousWeek } from "../../lib/date-utils";
-import { Header } from "./Header";
+import { ReadoutTopBar } from "../readout/ReadoutTopBar";
 
 export function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,13 +16,12 @@ export function Layout() {
   }, [currentWeek, setSearchParams]);
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
-      <Header
+    <div className="h-screen bg-sheet flex flex-col">
+      <ReadoutTopBar
         currentWeek={currentWeek}
-        setCurrentWeek={setCurrentWeek}
-        title="United Signals"
+        onWeekChange={setCurrentWeek}
       />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-hidden">
         <Outlet context={{ isDecrypted: true }} />
       </main>
     </div>

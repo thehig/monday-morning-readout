@@ -6,10 +6,9 @@ interface MockOutletProps {
   context: { isDecrypted: boolean };
 }
 
-interface MockHeaderProps {
+interface MockTopBarProps {
   currentWeek: number;
-  setCurrentWeek: (week: number) => void;
-  title: string;
+  onWeekChange: (week: number) => void;
 }
 
 // Mock react-router-dom
@@ -26,15 +25,12 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// Mock the Header component
-vi.mock("./Header", () => ({
-  Header: ({ currentWeek, setCurrentWeek, title }: MockHeaderProps) => (
+// Mock the readout top bar
+vi.mock("../readout/ReadoutTopBar", () => ({
+  ReadoutTopBar: ({ currentWeek, onWeekChange }: MockTopBarProps) => (
     <header data-testid="header">
-      <span data-testid="header-title">{title}</span>
       <span data-testid="header-week">{currentWeek}</span>
-      <button onClick={() => setCurrentWeek(currentWeek + 1)}>
-        Change Week
-      </button>
+      <button onClick={() => onWeekChange(currentWeek + 1)}>Change Week</button>
     </header>
   ),
 }));
@@ -59,20 +55,15 @@ describe("Layout", () => {
 
     const container = screen.getByRole("main");
     expect(container).toBeInTheDocument();
-    expect(container).toHaveClass("flex-1", "overflow-auto");
+    // The readout never scrolls: each state fits one screen.
+    expect(container).toHaveClass("flex-1", "overflow-hidden");
   });
 
-  it("renders Header with correct props", () => {
+  it("renders the top bar with the current week", () => {
     render(<Layout />);
 
-    const header = screen.getByTestId("header");
-    expect(header).toBeInTheDocument();
-
-    const title = screen.getByTestId("header-title");
-    expect(title).toHaveTextContent("United Signals");
-
-    const week = screen.getByTestId("header-week");
-    expect(week).toHaveTextContent("10"); // From mocked search params
+    expect(screen.getByTestId("header")).toBeInTheDocument();
+    expect(screen.getByTestId("header-week")).toHaveTextContent("10");
   });
 
   it("renders Outlet with correct context", () => {
@@ -94,8 +85,8 @@ describe("Layout", () => {
     const main = screen.getByRole("main");
     const container = header.parentElement;
 
-    expect(container).toHaveClass("h-screen", "bg-gray-50", "flex", "flex-col");
-    expect(main).toHaveClass("flex-1", "overflow-auto");
+    expect(container).toHaveClass("h-screen", "bg-sheet", "flex", "flex-col");
+    expect(main).toHaveClass("flex-1", "overflow-hidden");
   });
 
   it("handles week change correctly", async () => {

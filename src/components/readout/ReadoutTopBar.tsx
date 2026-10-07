@@ -1,0 +1,71 @@
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { getWeekRange, formatDate, getCurrentWeek } from "../../lib/date-utils";
+
+interface ReadoutTopBarProps {
+  currentWeek: number;
+  onWeekChange: (week: number) => void;
+  /** Counts for the right-hand side, e.g. "10 engagements · 5 need a decision". */
+  summary?: React.ReactNode;
+}
+
+const TOTAL_WEEKS = 52;
+
+/**
+ * The navy bar every state shares. Large enough to read in a shared video
+ * call: the smallest thing here is 19px.
+ */
+export function ReadoutTopBar({
+  currentWeek,
+  onWeekChange,
+  summary,
+}: ReadoutTopBarProps) {
+  const year = new Date().getFullYear();
+  const { start, end } = getWeekRange(currentWeek, year);
+  const isCurrent = currentWeek === getCurrentWeek(year);
+
+  return (
+    <header className="flex h-[72px] shrink-0 items-center justify-between gap-6 bg-navy px-8 text-white">
+      <span className="text-2xl font-extrabold tracking-tight text-brand">
+        United Signals
+      </span>
+
+      <div className="flex items-center gap-4" role="group" aria-label="Week navigation">
+        <button
+          type="button"
+          onClick={() => onWeekChange(Math.max(1, currentWeek - 1))}
+          disabled={currentWeek <= 1}
+          aria-label="Previous week"
+          className="rounded border border-navy-line p-1.5 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+        >
+          <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+        </button>
+
+        <div className="text-center" aria-live="polite">
+          <div className="text-xl font-semibold leading-tight">
+            Week {currentWeek}
+            {isCurrent && (
+              <span className="ml-2 text-[18px] font-normal text-brand">current</span>
+            )}
+          </div>
+          <div className="text-[18px] tabular-nums text-white/70">
+            {formatDate(start)} &ndash; {formatDate(end)}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onWeekChange(Math.min(TOTAL_WEEKS, currentWeek + 1))}
+          disabled={currentWeek >= TOTAL_WEEKS}
+          aria-label="Next week"
+          className="rounded border border-navy-line p-1.5 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+        >
+          <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+        </button>
+      </div>
+
+      <div className="min-w-[280px] text-right text-lg tabular-nums text-white/75">
+        {summary}
+      </div>
+    </header>
+  );
+}
