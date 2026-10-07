@@ -4,7 +4,12 @@ import type { Engagement } from "../../../lib/engagements";
 import { showDate } from "../../../lib/engagements";
 import { Labelled, Meter, ProgressBar, VelocityLight } from "../primitives";
 import { fitColumns, GRID_PADDING } from "../../../lib/wall-view";
-import { STATE_EDGE, STATE_TEXT } from "../state-styles";
+import {
+  STATE_FILL,
+  STATE_LABEL,
+  STATE_RULE,
+  STATE_TEXT,
+} from "../state-styles";
 
 interface RankedGridProps {
   engagements: Engagement[];
@@ -15,6 +20,7 @@ interface RankedGridProps {
 function Hero({ engagement }: { engagement: Engagement }) {
   const { state, slipDays, landsInDays } = engagement;
   const tone = STATE_TEXT[state];
+  const quiet = STATE_LABEL[state];
 
   if ((state === "late" || state === "watch") && slipDays !== null && slipDays > 0) {
     return (
@@ -48,8 +54,8 @@ function Hero({ engagement }: { engagement: Engagement }) {
   if (landsInDays === null) {
     return (
       <>
-        <div className="text-[17px] leading-none text-ink-3">Schedule</div>
-        <div className="text-[27px] font-bold leading-none text-ink-3">
+        <div className={`text-[17px] leading-none ${quiet}`}>Schedule</div>
+        <div className={`text-[27px] font-bold leading-none ${quiet}`}>
           Not recorded
         </div>
       </>
@@ -58,22 +64,22 @@ function Hero({ engagement }: { engagement: Engagement }) {
 
   return (
     <>
-      <div className="text-[17px] leading-none text-ink-3">Due in</div>
-      <div className="flex items-baseline gap-1.5">
+      <div className={`text-[17px] leading-none ${quiet}`}>Due in</div>
+      <div className={`flex items-baseline gap-1.5 ${tone}`}>
         <b className="text-[37px] font-extrabold leading-none tracking-tighter tabular-nums">
           {landsInDays}
         </b>
-        <span className="text-lg text-ink-3">days</span>
+        <span className="text-lg font-semibold">days</span>
       </div>
     </>
   );
 }
 
 function OwnersCall({ engagement }: { engagement: Engagement }) {
-  const { ownerSaysOnTrack, contradicts, slipDays } = engagement;
+  const { ownerSaysOnTrack, contradicts, slipDays, state } = engagement;
 
   if (ownerSaysOnTrack === null) {
-    return <span className="text-ink-3">Not reported</span>;
+    return <span className={STATE_LABEL[state]}>Not reported</span>;
   }
 
   if (contradicts) {
@@ -105,11 +111,13 @@ function Card({
     engagement.estimate &&
     engagement.slipDays === 0;
 
+  const quiet = STATE_LABEL[engagement.state];
+
   return (
     <Link
       to={`/feedback/${engagement.id}?week=${currentWeek}`}
-      className={`flex flex-col overflow-hidden rounded-md border-2 border-l-[10px] border-sheet-rule bg-sheet-card transition-shadow hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-        STATE_EDGE[engagement.state]
+      className={`flex flex-col overflow-hidden rounded-md border-2 transition-shadow hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+        STATE_FILL[engagement.state]
       }`}
     >
       {/*
@@ -134,7 +142,7 @@ function Card({
 
         {sameDate ? (
           <div className="flex items-baseline justify-between gap-2 text-[17px]">
-            <span className="text-ink-3">Deadline and estimate</span>
+            <span className={quiet}>Deadline and estimate</span>
             <span className="font-semibold tabular-nums">
               {showDate(engagement.deadline)}
             </span>
@@ -142,13 +150,13 @@ function Card({
         ) : (
           <>
             <div className="flex items-baseline justify-between gap-2 text-[17px]">
-              <span className="text-ink-3">Deadline</span>
+              <span className={quiet}>Deadline</span>
               <span className="font-semibold tabular-nums">
                 {showDate(engagement.deadline)}
               </span>
             </div>
             <div className="flex items-baseline justify-between gap-2 text-[17px]">
-              <span className="text-ink-3">Estimate</span>
+              <span className={quiet}>Estimate</span>
               <span className="font-semibold tabular-nums">
                 {showDate(engagement.estimate)}
               </span>
@@ -156,21 +164,25 @@ function Card({
           </>
         )}
 
-        <Labelled label="Progress">
+        <Labelled label="Progress" tone={quiet}>
           <ProgressBar value={engagement.progress} />
         </Labelled>
-        <Labelled label="Team">
+        <Labelled label="Team" tone={quiet}>
           <Meter value={engagement.teamHappiness} />
         </Labelled>
-        <Labelled label="Customer">
+        <Labelled label="Customer" tone={quiet}>
           <Meter value={engagement.customerHappiness} />
         </Labelled>
-        <Labelled label="Next week">
-          <VelocityLight velocity={engagement.velocity} />
+        <Labelled label="Next week" tone={quiet}>
+          <VelocityLight velocity={engagement.velocity} tone={quiet} />
         </Labelled>
 
-        <div className="mt-auto border-t-2 border-sheet-rule pt-1.5 text-[17px] leading-snug">
-          <span className="block text-ink-3">
+        <div
+          className={`mt-auto border-t-2 pt-1.5 text-[17px] leading-snug ${
+            STATE_RULE[engagement.state]
+          }`}
+        >
+          <span className={`block ${quiet}`}>
             Owner&rsquo;s own call on the deadline
           </span>
           <OwnersCall engagement={engagement} />

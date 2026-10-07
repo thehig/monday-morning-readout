@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { landingWeeks } from "../../../lib/dates-view";
+import { landingWeeks, weekWeight } from "../../../lib/dates-view";
 import { showDate } from "../../../lib/engagements";
 import type { Engagement } from "../../../lib/engagements";
 import { STATE_TEXT } from "../state-styles";
@@ -60,21 +60,51 @@ export function LandingWeeks({
   currentWeek,
   year = new Date().getFullYear(),
 }: LandingWeeksProps) {
-  const { columns, undated, peak } = landingWeeks(engagements, currentWeek, year);
+  const { track, undated, peak } = landingWeeks(engagements, currentWeek, year);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-6 pb-3 pt-3">
-      <div
-        className="grid min-h-0 flex-1 gap-2.5"
-        style={{
-          gridTemplateColumns: `repeat(${Math.max(1, columns.length)}, minmax(0, 1fr))`,
-        }}
-      >
-        {columns.map((column) => {
+      {/*
+        Width follows what lands, not the calendar. Weeks share the row in
+        proportion to their load, so the busiest is the widest thing on the
+        screen, and runs of empty weeks are one narrow marker rather than half
+        the width spent on nothing.
+      */}
+      <div className="flex min-h-0 flex-1 gap-2.5">
+        {track.map((entry) => {
+          if (entry.kind === "quiet") {
+            return (
+              <div
+                key={`quiet-${entry.from}`}
+                className="flex w-[78px] shrink-0 flex-col items-center justify-center gap-1 rounded border-2 border-dashed border-sheet-rule px-1 text-center"
+              >
+                <b className="text-[19px] font-bold leading-none tabular-nums text-ink-3">
+                  {entry.weeks}
+                </b>
+                <span className="text-[17px] leading-tight text-ink-3">
+                  quiet weeks
+                </span>
+                <span className="text-[17px] leading-none tabular-nums text-ink-3">
+                  {entry.from}&ndash;{entry.to}
+                </span>
+              </div>
+            );
+          }
+
+          const column = entry;
           const busiest = peak > 1 && column.engagements.length === peak;
 
           return (
-            <div key={column.week} className="flex min-h-0 flex-col gap-2.5">
+            <div
+              key={column.week}
+              className="flex min-h-0 min-w-0 flex-col gap-2.5"
+              style={{
+                flex: `${weekWeight(column.engagements.length)} 1 0%`,
+                // A week with nothing in it still has to fit its own dates on
+                // one line, or the column reads as broken rather than as quiet.
+                minWidth: column.engagements.length ? undefined : "118px",
+              }}
+            >
               <div
                 className={`grid gap-0.5 border-b-[3px] pb-2 ${
                   busiest

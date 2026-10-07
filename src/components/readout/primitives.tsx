@@ -16,6 +16,8 @@ interface LabelledProps {
   children: React.ReactNode;
   /** Fixed label column, so the marks line up down a card. */
   labelWidth?: string;
+  /** How the label reads on the surface behind it; see STATE_LABEL. */
+  tone?: string;
 }
 
 /**
@@ -29,10 +31,11 @@ export function Labelled({
   label,
   children,
   labelWidth = "w-[84px]",
+  tone = "text-ink-3",
 }: LabelledProps) {
   return (
     <div className="flex items-center gap-2 text-[17px]">
-      <span className={`${labelWidth} shrink-0 text-ink-3`}>{label}</span>
+      <span className={`${labelWidth} shrink-0 ${tone}`}>{label}</span>
       {children}
     </div>
   );
@@ -55,7 +58,7 @@ export function ProgressBar({ value }: { value: number }) {
         a bare flex-1 has nothing to take a share of and the bar disappears,
         leaving the percentage sitting on its own.
       */}
-      <span className="h-[13px] min-w-[132px] flex-1 overflow-hidden rounded-full bg-meter-track">
+      <span className="h-[13px] min-w-[132px] flex-1 overflow-hidden rounded-full bg-ink/[0.12]">
         {pct > 0 && (
           <span
             className="block h-full min-w-[7px] rounded-full bg-meter"
@@ -81,7 +84,7 @@ export function Meter({ value, max = 5 }: { value: number; max?: number }) {
           <span
             key={i}
             className={`h-[13px] w-[17px] rounded-sm ${
-              i < filled ? "bg-meter" : "bg-meter-track"
+              i < filled ? "bg-meter" : "bg-ink/[0.12]"
             }`}
           />
         ))}
@@ -106,9 +109,15 @@ export function VelocityDot({ velocity }: { velocity: VelocityType | null }) {
 }
 
 /** Traffic light for next week's velocity, with the English label beside it. */
-export function VelocityLight({ velocity }: { velocity: VelocityType | null }) {
+export function VelocityLight({
+  velocity,
+  tone = "text-ink-3",
+}: {
+  velocity: VelocityType | null;
+  tone?: string;
+}) {
   if (!velocity) {
-    return <span className="text-ink-3">Not reported</span>;
+    return <span className={tone}>Not reported</span>;
   }
 
   const label = VELOCITY_LABELS[velocity];

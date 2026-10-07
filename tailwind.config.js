@@ -13,7 +13,9 @@ export default {
         late: { ink: "#7E2A1E", wash: "#F8E2DD", mark: "#B8442F" },
         watch: { ink: "#6E4A00", wash: "#FAEED2", mark: "#BC8A14" },
         fine: { ink: "#1C5B46", wash: "#E3EFE9", mark: "#2E7D63" },
-        meter: { DEFAULT: "#3B3B87", track: "#E2E3EC" },
+        // The meter fill only. Its unfilled track is a tint of the ink
+        // underneath, so it works on white and on a state wash alike.
+        meter: "#3B3B87",
       },
       fontFamily: {
         // Reserved for text a person typed, so a sentence never looks like a

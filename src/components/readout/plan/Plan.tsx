@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { usePOFeedbackByWeek } from "../../../hooks/use-po-feedback";
 import { getPreviousWeek } from "../../../lib/date-utils";
-import { toEngagements, summarise } from "../../../lib/engagements";
+import {
+  toEngagements,
+  summarise,
+  scheduleNote,
+  type Engagement,
+} from "../../../lib/engagements";
+import { planExceptions } from "../../../lib/plan-view";
+import { STATE_TEXT } from "../state-styles";
 import {
   FooterActions,
   Key,
@@ -104,6 +111,90 @@ export function Plan() {
       ) : (
         <CommitmentList engagements={engagements} currentWeek={currentWeek} />
       )}
+
+      <Exceptions
+        engagements={engagements}
+        currentWeek={currentWeek}
+        totalCommitments={totals.commitments}
+        totalBehind={totals.needingDecision}
+      />
+    </div>
+  );
+}
+
+/**
+ * The band under the Plan: what the week still has to answer for.
+ *
+ * The counts above say "1 committed nothing" and "5 past or overrunning", but
+ * a count is read once and the engagement behind it is somewhere in a column
+ * of fifteen. These are named, so the call closes on them. The band is only
+ * drawn when there is something in it.
+ */
+function Exceptions({
+  engagements,
+  currentWeek,
+  totalCommitments,
+  totalBehind,
+}: {
+  engagements: Engagement[];
+  currentWeek: number;
+  totalCommitments: number;
+  totalBehind: number;
+}) {
+  const { silent, heaviest, mostBehind, any } = planExceptions(engagements);
+
+  if (!any) return null;
+
+  return (
+    <div className="shrink-0 border-t-2 border-sheet-rule bg-sheet-card px-6 py-3">
+      <div className="flex flex-wrap items-stretch gap-3">
+        {silent.length > 0 && (
+          <section className="flex min-w-0 flex-1 items-baseline gap-4 rounded border-2 border-late-mark bg-late-wash px-4 py-2.5">
+            <b className="shrink-0 text-xl font-extrabold text-late-ink">
+              Committed nothing
+            </b>
+            <p className="min-w-0 text-[19px] leading-snug text-late-ink">
+              {silent.map((engagement, i) => (
+                <span key={engagement.id}>
+                  {i > 0 && <span className="text-late-ink/60"> &middot; </span>}
+                  <Link
+                    to={`/feedback/${engagement.id}?week=${currentWeek}`}
+                    className="font-bold underline decoration-late-mark/40 underline-offset-2 hover:decoration-late-mark"
+                  >
+                    {engagement.customer}
+                  </Link>{" "}
+                  <span className="text-late-ink/80">
+                    {engagement.owner}
+                    {scheduleNote(engagement) && `, ${scheduleNote(engagement)}`}
+                  </span>
+                </span>
+              ))}
+            </p>
+          </section>
+        )}
+
+        {(heaviest || mostBehind) && (
+          <section className="flex shrink-0 items-baseline gap-5 rounded border-2 border-sheet-rule px-4 py-2.5">
+            {heaviest && (
+              <span className="text-[19px] leading-snug">
+                <b className="font-bold">{heaviest.owner}</b>
+                <span className="text-ink-2">
+                  {" "}
+                  carries {heaviest.commitments} of the {totalCommitments}, on{" "}
+                  {heaviest.engagements}{" "}
+                  {heaviest.engagements === 1 ? "engagement" : "engagements"}
+                </span>
+              </span>
+            )}
+            {mostBehind && (
+              <span className={`text-[19px] leading-snug ${STATE_TEXT.late}`}>
+                <b className="font-bold">{mostBehind.owner}</b> owns{" "}
+                {mostBehind.commitments} of the {totalBehind} that will miss
+              </span>
+            )}
+          </section>
+        )}
+      </div>
     </div>
   );
 }

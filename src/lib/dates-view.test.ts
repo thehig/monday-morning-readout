@@ -1,5 +1,12 @@
-import { landingWeeks, buildRunway, CLOSE_LANDING_DAYS } from "./dates-view";
-import { toEngagements } from "./engagements";
+import {
+  landingWeeks,
+  buildRunway,
+  collapseQuiet,
+  weekWeight,
+  CLOSE_LANDING_DAYS,
+  type LandingWeek,
+} from "./dates-view";
+import { toEngagements, type Engagement } from "./engagements";
 import type { POFeedback } from "../types/feedback";
 
 const TODAY = new Date(2026, 9, 7); // 7 Oct 2026
@@ -194,5 +201,86 @@ describe("buildRunway", () => {
     );
 
     expect(buildRunway(none, TODAY)).toBeNull();
+  });
+});
+
+describe("collapseQuiet", () => {
+  const week = (n: number, count: number, isOverflow = false): LandingWeek => ({
+    week: n,
+    weekLabel: `Week ${n}`,
+    label: "",
+    engagements: Array.from({ length: count }, () => ({}) as Engagement),
+    isCurrent: false,
+    isOverflow,
+  });
+
+  const shape = (columns: LandingWeek[]) =>
+    collapseQuiet(columns).map((t) =>
+      t.kind === "quiet" ? `quiet ${t.from}-${t.to}` : `week ${t.week}`
+    );
+
+  it("folds a run of empty weeks into one marker", () => {
+    // Week 39's real shape: the pile-up at 44, then five dead weeks, then 50.
+    expect(
+      shape([
+        week(44, 4),
+        week(45, 0),
+        week(46, 0),
+        week(47, 0),
+        week(48, 0),
+        week(49, 0),
+        week(50, 1),
+      ])
+    ).toEqual(["week 44", "quiet 45-49", "week 50"]);
+  });
+
+  it("leaves a single empty week as its own column", () => {
+    // One quiet week between two busy ones is a fact, not padding.
+    expect(shape([week(41, 2), week(42, 0), week(43, 1)])).toEqual([
+      "week 41",
+      "week 42",
+      "week 43",
+    ]);
+  });
+
+  it("folds a run at either end", () => {
+    expect(shape([week(40, 0), week(41, 0), week(42, 3)])).toEqual([
+      "quiet 40-41",
+      "week 42",
+    ]);
+    expect(shape([week(42, 3), week(43, 0), week(44, 0)])).toEqual([
+      "week 42",
+      "quiet 43-44",
+    ]);
+  });
+
+  it("keeps an empty overflow column, which means 'and everything after'", () => {
+    expect(shape([week(44, 2), week(45, 0), week(46, 0, true)])).toEqual([
+      "week 44",
+      "week 45",
+      "week 46",
+    ]);
+  });
+
+  it("leaves a fully loaded span alone", () => {
+    expect(shape([week(41, 1), week(42, 2)])).toEqual(["week 41", "week 42"]);
+  });
+});
+
+describe("weekWeight", () => {
+  it("gives the busiest week the most width", () => {
+    expect(weekWeight(4)).toBeGreaterThan(weekWeight(2));
+    expect(weekWeight(2)).toBeGreaterThan(weekWeight(1));
+    expect(weekWeight(1)).toBeGreaterThan(weekWeight(0));
+  });
+
+  it("grows slower than the count, so quiet weeks do not vanish", () => {
+    // Four landings earn more room than one, but not four times as much.
+    expect(weekWeight(4) / weekWeight(1)).toBeLessThan(4);
+    expect(weekWeight(4) / weekWeight(1)).toBeGreaterThan(1.5);
+  });
+
+  it("still gives an empty week room for its own date", () => {
+    expect(weekWeight(0)).toBeGreaterThan(0);
   });
 });

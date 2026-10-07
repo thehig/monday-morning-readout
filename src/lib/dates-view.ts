@@ -29,8 +29,23 @@ export interface LandingWeek {
   isOverflow: boolean;
 }
 
+/** A run of weeks with nothing landing, shown as one marker, not as columns. */
+export interface QuietRun {
+  kind: "quiet";
+  from: number;
+  to: number;
+  weeks: number;
+}
+
+export type LandingTrack = ({ kind: "week" } & LandingWeek) | QuietRun;
+
 export interface LandingWeeks {
   columns: LandingWeek[];
+  /**
+   * The columns as they are laid out: loaded weeks, with runs of empty ones
+   * folded into a single marker.
+   */
+  track: LandingTrack[];
   /** Engagements with no estimated completion date at all. */
   undated: Engagement[];
   /** The busiest column's count, so a pile-up can be called out. */
@@ -79,6 +94,7 @@ export function landingWeeks(
 
   return {
     columns,
+    track: collapseQuiet(columns),
     undated,
     peak: columns.reduce((n, c) => Math.max(n, c.engagements.length), 0),
   };
@@ -187,4 +203,64 @@ export function buildRunway(
     lanes,
     collidingOwners: lanes.filter((lane) => lane.collisions.length > 0).length,
   };
+}
+
+/** A run shorter than this keeps its own columns; the gap is worth seeing. */
+const MIN_QUIET_RUN = 2;
+
+/**
+ * Fold runs of empty weeks into one marker.
+ *
+ * Week 44 holding four landings and week 47 holding none were given the same
+ * share of the screen, so more than half the width went to weeks with nothing
+ * in them and the pile-up - the thing the screen exists to show - was the
+ * narrowest it could be. A single empty week stays a column, because one quiet
+ * week between two busy ones is itself worth seeing.
+ */
+export function collapseQuiet(columns: LandingWeek[]): LandingTrack[] {
+  const track: LandingTrack[] = [];
+  let run: LandingWeek[] = [];
+
+  const flush = () => {
+    if (!run.length) return;
+    if (run.length < MIN_QUIET_RUN) {
+      run.forEach((c) => track.push({ kind: "week", ...c }));
+    } else {
+      track.push({
+        kind: "quiet",
+        from: run[0].week,
+        to: run[run.length - 1].week,
+        weeks: run.length,
+      });
+    }
+    run = [];
+  };
+
+  for (const column of columns) {
+    // The overflow column means "and everything after", so it is never quiet
+    // even when the visible span happens to hold nothing.
+    if (!column.engagements.length && !column.isOverflow) {
+      run.push(column);
+      continue;
+    }
+    flush();
+    track.push({ kind: "week", ...column });
+  }
+  flush();
+
+  return track;
+}
+
+/**
+ * How much width a week has earned.
+ *
+ * Weight by what lands in it rather than by the calendar, so the busiest week
+ * is physically the widest thing on the screen. An empty week still gets a
+ * column wide enough for its own date, and the step between one and two
+ * landings is deliberately smaller than the count - four landings should be
+ * wider than one, not four times wider, or the quiet weeks vanish.
+ */
+export function weekWeight(count: number): number {
+  if (count === 0) return 0.5;
+  return 1 + (count - 1) * 0.6;
 }
