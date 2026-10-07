@@ -8,6 +8,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
+    // The team's weeks are German calendar weeks, and the week-range bug this
+    // guards against cannot reproduce at UTC. CI runners default to UTC, so
+    // pin the suite to the business timezone.
+    env: { TZ: "Europe/Berlin" },
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",

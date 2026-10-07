@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import {
   getWeekDates,
+  getWeekRange,
   getCurrentWeek,
   formatDate,
   formatTime,
@@ -40,6 +41,73 @@ describe("Date Utils", () => {
 
       expect(start.getDay()).toBe(1); // Should still start on Monday
       expect(end.getDay()).toBe(0); // Should still end on Sunday
+    });
+  });
+
+
+  describe("getWeekRange", () => {
+    // The suite is pinned to Europe/Berlin because this cannot reproduce at UTC.
+    it("runs in the business timezone", () => {
+      expect(new Date(2026, 8, 28).toISOString()).toBe("2026-09-27T22:00:00.000Z");
+    });
+
+    it("starts at local midnight on the Monday", () => {
+      const { start } = getWeekRange(39, 2026);
+
+      expect(start.getDay()).toBe(1);
+      expect(start.getDate()).toBe(28);
+      expect(start.getMonth()).toBe(8);
+      expect([
+        start.getHours(),
+        start.getMinutes(),
+        start.getSeconds(),
+        start.getMilliseconds(),
+      ]).toEqual([0, 0, 0, 0]);
+    });
+
+    it("ends at the last millisecond of the Sunday", () => {
+      const { end } = getWeekRange(39, 2026);
+
+      expect(end.getDay()).toBe(0);
+      expect(end.getDate()).toBe(4);
+      expect(end.getMonth()).toBe(9);
+      expect([
+        end.getHours(),
+        end.getMinutes(),
+        end.getSeconds(),
+        end.getMilliseconds(),
+      ]).toEqual([23, 59, 59, 999]);
+    });
+
+    it("spans exactly seven days", () => {
+      const { start, end } = getWeekRange(39, 2026);
+
+      expect(end.getTime() - start.getTime()).toBe(7 * 24 * 60 * 60 * 1000 - 1);
+    });
+
+    it("excludes the Sunday that belongs to the previous week", () => {
+      const { start } = getWeekRange(39, 2026);
+      // 27 Sep 2026 is the Sunday of week 38. The old range began a day early
+      // and pulled these submissions into week 39.
+      const previousSunday = new Date(2026, 8, 27, 12, 0, 0);
+
+      expect(previousSunday.getTime()).toBeLessThan(start.getTime());
+    });
+
+    it("includes a submission filed late on the week's own Sunday", () => {
+      const { end } = getWeekRange(39, 2026);
+      // The old range stopped at 03 Oct 23:59Z, so anything filed after about
+      // 02:00 on the Sunday was dropped.
+      const sundayEvening = new Date(2026, 9, 4, 22, 30, 0);
+
+      expect(sundayEvening.getTime()).toBeLessThanOrEqual(end.getTime());
+    });
+
+    it("produces query bounds that cover the whole local week", () => {
+      const { start, end } = getWeekRange(39, 2026);
+
+      expect(start.toISOString()).toBe("2026-09-27T22:00:00.000Z");
+      expect(end.toISOString()).toBe("2026-10-04T21:59:59.999Z");
     });
   });
 

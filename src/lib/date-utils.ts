@@ -21,6 +21,27 @@ export function getWeekDates(
   return { start, end };
 }
 
+/**
+ * The inclusive instants covering a week, ready for a timestamptz query.
+ *
+ * `getWeekDates` returns local midnights and the week picker displays those
+ * same local days, so the bounds are set in local time to cover exactly the
+ * days shown. Setting them with `setUTCHours` instead moves each instant back
+ * to midnight UTC, which lands a day early everywhere east of Greenwich: it
+ * pulls in the previous Sunday and drops the current one.
+ */
+export function getWeekRange(
+  week: number,
+  year: number
+): { start: Date; end: Date } {
+  const { start, end } = getWeekDates(week, year);
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+
+  return { start, end };
+}
+
 export function getCurrentWeek(year: number): number {
   const now = new Date();
   const yearStart = new Date(year, 0, 1);
