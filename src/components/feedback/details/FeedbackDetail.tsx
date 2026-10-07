@@ -38,7 +38,7 @@ export function FeedbackDetail() {
 
   if (weekLoading || (!fromWeek && singleLoading)) {
     return (
-      <div className="flex h-full items-center justify-center text-xl text-ink-3">
+      <div className="flex flex-1 items-center justify-center text-xl text-ink-3">
         Loading…
       </div>
     );
@@ -48,7 +48,7 @@ export function FeedbackDetail() {
 
   if (!engagement) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4">
+      <div className="flex flex-1 flex-col items-center justify-center gap-4">
         <p className="text-xl text-late-ink">
           That submission could not be loaded.
         </p>

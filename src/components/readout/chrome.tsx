@@ -1,11 +1,27 @@
 import { useContext } from "react";
 import { createPortal } from "react-dom";
 import { TopBarSlotContext } from "./top-bar-slot";
+import { FooterSlotContext } from "./footer-slot";
 
 /** Renders its children into the navy bar instead of in place. */
 export function TopBarActions({ children }: { children: React.ReactNode }) {
   const slot = useContext(TopBarSlotContext);
   return slot ? createPortal(children, slot) : null;
+}
+
+/** Renders its children into the footer instead of in place. */
+export function FooterActions({ children }: { children: React.ReactNode }) {
+  const slot = useContext(FooterSlotContext);
+  return slot ? createPortal(children, slot) : null;
+}
+
+/** A keycap. The letter is the interface, so it is drawn like one. */
+export function Key({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="mr-1.5 rounded border-2 border-sheet-rule bg-sheet px-2 font-bold text-ink-2">
+      {children}
+    </kbd>
+  );
 }
 
 export interface SegmentedOption<T extends string> {

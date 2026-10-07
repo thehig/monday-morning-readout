@@ -7,6 +7,7 @@ import { buildTimeline } from "../../../lib/timeline";
 import { formatDateTime } from "../../../lib/date-utils";
 import { describeStep, type StepPosition } from "../../../lib/stepping";
 import { Meter, ProgressBar, VelocityDot } from "../primitives";
+import { FooterActions, Key } from "../chrome";
 import { STATE_TEXT } from "../state-styles";
 import { isTypingTarget } from "../useReadoutKeys";
 import { MiniCalendar } from "./MiniCalendar";
@@ -17,15 +18,6 @@ interface StopProps {
   /** Where this sits in the week's running order; null when linked in alone. */
   step?: StepPosition | null;
   today?: Date;
-}
-
-/** A keycap in the footer hints. */
-function Key({ children }: { children: React.ReactNode }) {
-  return (
-    <kbd className="mr-1.5 rounded border-2 border-sheet-rule bg-sheet px-2 font-bold text-ink-2">
-      {children}
-    </kbd>
-  );
 }
 
 /** A labelled figure in the header, e.g. "Progress / 75%". */
@@ -144,7 +136,7 @@ export function Stop({
   const sinceDeadline = engagement.sinceDeadline;
 
   return (
-    <div className="flex h-full flex-col bg-sheet">
+    <div className="flex flex-1 flex-col bg-sheet">
       <header className="flex shrink-0 items-start gap-7 border-b-2 border-sheet-rule bg-sheet-card px-8 py-4">
         <button
           type="button"
@@ -289,12 +281,7 @@ export function Stop({
         </div>
       </div>
 
-      {/*
-        Pinned like the banner: the step counter and the keys that move between
-        engagements are what the operator is working from, so they stay on
-        screen in a window too short to show the whole frame.
-      */}
-      <footer className="sticky bottom-0 z-20 flex h-[56px] shrink-0 items-center gap-7 border-t-2 border-sheet-rule bg-sheet-card px-8 text-[18px] text-ink-3">
+      <FooterActions>
         <span className="flex items-center gap-5">
           {step?.previousId !== null && step !== null && (
             <span>
@@ -307,13 +294,10 @@ export function Stop({
               {step.nextStartsFastPass ? "start the fast pass" : "next"}
             </span>
           )}
-          <span>
-            <Key>Esc</Key>back to the wall
-          </span>
         </span>
 
         {step && (
-          <span className="font-semibold text-ink-2">
+          <span className="shrink-0 font-semibold text-ink-2">
             {step.position} of {step.total}
             <span className="ml-2 font-normal text-ink-3">
               &middot; {describeStep(step)}
@@ -321,12 +305,12 @@ export function Stop({
           </span>
         )}
 
-        <span className="ml-auto">
+        <span className="ml-auto truncate">
           Feedback {engagement.id} &middot; filed{" "}
           {formatDateTime(engagement.filedAt, "long")} &middot; stored velocity{" "}
           {engagement.velocity ?? "none"}
         </span>
-      </footer>
+      </FooterActions>
     </div>
   );
 }

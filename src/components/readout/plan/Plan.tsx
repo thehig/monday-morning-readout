@@ -4,6 +4,8 @@ import { usePOFeedbackByWeek } from "../../../hooks/use-po-feedback";
 import { getPreviousWeek } from "../../../lib/date-utils";
 import { toEngagements, summarise } from "../../../lib/engagements";
 import {
+  FooterActions,
+  Key,
   Segmented,
   TopBarActions,
   type SegmentedOption,
@@ -57,7 +59,7 @@ export function Plan() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-sheet">
+    <div className="flex flex-1 flex-col bg-sheet">
       <div className="flex shrink-0 items-center gap-7 border-b-2 border-sheet-rule bg-sheet-card px-6 py-2.5">
         <h2 className="text-xl font-bold tracking-tight">
           Week {currentWeek + 1} plan
@@ -78,12 +80,6 @@ export function Plan() {
         </div>
 
         <TopBarActions>
-          <span className="text-[17px] text-white/70">
-            <kbd className="mr-1.5 rounded border border-navy-line px-1.5 font-bold text-white">
-              T
-            </kbd>
-            toggle
-          </span>
           <Segmented
             label="Plan view"
             options={PLAN_VIEWS}
@@ -91,6 +87,12 @@ export function Plan() {
             onChange={setView}
           />
         </TopBarActions>
+
+        <FooterActions>
+          <span>
+            <Key>T</Key>switch the view
+          </span>
+        </FooterActions>
       </div>
 
       {engagements.length === 0 ? (

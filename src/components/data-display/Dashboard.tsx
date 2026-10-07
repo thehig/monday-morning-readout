@@ -6,7 +6,12 @@ import { toEngagements, summarise } from "../../lib/engagements";
 import { RankedGrid } from "../readout/wall/RankedGrid";
 import { Ladder } from "../readout/wall/Ladder";
 import { Field } from "../readout/wall/Field";
-import { Segmented, TopBarActions } from "../readout/chrome";
+import {
+  FooterActions,
+  Key,
+  Segmented,
+  TopBarActions,
+} from "../readout/chrome";
 import { isTypingTarget } from "../readout/useReadoutKeys";
 
 type WallLayout = "grid" | "ladder" | "field";
@@ -70,8 +75,8 @@ export function Dashboard() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex shrink-0 items-center gap-4 border-b-2 border-sheet-rule bg-sheet-card px-6 py-2.5">
+    <div className="flex flex-1 flex-col">
+      <div className="flex shrink-0 items-center gap-4 border-b-2 border-sheet-rule bg-sheet-card px-6 py-2">
         <h2 className="text-xl font-bold tracking-tight">
           {totals.needingDecision > 0 ? "Needs a decision first" : "All on the date"}
         </h2>
@@ -93,6 +98,20 @@ export function Dashboard() {
             onChange={setLayout}
           />
         </TopBarActions>
+
+        <FooterActions>
+          <span>
+            <Key>1</Key>
+            <Key>2</Key>
+            <Key>3</Key>
+            layout
+          </span>
+          {firstId !== undefined && (
+            <span>
+              <Key>&rarr;</Key>step into the first that needs a decision
+            </span>
+          )}
+        </FooterActions>
       </div>
 
       {engagements.length === 0 ? (

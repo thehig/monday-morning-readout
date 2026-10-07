@@ -2,13 +2,16 @@ import { useState, useEffect } from "react";
 import { useSearchParams, Outlet } from "react-router-dom";
 import { getPreviousWeek } from "../../lib/date-utils";
 import { ReadoutTopBar } from "../readout/ReadoutTopBar";
+import { ReadoutFooter } from "../readout/ReadoutFooter";
 import { TopBarSlotContext } from "../readout/top-bar-slot";
+import { FooterSlotContext } from "../readout/footer-slot";
 import { useReadoutKeys } from "../readout/useReadoutKeys";
 
 export function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
   // Held in state rather than a ref so the states re-render once it exists.
   const [actionsSlot, setActionsSlot] = useState<HTMLDivElement | null>(null);
+  const [footerSlot, setFooterSlot] = useState<HTMLDivElement | null>(null);
 
   const weekParam = searchParams.get("week");
   const [currentWeek, setCurrentWeek] = useState(
@@ -33,9 +36,12 @@ export function Layout() {
       />
       <main className="flex flex-1 flex-col">
         <TopBarSlotContext.Provider value={actionsSlot}>
-          <Outlet context={{ isDecrypted: true }} />
+          <FooterSlotContext.Provider value={footerSlot}>
+            <Outlet context={{ isDecrypted: true }} />
+          </FooterSlotContext.Provider>
         </TopBarSlotContext.Provider>
       </main>
+      <ReadoutFooter onActionsSlot={setFooterSlot} />
     </div>
   );
 }

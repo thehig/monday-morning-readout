@@ -5,6 +5,8 @@ import { getPreviousWeek } from "../../../lib/date-utils";
 import { toEngagements } from "../../../lib/engagements";
 import { landingWeeks, buildRunway } from "../../../lib/dates-view";
 import {
+  FooterActions,
+  Key,
   Segmented,
   TopBarActions,
   type SegmentedOption,
@@ -89,7 +91,7 @@ export function Dates() {
   const slipping = engagements.filter((e) => (e.slipDays ?? 0) > 0).length;
 
   return (
-    <div className="flex h-full flex-col bg-sheet">
+    <div className="flex flex-1 flex-col bg-sheet">
       <div className="flex shrink-0 items-center gap-7 border-b-2 border-sheet-rule bg-sheet-card px-6 py-2.5">
         <h2 className="text-xl font-bold tracking-tight">What lands when</h2>
 
@@ -112,12 +114,6 @@ export function Dates() {
         </div>
 
         <TopBarActions>
-          <span className="text-[17px] text-white/70">
-            <kbd className="mr-1.5 rounded border border-navy-line px-1.5 font-bold text-white">
-              T
-            </kbd>
-            toggle
-          </span>
           <Segmented
             label="Dates view"
             options={DATES_VIEWS}
@@ -125,6 +121,12 @@ export function Dates() {
             onChange={setView}
           />
         </TopBarActions>
+
+        <FooterActions>
+          <span>
+            <Key>T</Key>switch the view
+          </span>
+        </FooterActions>
       </div>
 
       {engagements.length === 0 ? (
