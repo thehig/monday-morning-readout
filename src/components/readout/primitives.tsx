@@ -51,7 +51,7 @@ export function ProgressBar({ value }: { value: number }) {
           />
         )}
       </span>
-      <span className="w-[52px] shrink-0 text-right font-bold tabular-nums">
+      <span className="w-[52px] shrink-0 text-right text-[17px] font-bold tabular-nums">
         {pct}%
       </span>
     </>
@@ -74,7 +74,7 @@ export function Meter({ value, max = 5 }: { value: number; max?: number }) {
           />
         ))}
       </span>
-      <span className="w-[52px] shrink-0 text-right font-bold tabular-nums">
+      <span className="w-[52px] shrink-0 text-right text-[17px] font-bold tabular-nums">
         {filled}/{max}
       </span>
     </>

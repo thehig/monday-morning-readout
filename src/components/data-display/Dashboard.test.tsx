@@ -1,10 +1,19 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Dashboard } from "./Dashboard";
 
 // Mock the Wall's grid so these tests stay about the Dashboard's own wiring
+vi.mock("../readout/wall/Ladder", () => ({
+  Ladder: () => <div data-testid="ladder" />,
+}));
+
+vi.mock("../readout/wall/Field", () => ({
+  Field: () => <div data-testid="field" />,
+}));
+
 vi.mock("../readout/wall/RankedGrid", () => ({
   RankedGrid: ({
     engagements,
@@ -80,15 +89,51 @@ describe("Dashboard", () => {
   });
 
   it("falls back to the previous week when the URL has no week", () => {
+    mockRows.current = [row()];
     render(<Dashboard />, { wrapper: createTestWrapper() });
 
     expect(screen.getByTestId("ranked-grid")).toHaveAttribute("data-week", "24");
   });
 
   it("takes the week from the URL when it is given", () => {
+    mockRows.current = [row()];
     render(<Dashboard />, { wrapper: createTestWrapper(["/?week=25"]) });
 
     expect(screen.getByTestId("ranked-grid")).toHaveAttribute("data-week", "25");
+  });
+
+  it("says so rather than showing an empty board", () => {
+    render(<Dashboard />, { wrapper: createTestWrapper() });
+
+    expect(screen.getByText("No submissions for week 24.")).toBeInTheDocument();
+    expect(screen.queryByTestId("ranked-grid")).not.toBeInTheDocument();
+  });
+
+  it("opens on the ranked grid and switches layout on click", async () => {
+    mockRows.current = [row()];
+    render(<Dashboard />, { wrapper: createTestWrapper() });
+
+    expect(screen.getByTestId("ranked-grid")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Ranked grid/ })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: /Ladder/ }));
+
+    expect(screen.getByTestId("ladder")).toBeInTheDocument();
+    expect(screen.queryByTestId("ranked-grid")).not.toBeInTheDocument();
+  });
+
+  it("switches layout from the number keys", async () => {
+    mockRows.current = [row()];
+    render(<Dashboard />, { wrapper: createTestWrapper() });
+
+    await userEvent.keyboard("3");
+    expect(screen.getByTestId("field")).toBeInTheDocument();
+
+    await userEvent.keyboard("1");
+    expect(screen.getByTestId("ranked-grid")).toBeInTheDocument();
   });
 
   it("shows a loading line rather than an empty board", () => {
