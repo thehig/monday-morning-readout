@@ -7,20 +7,9 @@ import {
 import { formatEmailDisplayName, formatAmount } from "../../../lib/utils";
 import { getDateTimeProps } from "../../../lib/date-utils";
 import { TechnicalDetails } from "./TechnicalDetails";
-import type { POFeedback, AggregatedPOFeedback } from "../../../types/feedback";
 import { FeedbackContentProps } from "../../../types/components";
 
-function isAggregatedFeedback(
-  feedback: POFeedback | AggregatedPOFeedback
-): feedback is AggregatedPOFeedback {
-  return "all_submission_dates" in feedback;
-}
-
-export function FeedbackContent({
-  feedback,
-  week,
-  allFeedbackIds,
-}: FeedbackContentProps) {
+export function FeedbackContent({ feedback, week }: FeedbackContentProps) {
   const displayName = formatEmailDisplayName(feedback.submitted_by);
   const customerName = feedback.customer || "Unknown Customer";
   const submissionDate = new Date(feedback.created_at);
@@ -270,13 +259,6 @@ export function FeedbackContent({
         createdAt={feedback.created_at}
         submittedBy={feedback.submitted_by}
         relativeTime={relativeTime}
-        allSubmissionDates={
-          isAggregatedFeedback(feedback)
-            ? feedback.all_submission_dates
-            : undefined
-        }
-        isAggregated={isAggregatedFeedback(feedback)}
-        allIds={allFeedbackIds}
       />
     </motion.div>
   );

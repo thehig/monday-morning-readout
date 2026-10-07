@@ -1,4 +1,3 @@
-/* eslint-env browser */
 import CryptoJS from "crypto-js";
 
 // Encryption configuration
@@ -81,11 +80,6 @@ function decryptData(encryptedData, password) {
     return result;
   } catch (e) {
     console.error("Decryption failed:", e);
-    console.error("CryptoJS availability:", {
-      CryptoJS: !!window.CryptoJS,
-      AES: !!window.CryptoJS?.AES,
-      PBKDF2: !!window.CryptoJS?.PBKDF2,
-    });
     throw new Error("Decryption failed. Invalid password or corrupted data.");
   }
 }
@@ -147,7 +141,5 @@ const secureEnv = {
   encryptEnvVars,
   decryptEnvVars,
 };
-
-// window.secureEnv = secureEnv; // Removed browser-specific code
 
 export default secureEnv;

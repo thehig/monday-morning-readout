@@ -13,9 +13,6 @@ export const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({
   createdAt,
   submittedBy,
   relativeTime,
-  allSubmissionDates,
-  isAggregated,
-  allIds,
 }) => {
   return (
     <div className="mt-8 pt-6 border-t border-gray-100">
@@ -26,20 +23,8 @@ export const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
         <div className="space-y-1">
-          <div className="text-xs text-gray-400">
-            Feedback ID{isAggregated && allIds && allIds.length > 1 ? "s" : ""}
-          </div>
-          {isAggregated && allIds && allIds.length > 0 ? (
-            <div className="font-mono text-gray-600 space-y-1">
-              {allIds.map((feedbackId, index) => (
-                <div key={feedbackId}>
-                  {feedbackId} {index === 0 && "(Latest)"}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="font-mono text-gray-600">{id}</div>
-          )}
+          <div className="text-xs text-gray-400">Feedback ID</div>
+          <div className="font-mono text-gray-600">{id}</div>
         </div>
 
         <div className="space-y-1">
@@ -47,38 +32,24 @@ export const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({
           <div className="font-mono text-gray-600">{week}</div>
         </div>
 
-        {isAggregated && allSubmissionDates && allSubmissionDates.length > 0 ? (
-          <div className="space-y-1">
-            <div className="text-xs text-gray-400">Submission Dates</div>
-            <div className="font-mono text-gray-600 space-y-1">
-              {allSubmissionDates.map((date, index) => (
-                <div key={date}>
-                  {formatDate(new Date(date), "isoDate")}{" "}
-                  {index === 0 && "(Latest)"}
-                </div>
-              ))}
-            </div>
+        <div className="space-y-1">
+          <div className="text-xs text-gray-400">Submission Time</div>
+          <div className="font-mono text-gray-600">
+            {formatTime(submissionDate, true)}
           </div>
-        ) : (
-          <>
-            <div className="space-y-1">
-              <div className="text-xs text-gray-400">Submission Time</div>
-              <div className="font-mono text-gray-600">
-                {formatTime(submissionDate, true)}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs text-gray-400">Submission Date</div>
-              <div className="font-mono text-gray-600">
-                {formatDate(submissionDate, "isoDate")}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs text-gray-400">Raw Timestamp</div>
-              <div className="font-mono text-gray-600">{createdAt}</div>
-            </div>
-          </>
-        )}
+        </div>
+
+        <div className="space-y-1">
+          <div className="text-xs text-gray-400">Submission Date</div>
+          <div className="font-mono text-gray-600">
+            {formatDate(submissionDate, "isoDate")}
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <div className="text-xs text-gray-400">Raw Timestamp</div>
+          <div className="font-mono text-gray-600">{createdAt}</div>
+        </div>
 
         <div className="space-y-1">
           <div className="text-xs text-gray-400">Submitter Email</div>

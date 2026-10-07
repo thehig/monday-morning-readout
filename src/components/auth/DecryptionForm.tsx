@@ -9,8 +9,7 @@ import secureEnv from "../../utils/encryption.js";
 // the @ts-ignore achieves this, and the eslint-disable silences the warning about using @ts-ignore.
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import encryptedEnvData from "../../encrypted-env.json"; // Import JSON data
-// Removed global types dependency
+import encryptedEnvData from "../../encrypted-env.json";
 
 interface DecryptionFormProps {
   onDecryptionSuccess: () => void;
@@ -30,34 +29,10 @@ export function DecryptionForm({
       return;
     }
 
-    // Removed check for window.ENCRYPTED_ENV
-    /*
-    if (!window.ENCRYPTED_ENV) {
-      setError("Encrypted environment variables not found.");
-      return;
-    }
-    */
-
     try {
       console.log("Starting decryption process");
-      // console.log("ENCRYPTED_ENV available:", !!window.ENCRYPTED_ENV); // Removed check
-      // console.log("secureEnv available:", !!window.secureEnv); // Removed check
 
-      // Removed check for window.ENCRYPTED_ENV existence
-      /*
-      if (!window.ENCRYPTED_ENV) {
-        throw new Error(
-          "Encrypted environment variables not found on window object."
-        );
-      }
-      */
-
-      // Use imported JSON data - type should be inferred
-      const decryptedVars = secureEnv.decryptEnvVars(
-        encryptedEnvData, // Remove cast
-        password
-      );
-      // window.DECRYPTED_ENV = decryptedVars as any; // Removed assignment to window
+      const decryptedVars = secureEnv.decryptEnvVars(encryptedEnvData, password);
       console.log(
         "Decryption successful, variables available:",
         Object.keys(decryptedVars).join(", ")

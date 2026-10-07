@@ -4,10 +4,10 @@ import { TechnicalDetails } from "./TechnicalDetails";
 
 // Mock the date-utils functions
 vi.mock("../../../lib/date-utils", () => ({
-  formatTime: vi.fn((date: Date, includeSeconds?: boolean) => {
+  formatTime: vi.fn((_date: Date, includeSeconds?: boolean) => {
     return includeSeconds ? "10:30:45" : "10:30";
   }),
-  formatDate: vi.fn((date: Date, format: string) => {
+  formatDate: vi.fn((_date: Date, format: string) => {
     if (format === "isoDate") return "2024-01-15";
     return "January 15, 2024";
   }),
@@ -106,105 +106,7 @@ describe("TechnicalDetails", () => {
     });
   });
 
-  describe("Aggregated Feedback Rendering", () => {
-    const aggregatedProps = {
-      ...baseProps,
-      isAggregated: true,
-      allIds: ["feedback-123", "feedback-124", "feedback-125"],
-      allSubmissionDates: [
-        "2024-01-15T10:30:45Z",
-        "2024-01-14T09:20:30Z",
-        "2024-01-13T14:15:20Z",
-      ],
-    };
-
-    it("renders multiple feedback IDs for aggregated feedback", () => {
-      render(<TechnicalDetails {...aggregatedProps} />);
-
-      expect(screen.getByText("Feedback IDs")).toBeInTheDocument(); // Plural
-      expect(screen.getByText(/feedback-123/)).toBeInTheDocument();
-      expect(screen.getByText(/feedback-124/)).toBeInTheDocument();
-      expect(screen.getByText(/feedback-125/)).toBeInTheDocument();
-      expect(screen.getAllByText(/\(Latest\)/)).toHaveLength(2); // One for IDs, one for dates
-    });
-
-    it("renders multiple submission dates for aggregated feedback", () => {
-      render(<TechnicalDetails {...aggregatedProps} />);
-
-      expect(screen.getByText("Submission Dates")).toBeInTheDocument();
-      // All dates should be formatted as 2024-01-15 by the mock
-      expect(screen.getAllByText(/2024-01-15/)).toHaveLength(3);
-      expect(screen.getAllByText(/\(Latest\)/)).toHaveLength(2); // One for IDs, one for dates
-    });
-
-    it("does not show individual submission time/date fields for aggregated feedback", () => {
-      render(<TechnicalDetails {...aggregatedProps} />);
-
-      expect(screen.queryByText("Submission Time")).not.toBeInTheDocument();
-      expect(screen.queryByText("Submission Date")).not.toBeInTheDocument();
-      expect(screen.queryByText("Raw Timestamp")).not.toBeInTheDocument();
-    });
-
-    it("handles single ID in aggregated mode", () => {
-      const singleIdAggregated = {
-        ...baseProps,
-        isAggregated: true,
-        allIds: ["feedback-123"],
-        allSubmissionDates: ["2024-01-15T10:30:45Z"],
-      };
-
-      render(<TechnicalDetails {...singleIdAggregated} />);
-
-      expect(screen.getByText("Feedback ID")).toBeInTheDocument(); // Singular
-      expect(screen.getByText(/feedback-123/)).toBeInTheDocument();
-    });
-  });
-
   describe("Edge Cases", () => {
-    it("handles missing allIds in aggregated mode", () => {
-      const missingIdsProps = {
-        ...baseProps,
-        isAggregated: true,
-        allSubmissionDates: ["2024-01-15T10:30:45Z"],
-      };
-
-      render(<TechnicalDetails {...missingIdsProps} />);
-
-      // Should fall back to single ID display
-      expect(screen.getByText("Feedback ID")).toBeInTheDocument();
-      expect(screen.getByText(/feedback-123/)).toBeInTheDocument();
-    });
-
-    it("handles missing allSubmissionDates in aggregated mode", () => {
-      const missingDatesProps = {
-        ...baseProps,
-        isAggregated: true,
-        allIds: ["feedback-123", "feedback-124"],
-      };
-
-      render(<TechnicalDetails {...missingDatesProps} />);
-
-      // Should show individual date fields instead
-      expect(screen.getByText("Submission Time")).toBeInTheDocument();
-      expect(screen.getByText("Submission Date")).toBeInTheDocument();
-      expect(screen.getByText("Raw Timestamp")).toBeInTheDocument();
-    });
-
-    it("handles empty arrays in aggregated mode", () => {
-      const emptyArraysProps = {
-        ...baseProps,
-        isAggregated: true,
-        allIds: [],
-        allSubmissionDates: [],
-      };
-
-      render(<TechnicalDetails {...emptyArraysProps} />);
-
-      // Should fall back to single ID display
-      expect(screen.getByText("Feedback ID")).toBeInTheDocument();
-      expect(screen.getByText(/feedback-123/)).toBeInTheDocument();
-    });
-
     it("handles week number 0", () => {
       const weekZeroProps = { ...baseProps, week: 0 };
       render(<TechnicalDetails {...weekZeroProps} />);

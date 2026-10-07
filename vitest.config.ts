@@ -22,7 +22,6 @@ export default defineConfig({
         // Main entry points and configuration
         "src/main.tsx",
         "src/App.tsx",
-        "src/encrypted-env.js",
         "src/vite-env.d.ts",
         // Simple index files that only export other modules
         "src/components/indicators/index.ts",

@@ -7,20 +7,6 @@ import { Layout } from "./components/layout/Layout";
 import { Dashboard } from "./components/data-display/Dashboard";
 import { DecryptionForm } from "./components/auth/DecryptionForm";
 
-// Extend Window interface to include our custom properties
-declare global {
-  interface Window {
-    ENCRYPTED_ENV: string;
-    DECRYPTED_ENV: Record<string, string>;
-    secureEnv: {
-      decryptEnvVars: (
-        encrypted: string,
-        password: string
-      ) => Record<string, string>;
-    };
-  }
-}
-
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -28,14 +28,23 @@ components/
 ├── data-display/
 │   └── Dashboard
 ├── feedback/
+│   ├── cards/
+│   │   └── FeedbackCard
 │   └── details/
-│       └── FeedbackDetail
+│       ├── FeedbackContent
+│       ├── FeedbackDetail
+│       └── TechnicalDetails
 ├── indicators/
+│   ├── metrics/
+│   │   ├── HappinessIndicator
+│   │   └── VelocityIndicator
+│   └── visualization/
+│       └── Thermometer
 ├── inputs/
-├── layout/
-│   └── Layout
-├── navigation/
-└── ui/
+│   └── WeekPicker
+└── layout/
+    ├── Header
+    └── Layout
 ```
 
 ## Utility Functions and Support Code
@@ -68,15 +77,13 @@ components/
 
 - **cn**: Utility for combining class names with Tailwind
 - **formatEmailDisplayName**: Formats email addresses for display
-- **aggregateFeedbackByEmail**: Complex data transformation for feedback
-  - Includes averaging and grouping logic
-  - Handles multiple data fields
-- **getGravatarUrl**: Generates Gravatar URLs for avatars
+- **formatAmount**: Formats an amount string as Euro currency
 
 ### Date Utilities (`src/lib/date-utils.ts`)
 
-- **getWeekDates**: Calculates start/end dates for week numbers
+- **getWeekDates**: Calculates Monday–Sunday start/end dates for week numbers
 - **getCurrentWeek**: Determines current week number
+- **getPreviousWeek**: Determines the previous week number (the dashboard default)
 - **formatDate**: Date formatting with multiple format options
 - **formatTime**: Time formatting with/without seconds
 - **formatDateTime**: Combined date and time formatting
@@ -89,8 +96,7 @@ components/
 - **usePOFeedbackByWeek**: React Query hook for fetching feedback by week
   - Includes date range calculations
   - Handles data fetching and error states
-- **usePOFeedbackById**: React Query hook for fetching specific feedback
-  - Supports single or multiple IDs
+- **usePOFeedbackById**: React Query hook for fetching a single feedback entry by ID
   - Includes error handling
 
 ### Testing Priorities

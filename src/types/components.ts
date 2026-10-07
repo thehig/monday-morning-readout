@@ -1,11 +1,5 @@
-import { POFeedback, AggregatedPOFeedback } from "./feedback";
+import { POFeedback } from "./feedback";
 import { HappinessType, VelocityType } from "./indicators";
-
-export interface ToggleProps {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  label?: string;
-}
 
 export interface HeaderProps {
   title: string;
@@ -36,11 +30,6 @@ export interface HappinessIndicatorProps {
   value: number;
 }
 
-export interface FeedbackListProps {
-  feedback: POFeedback[];
-  currentWeek: number;
-}
-
 export interface TechnicalDetailsProps {
   id: string;
   week: number;
@@ -48,22 +37,14 @@ export interface TechnicalDetailsProps {
   createdAt: string;
   submittedBy: string;
   relativeTime: string;
-  allSubmissionDates?: string[];
-  isAggregated?: boolean;
-  allIds?: string[];
 }
 
 export interface FeedbackContentProps {
-  feedback: POFeedback | AggregatedPOFeedback;
+  feedback: POFeedback;
   week: number;
-  allFeedbackIds?: string[];
 }
 
 export interface FeedbackCardProps {
   feedback: POFeedback;
   currentWeek: number;
-}
-
-export interface DecryptionFormProps {
-  onDecrypt: (key: string) => void;
 }

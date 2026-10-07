@@ -31,16 +31,9 @@ vi.mock("framer-motion", () => ({
       className?: string;
       [key: string]: unknown;
     }) => {
-      // Filter out motion-specific props
+      // Filter out motion-specific props so they don't land on the DOM node
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const {
-        variants: _variants,
-        initial: _initial,
-        animate: _animate,
-        whileHover: _whileHover,
-        whileTap: _whileTap,
-        ...domProps
-      } = props;
+      const { variants, initial, animate, whileHover, whileTap, ...domProps } = props;
       return (
         <div className={className} {...domProps}>
           {children}

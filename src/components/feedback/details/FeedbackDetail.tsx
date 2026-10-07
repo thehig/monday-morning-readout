@@ -61,13 +61,7 @@ export function FeedbackDetail() {
         </div>
 
         {/* Feedback Content */}
-        <FeedbackContent
-          feedback={
-            Array.isArray(feedbackData) ? feedbackData[0] : feedbackData
-          }
-          week={week}
-          allFeedbackIds={undefined}
-        />
+        <FeedbackContent feedback={feedbackData} week={week} />
       </div>
     </div>
   );
