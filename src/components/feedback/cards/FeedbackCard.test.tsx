@@ -44,11 +44,10 @@ vi.mock("framer-motion", () => ({
 }));
 
 const mockFeedback: POFeedback = {
-  id: "test-123",
+  id: 123,
   customer: "Acme Corp",
   submitted_by: "john.doe@example.com",
   created_at: "2024-01-15T10:00:00Z",
-  week_number: 10,
   velocity_next_week: "Grün",
   progress_percent: 75,
   team_happiness: 4.5,
@@ -56,7 +55,8 @@ const mockFeedback: POFeedback = {
   milestones_done: "Completed user authentication",
   risks: "Database migration pending",
   goals_next_week: "Deploy to staging",
-  ps_call_status: "Scheduled for Friday",
+  ps_call_needed: "JA",
+  ps_call_context: "Scheduled for Friday",
 };
 
 const defaultProps = {
@@ -202,20 +202,20 @@ describe("FeedbackCard", () => {
       renderWithRouter(<FeedbackCard {...defaultProps} />);
 
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/feedback/test-123?week=10");
+      expect(link).toHaveAttribute("href", "/feedback/123?week=10");
     });
 
     it("updates link with different week parameter", () => {
       renderWithRouter(<FeedbackCard {...defaultProps} currentWeek={15} />);
 
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/feedback/test-123?week=15");
+      expect(link).toHaveAttribute("href", "/feedback/123?week=15");
     });
 
     it("updates link with different feedback ID", () => {
       const differentFeedback = {
         ...mockFeedback,
-        id: "different-456",
+        id: 456,
       };
 
       renderWithRouter(
@@ -223,7 +223,7 @@ describe("FeedbackCard", () => {
       );
 
       const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/feedback/different-456?week=10");
+      expect(link).toHaveAttribute("href", "/feedback/456?week=10");
     });
   });
 
@@ -398,8 +398,8 @@ describe("FeedbackCard", () => {
 
   describe("Component Integration", () => {
     it("renders multiple feedback cards with different data", () => {
-      const feedback1 = { ...mockFeedback, id: "1", customer: "Customer 1" };
-      const feedback2 = { ...mockFeedback, id: "2", customer: "Customer 2" };
+      const feedback1 = { ...mockFeedback, id: 1, customer: "Customer 1" };
+      const feedback2 = { ...mockFeedback, id: 2, customer: "Customer 2" };
 
       renderWithRouter(
         <div>
@@ -450,6 +450,64 @@ describe("FeedbackCard", () => {
 
       expect(screen.getByText("Team Happiness: 1.5")).toBeInTheDocument();
       expect(screen.getByText("Customer Happiness: 2")).toBeInTheDocument();
+    });
+  });
+
+  describe("Schedule chip", () => {
+    it("shows nothing for feedback that predates the schedule fields", () => {
+      renderWithRouter(<FeedbackCard {...defaultProps} />);
+
+      expect(screen.queryByText(/Overdue by/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Time left/)).not.toBeInTheDocument();
+      expect(screen.queryByText("Not on track")).not.toBeInTheDocument();
+    });
+
+    it("shows time left when the deadline is still ahead", () => {
+      const feedback = {
+        ...mockFeedback,
+        target_date: "2026-11-05",
+        target_diff: { years: 0, months: -1, days: -3 },
+      };
+      renderWithRouter(<FeedbackCard {...defaultProps} feedback={feedback} />);
+
+      const chip = screen.getByText("Time left 1 month 3 days");
+      expect(chip).toBeInTheDocument();
+      expect(chip).toHaveAttribute("title", "Deadline Nov 5, 2026");
+      expect(chip).not.toHaveClass("text-red-200");
+    });
+
+    it("marks an overdue deadline", () => {
+      const feedback = {
+        ...mockFeedback,
+        target_diff: { years: 0, months: 0, days: 23 },
+      };
+      renderWithRouter(<FeedbackCard {...defaultProps} feedback={feedback} />);
+
+      const chip = screen.getByText("Overdue by 23 days");
+      expect(chip).toBeInTheDocument();
+      expect(chip).toHaveClass("text-red-200");
+    });
+
+    it("falls back to the self-reported flag when there is no diff", () => {
+      const feedback = { ...mockFeedback, project_on_track: false };
+      renderWithRouter(<FeedbackCard {...defaultProps} feedback={feedback} />);
+
+      expect(screen.getByText("Not on track")).toBeInTheDocument();
+    });
+
+    it("stays silent when the project is on track and no diff is recorded", () => {
+      const feedback = { ...mockFeedback, project_on_track: true };
+      renderWithRouter(<FeedbackCard {...defaultProps} feedback={feedback} />);
+
+      expect(screen.queryByText("Not on track")).not.toBeInTheDocument();
+    });
+
+    it("ignores a malformed target_diff rather than failing to render", () => {
+      const feedback = { ...mockFeedback, target_diff: "nonsense" } as never;
+      renderWithRouter(<FeedbackCard {...defaultProps} feedback={feedback} />);
+
+      expect(screen.getByText("Customer: Acme Corp")).toBeInTheDocument();
+      expect(screen.queryByText(/Overdue by/)).not.toBeInTheDocument();
     });
   });
 });

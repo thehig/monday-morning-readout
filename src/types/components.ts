@@ -31,7 +31,7 @@ export interface HappinessIndicatorProps {
 }
 
 export interface TechnicalDetailsProps {
-  id: string;
+  id: number;
   week: number;
   submissionDate: Date;
   createdAt: string;

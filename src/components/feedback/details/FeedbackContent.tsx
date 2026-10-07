@@ -6,6 +6,7 @@ import {
 } from "../../indicators";
 import { formatEmailDisplayName, formatAmount } from "../../../lib/utils";
 import { getDateTimeProps } from "../../../lib/date-utils";
+import { getScheduleSummary } from "../../../lib/schedule";
 import { TechnicalDetails } from "./TechnicalDetails";
 import { FeedbackContentProps } from "../../../types/components";
 
@@ -14,6 +15,7 @@ export function FeedbackContent({ feedback, week }: FeedbackContentProps) {
   const customerName = feedback.customer || "Unknown Customer";
   const submissionDate = new Date(feedback.created_at);
   const { dateTime, title, relativeTime } = getDateTimeProps(submissionDate);
+  const schedule = getScheduleSummary(feedback);
 
   return (
     <motion.div
@@ -92,9 +94,72 @@ export function FeedbackContent({ feedback, week }: FeedbackContentProps) {
                     {formatAmount(feedback.amount_charged)}
                   </span>
                   <span className="text-sm text-gray-500">
-                    Invoiced for week {feedback.week_number}
+                    Invoiced for week {week}
                   </span>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Schedule - only present on feedback submitted after these fields were added */}
+          {schedule.hasAny && (
+            <div>
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="text-lg font-medium text-gray-900">Schedule</h2>
+                {schedule.diff && (
+                  <div
+                    className={`text-sm font-medium ${
+                      schedule.diff.direction === "overdue"
+                        ? "text-red-600"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {schedule.diff.label} {schedule.diff.text}
+                  </div>
+                )}
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg space-y-3">
+                <div className="grid grid-cols-2 gap-4">
+                  {schedule.deadline && (
+                    <div>
+                      <div className="text-xs text-gray-400">Deadline</div>
+                      <div className="text-gray-900 font-medium">
+                        {schedule.deadline}
+                      </div>
+                    </div>
+                  )}
+                  {schedule.estimatedCompletion && (
+                    <div>
+                      <div className="text-xs text-gray-400">
+                        Estimated Completion Date
+                      </div>
+                      <div className="text-gray-900 font-medium">
+                        {schedule.estimatedCompletion}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {schedule.onTrackText && (
+                  <div
+                    className={`text-sm font-medium ${
+                      schedule.onTrack ? "text-emerald-700" : "text-red-600"
+                    }`}
+                  >
+                    {schedule.onTrackText}
+                  </div>
+                )}
+
+                {schedule.delayReason && (
+                  <div>
+                    <div className="text-xs text-gray-400">
+                      Reason for the delay
+                    </div>
+                    <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                      {schedule.delayReason}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -237,9 +302,18 @@ export function FeedbackContent({ feedback, week }: FeedbackContentProps) {
               <div className="text-sm text-purple-600">Problem Solving</div>
             </div>
             <div className="p-4 bg-purple-50/50 rounded-lg border border-purple-100">
-              {feedback.ps_call_status ? (
-                <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
-                  {feedback.ps_call_status}
+              {feedback.ps_call_needed || feedback.ps_call_context ? (
+                <div className="space-y-2">
+                  {feedback.ps_call_needed && (
+                    <div className="font-medium text-gray-900">
+                      {feedback.ps_call_needed}
+                    </div>
+                  )}
+                  {feedback.ps_call_context && (
+                    <div className="prose prose-sm max-w-none text-gray-600 whitespace-pre-wrap">
+                      {feedback.ps_call_context}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-4 text-gray-400">

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { formatEmailDisplayName } from "../../../lib/utils";
+import { getScheduleSummary } from "../../../lib/schedule";
 import {
   Thermometer,
   HappinessIndicator,
@@ -18,6 +19,15 @@ const cardVariants = {
 export function FeedbackCard({ feedback, currentWeek }: FeedbackCardProps) {
   const customerName = feedback.customer || "Unknown Customer";
   const emailDisplayName = formatEmailDisplayName(feedback.submitted_by);
+  const schedule = getScheduleSummary(feedback);
+  // Older feedback has no schedule fields at all - the chip is simply absent.
+  const scheduleChip = schedule.diff
+    ? `${schedule.diff.label} ${schedule.diff.text}`
+    : schedule.onTrack === false
+    ? "Not on track"
+    : null;
+  const scheduleIsLate =
+    schedule.diff?.direction === "overdue" || schedule.onTrack === false;
 
   return (
     <motion.div
@@ -46,6 +56,22 @@ export function FeedbackCard({ feedback, currentWeek }: FeedbackCardProps) {
             >
               {emailDisplayName}
             </p>
+            {scheduleChip && (
+              <span
+                className={`mt-1 inline-block rounded px-2 py-0.5 text-xs font-medium truncate max-w-full ${
+                  scheduleIsLate
+                    ? "bg-red-500/20 text-red-200"
+                    : "bg-white/10 text-gray-200"
+                }`}
+                title={
+                  schedule.deadline
+                    ? `Deadline ${schedule.deadline}`
+                    : undefined
+                }
+              >
+                {scheduleChip}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-3 flex-shrink-0">

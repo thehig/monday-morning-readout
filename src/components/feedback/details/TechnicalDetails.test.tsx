@@ -23,7 +23,7 @@ vi.mock("@heroicons/react/24/outline", () => ({
 }));
 
 const baseProps = {
-  id: "feedback-123",
+  id: 346,
   week: 10,
   submissionDate: new Date("2024-01-15T10:30:45Z"),
   createdAt: "2024-01-15T10:30:45.123Z",
@@ -38,7 +38,7 @@ describe("TechnicalDetails", () => {
 
       expect(screen.getByText("Technical Details")).toBeInTheDocument();
       expect(screen.getByText("System Information")).toBeInTheDocument();
-      expect(screen.getByText("feedback-123")).toBeInTheDocument();
+      expect(screen.getByText("346")).toBeInTheDocument();
       expect(screen.getByText("10")).toBeInTheDocument();
       expect(screen.getByText("user@example.com")).toBeInTheDocument();
       expect(screen.getByText("Last updated: 2 hours ago")).toBeInTheDocument();
@@ -154,7 +154,7 @@ describe("TechnicalDetails", () => {
       const label = screen.getByText("Feedback ID");
       expect(label).toHaveClass("text-xs", "text-gray-400");
 
-      const value = screen.getByText(/feedback-123/);
+      const value = screen.getByText(/346/);
       expect(value).toHaveClass("font-mono", "text-gray-600");
 
       const container = label.closest(".space-y-1");
@@ -214,7 +214,7 @@ describe("TechnicalDetails", () => {
       const labels = screen.getByText("Feedback ID");
       expect(labels).toHaveClass("text-gray-400");
 
-      const values = screen.getByText(/feedback-123/);
+      const values = screen.getByText(/346/);
       expect(values).toHaveClass("text-gray-600");
     });
   });
@@ -242,7 +242,7 @@ describe("TechnicalDetails", () => {
       render(<TechnicalDetails {...baseProps} />);
 
       const technicalValues = [
-        screen.getByText(/feedback-123/),
+        screen.getByText(/346/),
         screen.getByText("10"),
         screen.getByText("10:30:45"),
         screen.getByText("2024-01-15"),
@@ -313,13 +313,13 @@ describe("TechnicalDetails", () => {
     it("handles props updates correctly", () => {
       const { rerender } = render(<TechnicalDetails {...baseProps} />);
 
-      expect(screen.getByText("feedback-123")).toBeInTheDocument();
+      expect(screen.getByText("346")).toBeInTheDocument();
 
-      rerender(<TechnicalDetails {...baseProps} id="feedback-456" week={20} />);
+      rerender(<TechnicalDetails {...baseProps} id={456} week={20} />);
 
-      expect(screen.getByText("feedback-456")).toBeInTheDocument();
+      expect(screen.getByText("456")).toBeInTheDocument();
       expect(screen.getByText("20")).toBeInTheDocument();
-      expect(screen.queryByText("feedback-123")).not.toBeInTheDocument();
+      expect(screen.queryByText("346")).not.toBeInTheDocument();
     });
   });
 });

@@ -65,7 +65,41 @@ export const DATE_FORMAT_OPTIONS = {
     month: "2-digit",
     day: "2-digit",
   } as const,
+  dayMonthYear: {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  } as const,
 } as const;
+
+/**
+ * Parses a plain `yyyy-MM-dd` date into a local Date.
+ *
+ * `new Date("2026-10-06")` is parsed as UTC midnight, which renders as the
+ * previous day west of Greenwich. These columns carry a calendar date with no
+ * time, so build it in local time instead. Returns null for anything that is
+ * not a real date.
+ */
+export function parseDateOnly(value: unknown): Date | null {
+  if (typeof value !== "string") return null;
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!match) return null;
+
+  const [, year, month, day] = match.map(Number);
+  const date = new Date(year, month - 1, day);
+
+  // Rejects dates that rolled over, e.g. 2026-02-31.
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return date;
+}
 
 export function formatDate(
   date: Date,
