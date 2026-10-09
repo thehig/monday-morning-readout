@@ -6,7 +6,7 @@ import { showDate } from "../../../lib/engagements";
 import { buildStatement } from "../../../lib/statement";
 import { buildTimeline } from "../../../lib/timeline";
 import { formatDateTime } from "../../../lib/date-utils";
-import { describeStep, type StepPosition } from "../../../lib/stepping";
+import type { StepPosition } from "../../../lib/stepping";
 import { Meter, ProgressBar, VelocityDot } from "../primitives";
 import { FooterActions, Key } from "../chrome";
 import { STATE_TEXT } from "../state-styles";
@@ -121,7 +121,7 @@ export function Stop({
   const statement = buildStatement(engagement);
 
   // The operator steps through the week one-handed while talking, so the arrows
-  // walk the Wall's own order: the exceptions first, then a pass of the rest.
+  // walk the Wall's own order: the ones behind schedule first, then the rest.
   useEffect(() => {
     if (!step) return;
 
@@ -299,19 +299,10 @@ export function Stop({
           {step?.nextId != null && (
             <span>
               <Key>&rarr;</Key>
-              {step.nextStartsFastPass ? "start the fast pass" : "next"}
+              next
             </span>
           )}
         </span>
-
-        {step && (
-          <span className="flex shrink-0 gap-2.5">
-            <b className="font-bold text-ink-2">
-              {step.position} of {step.total}
-            </b>
-            {describeStep(step)}
-          </span>
-        )}
 
         <span className="ml-auto flex gap-[18px] truncate text-[17px]">
           <span>Feedback {engagement.id}</span>

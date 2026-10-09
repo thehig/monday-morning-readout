@@ -40,7 +40,7 @@ export function Dashboard({ layout }: { layout: WallLayout }) {
     const onKey = (event: KeyboardEvent) => {
       if (isTypingTarget(event)) return;
 
-      // The call opens by stepping into whatever needs a decision first.
+      // The call opens by stepping into the first engagement - the most behind.
       if (event.key === "ArrowRight" && firstId !== undefined) {
         event.preventDefault();
         navigate(`/feedback/${firstId}?week=${currentWeek}`);
@@ -85,7 +85,7 @@ export function Dashboard({ layout }: { layout: WallLayout }) {
         <FooterActions>
           {firstId !== undefined && (
             <span>
-              <Key>&rarr;</Key>step into the first that needs a decision
+              <Key>&rarr;</Key>open the first engagement
             </span>
           )}
         </FooterActions>

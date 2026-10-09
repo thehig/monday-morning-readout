@@ -1,121 +1,29 @@
-import { getWeekDates, formatDate } from "./date-utils";
 import { monthTicks, type TimelineTick } from "./timeline";
 import type { Engagement } from "./engagements";
 
 /**
- * Data for the Dates state, which looks forward rather than back.
+ * Data for the owner runway: one lane per product owner, one dot per
+ * engagement, placed on a shared calendar by its estimated completion date.
  *
- * Everything is placed by estimated completion rather than by the committed
- * deadline, because the estimate is what will actually happen. The Ladder
- * already answers "what slipped"; this answers "what is coming, and what
- * collides".
+ * Placed by the estimate rather than the deadline because the runway looks
+ * forward: the estimate is when the owner expects the work to land. An owner's
+ * engagements are separate pieces of work for separate customers, so the lane
+ * draws where each one lands and nothing between them.
  */
 
 const DAY = 24 * 60 * 60 * 1000;
-/** Columns past this many weeks are collapsed into one, to keep them readable. */
-const MAX_WEEK_COLUMNS = 11;
-/** Two landings for one person closer than this are worth remarking on. */
-export const CLOSE_LANDING_DAYS = 10;
-
-export interface LandingWeek {
-  week: number;
-  /** "Week 44", or "Week 3 of 2027" once the count runs past the year end. */
-  weekLabel: string;
-  /** "5 – 11 Oct" */
-  label: string;
-  engagements: Engagement[];
-  isCurrent: boolean;
-  /** The final column, holding everything beyond the visible span. */
-  isOverflow: boolean;
-}
-
-/** A run of weeks with nothing landing, shown as one marker, not as columns. */
-export interface QuietRun {
-  kind: "quiet";
-  from: number;
-  to: number;
-  weeks: number;
-}
-
-export type LandingTrack = ({ kind: "week" } & LandingWeek) | QuietRun;
-
-export interface LandingWeeks {
-  columns: LandingWeek[];
-  /**
-   * The columns as they are laid out: loaded weeks, with runs of empty ones
-   * folded into a single marker.
-   */
-  track: LandingTrack[];
-  /** Engagements with no estimated completion date at all. */
-  undated: Engagement[];
-  /** The busiest column's count, so a pile-up can be called out. */
-  peak: number;
-}
-
-/**
- * Engagements bucketed into the calendar week their estimate falls in,
- * starting the week after the readout.
- */
-export function landingWeeks(
-  engagements: Engagement[],
-  currentWeek: number,
-  year: number
-): LandingWeeks {
-  const dated = engagements.filter((e) => e.landingWeek !== null);
-  const undated = engagements.filter((e) => e.landingWeek === null);
-
-  const first = currentWeek + 1;
-  const last = dated.length
-    ? Math.max(...dated.map((e) => e.landingWeek as number))
-    : first;
-  const visibleLast = Math.min(last, first + MAX_WEEK_COLUMNS - 1);
-
-  const columns: LandingWeek[] = [];
-  for (let week = first; week <= visibleLast; week += 1) {
-    const { start, end } = getWeekDates(week, year);
-    const isOverflow = week === visibleLast && last > visibleLast;
-
-    columns.push({
-      week,
-      weekLabel:
-        week <= 52 ? `Week ${week}` : `Week ${week - 52} of ${year + 1}`,
-      label: isOverflow
-        ? `from ${formatDate(start)}`
-        : `${formatDate(start)} – ${formatDate(end)}`,
-      isCurrent: week === first,
-      isOverflow,
-      engagements: dated.filter((e) =>
-        isOverflow
-          ? (e.landingWeek as number) >= week
-          : e.landingWeek === week
-      ),
-    });
-  }
-
-  return {
-    columns,
-    track: collapseQuiet(columns),
-    undated,
-    peak: columns.reduce((n, c) => Math.max(n, c.engagements.length), 0),
-  };
-}
 
 export interface RunwayMark {
   engagement: Engagement;
+  /** Where the estimated completion date falls across the axis. */
   pct: number;
-}
-
-export interface RunwayCollision {
-  fromPct: number;
-  toPct: number;
-  days: number;
 }
 
 export interface OwnerLane {
   owner: string;
   ownerKey: string;
+  /** The owner's engagements, earliest estimate first. */
   marks: RunwayMark[];
-  collisions: RunwayCollision[];
 }
 
 export interface Runway {
@@ -124,20 +32,14 @@ export interface Runway {
   months: TimelineTick[];
   todayPct: number;
   lanes: OwnerLane[];
-  /** Owners carrying two landings inside CLOSE_LANDING_DAYS. */
-  collidingOwners: number;
 }
 
 /**
- * One lane per product owner on a shared axis, with the gaps between their own
- * landings measured. This is the only view that connects delivery dates to the
- * people who have to deliver them.
+ * One lane per product owner on a shared axis that always holds today and
+ * every estimate. Engagements without an estimate have nowhere to sit and are
+ * left out.
  */
-export function buildRunway(
-  engagements: Engagement[],
-  today: Date,
-  closeDays = CLOSE_LANDING_DAYS
-): Runway | null {
+export function buildRunway(engagements: Engagement[], today: Date): Runway | null {
   const dated = engagements.filter((e) => e.estimate);
   if (!dated.length) return null;
 
@@ -165,35 +67,17 @@ export function buildRunway(
       const sorted = [...list].sort(
         (a, b) => (a.estimate as Date).getTime() - (b.estimate as Date).getTime()
       );
-      const marks = sorted.map((engagement) => ({
-        engagement,
-        pct: pct(engagement.estimate as Date),
-      }));
-
-      const collisions: RunwayCollision[] = [];
-      for (let i = 1; i < sorted.length; i += 1) {
-        const gap = Math.round(
-          ((sorted[i].estimate as Date).getTime() -
-            (sorted[i - 1].estimate as Date).getTime()) /
-            DAY
-        );
-        if (gap <= closeDays) {
-          collisions.push({
-            fromPct: marks[i - 1].pct,
-            toPct: marks[i].pct,
-            days: gap,
-          });
-        }
-      }
-
-      return { owner: sorted[0].owner, ownerKey, marks, collisions };
+      return {
+        owner: sorted[0].owner,
+        ownerKey,
+        marks: sorted.map((engagement) => ({
+          engagement,
+          pct: pct(engagement.estimate as Date),
+        })),
+      };
     })
-    .sort((a, b) => {
-      // Owners with a crowded fortnight lead, then the busiest.
-      const byCollision = b.collisions.length - a.collisions.length;
-      if (byCollision !== 0) return byCollision;
-      return b.marks.length - a.marks.length;
-    });
+    // The busiest owners lead; ties keep the week's own order.
+    .sort((a, b) => b.marks.length - a.marks.length);
 
   return {
     rangeStart,
@@ -201,66 +85,5 @@ export function buildRunway(
     months: monthTicks(rangeStart, rangeEnd, pct),
     todayPct: pct(today),
     lanes,
-    collidingOwners: lanes.filter((lane) => lane.collisions.length > 0).length,
   };
-}
-
-/** A run shorter than this keeps its own columns; the gap is worth seeing. */
-const MIN_QUIET_RUN = 2;
-
-/**
- * Fold runs of empty weeks into one marker.
- *
- * Week 44 holding four landings and week 47 holding none were given the same
- * share of the screen, so more than half the width went to weeks with nothing
- * in them and the pile-up - the thing the screen exists to show - was the
- * narrowest it could be. A single empty week stays a column, because one quiet
- * week between two busy ones is itself worth seeing.
- */
-export function collapseQuiet(columns: LandingWeek[]): LandingTrack[] {
-  const track: LandingTrack[] = [];
-  let run: LandingWeek[] = [];
-
-  const flush = () => {
-    if (!run.length) return;
-    if (run.length < MIN_QUIET_RUN) {
-      run.forEach((c) => track.push({ kind: "week", ...c }));
-    } else {
-      track.push({
-        kind: "quiet",
-        from: run[0].week,
-        to: run[run.length - 1].week,
-        weeks: run.length,
-      });
-    }
-    run = [];
-  };
-
-  for (const column of columns) {
-    // The overflow column means "and everything after", so it is never quiet
-    // even when the visible span happens to hold nothing.
-    if (!column.engagements.length && !column.isOverflow) {
-      run.push(column);
-      continue;
-    }
-    flush();
-    track.push({ kind: "week", ...column });
-  }
-  flush();
-
-  return track;
-}
-
-/**
- * How much width a week has earned.
- *
- * Weight by what lands in it rather than by the calendar, so the busiest week
- * is physically the widest thing on the screen. An empty week still gets a
- * column wide enough for its own date, and the step between one and two
- * landings is deliberately smaller than the count - four landings should be
- * wider than one, not four times wider, or the quiet weeks vanish.
- */
-export function weekWeight(count: number): number {
-  if (count === 0) return 0.5;
-  return 1 + (count - 1) * 0.6;
 }

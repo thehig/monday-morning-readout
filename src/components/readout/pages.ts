@@ -17,8 +17,7 @@ export interface ReadoutPage {
 export const PAGES: ReadoutPage[] = [
   { key: "1", label: "Ranked grid", path: "/grid" },
   { key: "2", label: "Ladder", path: "/ladder" },
-  { key: "3", label: "Landing weeks", path: "/landing-weeks" },
-  { key: "4", label: "Owner runway", path: "/owner-runway" },
+  { key: "3", label: "Owner runway", path: "/owner-runway" },
 ];
 
 /** Where the readout opens, and where a link with no page lands. */

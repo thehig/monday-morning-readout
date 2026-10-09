@@ -48,12 +48,14 @@ export function ReadoutFooter({ currentWeek, onActionsSlot }: ReadoutFooterProps
         })}
       </nav>
 
-      <span className="h-5 w-px shrink-0 bg-sheet-rule" aria-hidden="true" />
-
-      {/* The current page adds its own keys and position here. */}
+      {/*
+        The current page adds its own keys and position here. The rule on its
+        left separates them from the page links, and goes with them when a page
+        has none.
+      */}
       <div
         ref={onActionsSlot}
-        className="flex min-w-0 flex-1 items-center gap-[30px]"
+        className="flex min-w-0 flex-1 items-center gap-[30px] border-l border-sheet-rule pl-[30px] empty:border-l-0 empty:pl-0"
       />
     </footer>
   );

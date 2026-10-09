@@ -95,7 +95,6 @@ describe("engagements", () => {
 
       expect(e.slipDays).toBe(31);
       expect(e.landsInDays).toBe(24);
-      expect(e.landingWeek).toBe(43);
       expect(e.state).toBe("late");
     });
 
@@ -184,7 +183,6 @@ describe("engagements", () => {
       expect(e.deadline).toBeNull();
       expect(e.estimate).toBeNull();
       expect(e.slipDays).toBeNull();
-      expect(e.landingWeek).toBeNull();
       expect(e.state).toBe("unknown");
       expect(e.daysToDeadline).toBeNull();
       expect(e.overdueDays).toBeNull();
@@ -283,7 +281,7 @@ describe("engagements", () => {
       expect(summarise(engagements)).toEqual({
         engagements: 2,
         scheduled: 2,
-        needingDecision: 1,
+        behindSchedule: 1,
         offTrack: 0,
       });
     });
@@ -332,7 +330,7 @@ describe("summarise counts what can be compared", () => {
 
     expect(totals.engagements).toBe(2);
     expect(totals.scheduled).toBe(1);
-    expect(totals.needingDecision).toBe(1);
+    expect(totals.behindSchedule).toBe(1);
   });
 
   it("reports no schedules at all for a week that recorded none", () => {

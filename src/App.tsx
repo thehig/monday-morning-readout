@@ -48,11 +48,11 @@ function App() {
             <Route index element={<Redirect to={HOME} />} />
             <Route path="grid" element={<Dashboard layout="grid" />} />
             <Route path="ladder" element={<Dashboard layout="ladder" />} />
-            <Route path="landing-weeks" element={<Dates view="weeks" />} />
-            <Route path="owner-runway" element={<Dates view="runway" />} />
+            <Route path="owner-runway" element={<Dates />} />
             <Route path="feedback/:id" element={<FeedbackDetail />} />
-            {/* The Dates used to share one address between both views. */}
-            <Route path="dates" element={<Redirect to="/landing-weeks" />} />
+            {/* Retired addresses: the old shared Dates page, and Landing weeks. */}
+            <Route path="dates" element={<Redirect to="/owner-runway" />} />
+            <Route path="landing-weeks" element={<Redirect to="/owner-runway" />} />
             <Route path="*" element={<Redirect to={HOME} />} />
           </Route>
         </Routes>

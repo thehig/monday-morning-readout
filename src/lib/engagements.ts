@@ -1,4 +1,4 @@
-import { getWeekNumber, parseDateOnly, formatDate } from "./date-utils";
+import { parseDateOnly, formatDate } from "./date-utils";
 import { formatAmount, formatEmailDisplayName } from "./utils";
 import { describeTargetDiff, type TargetDiffSummary } from "./schedule";
 import { VELOCITY_LABELS } from "./velocity";
@@ -57,11 +57,6 @@ export interface Engagement {
   slipDays: number | null;
   /** Estimated completion minus today, in whole days. */
   landsInDays: number | null;
-  /**
-   * Calendar week the estimate falls in, counted from the readout year's first
-   * Monday. Runs past 52 for dates in the following year, so it stays ordered.
-   */
-  landingWeek: number | null;
   /** The stored `target_diff`, humanised: how overdue it was when filed. */
   sinceDeadline: TargetDiffSummary | null;
 
@@ -223,7 +218,6 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
     estimate,
     slipDays,
     landsInDays: estimate ? daysBetween(today, estimate) : null,
-    landingWeek: estimate ? getWeekNumber(estimate, today.getFullYear()) : null,
     sinceDeadline: describeTargetDiff(row.target_diff),
     daysToDeadline,
     overdueDays:
@@ -274,7 +268,7 @@ export interface ReadoutTotals {
    * above zero.
    */
   scheduled: number;
-  needingDecision: number;
+  behindSchedule: number;
   /**
    * Owners who say they are not on track for their own estimated completion
    * date - the owner doubting even the date they set, which is the warning.
@@ -286,7 +280,7 @@ export function summarise(engagements: Engagement[]): ReadoutTotals {
   return {
     engagements: engagements.length,
     scheduled: engagements.filter((e) => e.state !== "unknown").length,
-    needingDecision: engagements.filter(
+    behindSchedule: engagements.filter(
       (e) => e.state === "late" || e.state === "watch"
     ).length,
     offTrack: engagements.filter((e) => e.ownerSaysOnTrack === false).length,

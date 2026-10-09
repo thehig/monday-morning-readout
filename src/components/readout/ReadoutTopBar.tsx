@@ -1,5 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { getWeekRange, formatDate, getCurrentWeek } from "../../lib/date-utils";
+import logo from "../../logo.svg";
 
 interface ReadoutTopBarProps {
   currentWeek: number;
@@ -24,8 +25,12 @@ export function ReadoutTopBar({
     // Sticky because in a window short enough to scroll, the week being read
     // out is the one piece of context the room needs kept on screen.
     <header className="sticky top-0 z-20 flex h-[72px] shrink-0 items-center justify-between gap-6 bg-navy px-8 text-white">
-      <span className="w-[460px] text-2xl font-extrabold tracking-[-0.01em] text-brand">
-        United Signals
+      {/*
+        Imported rather than referenced by path, so the build inlines it as a
+        data URI and the readout stays one self-contained HTML file.
+      */}
+      <span className="flex w-[460px] items-center">
+        <img src={logo} alt="United Signals" className="h-8 w-auto" />
       </span>
 
       <div className="flex items-center gap-[18px]" role="group" aria-label="Week navigation">

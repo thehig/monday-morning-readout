@@ -1,17 +1,8 @@
-import {
-  landingWeeks,
-  buildRunway,
-  collapseQuiet,
-  weekWeight,
-  CLOSE_LANDING_DAYS,
-  type LandingWeek,
-} from "./dates-view";
-import { toEngagements, type Engagement } from "./engagements";
+import { buildRunway } from "./dates-view";
+import { toEngagements } from "./engagements";
 import type { POFeedback } from "../types/feedback";
 
 const TODAY = new Date(2026, 9, 7); // 7 Oct 2026
-const WEEK = 39;
-const YEAR = 2026;
 
 function row(over: Partial<POFeedback> = {}): POFeedback {
   return {
@@ -55,81 +46,6 @@ const WEEK_39 = [
 
 const engagements = toEngagements(WEEK_39, TODAY);
 
-describe("landingWeeks", () => {
-  it("buckets engagements into the week their estimate falls in", () => {
-    const { columns } = landingWeeks(engagements, WEEK, YEAR);
-    const byWeek = Object.fromEntries(
-      columns.map((c) => [c.week, c.engagements.map((e) => e.customer)])
-    );
-
-    expect(byWeek[41]).toEqual(
-      expect.arrayContaining(["Test API", "PROAKTIVA VV"])
-    );
-    expect(byWeek[42]).toEqual(["FIDUS Finanz AG"]);
-    expect(byWeek[43]).toEqual(expect.arrayContaining(["Plutos", "FIVV AG"]));
-    expect(byWeek[44]).toHaveLength(4);
-  });
-
-  it("finds the pile-up", () => {
-    // four engagements land in week 44, across four different owners
-    expect(landingWeeks(engagements, WEEK, YEAR).peak).toBe(4);
-  });
-
-  it("starts the week after the readout", () => {
-    expect(landingWeeks(engagements, WEEK, YEAR).columns[0].week).toBe(40);
-    expect(landingWeeks(engagements, WEEK, YEAR).columns[0].isCurrent).toBe(true);
-  });
-
-  it("leaves empty weeks in place, because a gap is information", () => {
-    const columns = landingWeeks(engagements, WEEK, YEAR).columns;
-    const empty = columns.filter((c) => c.engagements.length === 0);
-
-    expect(empty.length).toBeGreaterThan(0);
-    expect(empty.map((c) => c.week)).toContain(45);
-  });
-
-  it("collapses anything past the visible span into a final column", () => {
-    const far = toEngagements(
-      [
-        ...WEEK_39,
-        row({ id: 999, customer: "Far future", estimated_completion_date: "2027-06-01" }),
-      ],
-      TODAY
-    );
-    const { columns } = landingWeeks(far, WEEK, YEAR);
-    const last = columns[columns.length - 1];
-
-    expect(columns.length).toBeLessThanOrEqual(11);
-    expect(last.isOverflow).toBe(true);
-    expect(last.engagements.map((e) => e.customer)).toContain("Far future");
-  });
-
-  it("keeps counting past the year end rather than wrapping to week 1", () => {
-    const next = toEngagements(
-      [row({ id: 999, customer: "Next year", estimated_completion_date: "2027-01-20" })],
-      TODAY
-    );
-    const { columns } = landingWeeks(next, WEEK, YEAR);
-
-    expect(next[0].landingWeek).toBeGreaterThan(52);
-    expect(columns.some((c) => c.engagements.length > 0)).toBe(true);
-    expect(columns[columns.length - 1].weekLabel).toMatch(/^Week \d+/);
-  });
-
-  it("keeps engagements with no estimate out of the columns", () => {
-    const mixed = toEngagements(
-      [...WEEK_39, row({ id: 998, customer: "No dates", target_date: undefined, estimated_completion_date: undefined })],
-      TODAY
-    );
-    const { columns, undated } = landingWeeks(mixed, WEEK, YEAR);
-
-    expect(undated.map((e) => e.customer)).toEqual(["No dates"]);
-    expect(columns.flatMap((c) => c.engagements).map((e) => e.customer)).not.toContain(
-      "No dates"
-    );
-  });
-});
-
 describe("buildRunway", () => {
   const runway = buildRunway(engagements, TODAY)!;
 
@@ -150,24 +66,25 @@ describe("buildRunway", () => {
     expect(david.marks).toHaveLength(3);
   });
 
-  it("measures the gap when one person lands twice in a fortnight", () => {
+  it("places each dot by its estimated completion date, not its deadline", () => {
+    // FIDUS: deadline May 31, estimate Oct 23. Its dot sits after today,
+    // where the estimate is, not months back at the deadline.
     const raunaq = runway.lanes.find((l) => l.owner === "Raunaq Inam")!;
-    const gautam = runway.lanes.find((l) => l.owner === "Gautam Katakkar")!;
+    const fidus = raunaq.marks.find((m) => m.engagement.customer === "FIDUS Finanz AG")!;
 
-    expect(raunaq.collisions.map((c) => c.days)).toEqual([8]);
-    expect(gautam.collisions.map((c) => c.days)).toEqual([6]);
-    expect(runway.collidingOwners).toBe(2);
+    expect(fidus.pct).toBeGreaterThan(runway.todayPct);
+    expect(runway.rangeStart.getTime()).toBeGreaterThan(new Date(2026, 4, 31).getTime());
   });
 
-  it("leaves well-spaced owners alone", () => {
-    const david = runway.lanes.find((l) => l.owner === "David Siegel")!;
-
-    expect(david.collisions).toEqual([]);
+  it("draws nothing between an owner's engagements: they are separate work", () => {
+    for (const lane of runway.lanes) {
+      expect(Object.keys(lane).sort()).toEqual(["marks", "owner", "ownerKey"]);
+    }
   });
 
-  it("leads with the owners whose weeks collide", () => {
-    expect(runway.lanes[0].collisions.length).toBeGreaterThan(0);
-    expect(runway.lanes[runway.lanes.length - 1].collisions).toEqual([]);
+  it("leads with the busiest owner", () => {
+    expect(runway.lanes[0].owner).toBe("David Siegel");
+    expect(runway.lanes[runway.lanes.length - 1].marks).toHaveLength(1);
   });
 
   it("orders each lane's marks by date", () => {
@@ -186,14 +103,6 @@ describe("buildRunway", () => {
     }
   });
 
-  it("respects a different idea of what counts as close", () => {
-    const strict = buildRunway(engagements, TODAY, 5)!;
-    const raunaq = strict.lanes.find((l) => l.owner === "Raunaq Inam")!;
-
-    expect(CLOSE_LANDING_DAYS).toBe(10);
-    expect(raunaq.collisions).toEqual([]); // 8 days apart is no longer close
-  });
-
   it("returns nothing when no engagement has an estimate", () => {
     const none = toEngagements(
       [row({ id: 1, customer: "X", target_date: undefined, estimated_completion_date: undefined })],
@@ -201,86 +110,5 @@ describe("buildRunway", () => {
     );
 
     expect(buildRunway(none, TODAY)).toBeNull();
-  });
-});
-
-describe("collapseQuiet", () => {
-  const week = (n: number, count: number, isOverflow = false): LandingWeek => ({
-    week: n,
-    weekLabel: `Week ${n}`,
-    label: "",
-    engagements: Array.from({ length: count }, () => ({}) as Engagement),
-    isCurrent: false,
-    isOverflow,
-  });
-
-  const shape = (columns: LandingWeek[]) =>
-    collapseQuiet(columns).map((t) =>
-      t.kind === "quiet" ? `quiet ${t.from}-${t.to}` : `week ${t.week}`
-    );
-
-  it("folds a run of empty weeks into one marker", () => {
-    // Week 39's real shape: the pile-up at 44, then five dead weeks, then 50.
-    expect(
-      shape([
-        week(44, 4),
-        week(45, 0),
-        week(46, 0),
-        week(47, 0),
-        week(48, 0),
-        week(49, 0),
-        week(50, 1),
-      ])
-    ).toEqual(["week 44", "quiet 45-49", "week 50"]);
-  });
-
-  it("leaves a single empty week as its own column", () => {
-    // One quiet week between two busy ones is a fact, not padding.
-    expect(shape([week(41, 2), week(42, 0), week(43, 1)])).toEqual([
-      "week 41",
-      "week 42",
-      "week 43",
-    ]);
-  });
-
-  it("folds a run at either end", () => {
-    expect(shape([week(40, 0), week(41, 0), week(42, 3)])).toEqual([
-      "quiet 40-41",
-      "week 42",
-    ]);
-    expect(shape([week(42, 3), week(43, 0), week(44, 0)])).toEqual([
-      "week 42",
-      "quiet 43-44",
-    ]);
-  });
-
-  it("keeps an empty overflow column, which means 'and everything after'", () => {
-    expect(shape([week(44, 2), week(45, 0), week(46, 0, true)])).toEqual([
-      "week 44",
-      "week 45",
-      "week 46",
-    ]);
-  });
-
-  it("leaves a fully loaded span alone", () => {
-    expect(shape([week(41, 1), week(42, 2)])).toEqual(["week 41", "week 42"]);
-  });
-});
-
-describe("weekWeight", () => {
-  it("gives the busiest week the most width", () => {
-    expect(weekWeight(4)).toBeGreaterThan(weekWeight(2));
-    expect(weekWeight(2)).toBeGreaterThan(weekWeight(1));
-    expect(weekWeight(1)).toBeGreaterThan(weekWeight(0));
-  });
-
-  it("grows slower than the count, so quiet weeks do not vanish", () => {
-    // Four landings earn more room than one, but not four times as much.
-    expect(weekWeight(4) / weekWeight(1)).toBeLessThan(4);
-    expect(weekWeight(4) / weekWeight(1)).toBeGreaterThan(1.5);
-  });
-
-  it("still gives an empty week room for its own date", () => {
-    expect(weekWeight(0)).toBeGreaterThan(0);
   });
 });

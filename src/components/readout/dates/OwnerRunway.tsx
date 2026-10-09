@@ -26,10 +26,6 @@ function Lane({
   monthPcts: number[];
 }) {
   const engagements = lane.marks.length;
-  const worst = lane.collisions.reduce(
-    (min, c) => Math.min(min, c.days),
-    Number.POSITIVE_INFINITY
-  );
 
   return (
     <section className="grid min-h-0 flex-1 grid-cols-[280px_minmax(0,1fr)] items-center gap-x-6 border-t border-[#EDEEF2]">
@@ -37,12 +33,6 @@ function Lane({
         <b className="text-[21px] font-[750] tracking-[-0.01em]">{lane.owner}</b>
         <span className="text-[17px] text-ink-3">
           {engagements === 1 ? "1 engagement" : `${engagements} engagements`}
-          {lane.collisions.length > 0 && (
-            <>
-              {", "}
-              <span className="font-bold text-late-ink">{worst} days apart</span>
-            </>
-          )}
         </span>
       </div>
 
@@ -61,19 +51,6 @@ function Lane({
           style={{ left: `${todayPct}%` }}
           aria-hidden="true"
         />
-
-        {lane.collisions.map((collision) => (
-          <span
-            key={`${collision.fromPct}-${collision.toPct}`}
-            className="absolute top-1/2 flex h-7 -translate-y-1/2 items-center justify-center rounded-full bg-late-capsule text-[17px] font-[750] text-late-ink"
-            style={{
-              left: `${collision.fromPct}%`,
-              width: `${collision.toPct - collision.fromPct}%`,
-            }}
-          >
-            {collision.days} days
-          </span>
-        ))}
 
         {lane.marks.map(({ engagement, pct }, i) => (
           <span key={engagement.id}>
@@ -102,10 +79,9 @@ function Lane({
 }
 
 /**
- * One lane per product owner on a shared axis.
- *
- * The capsule marks two landings close enough together to be a problem for one
- * person - the only view that ties delivery dates to who has to deliver them.
+ * One lane per product owner on a shared axis, one dot per engagement at its
+ * estimated completion date. An owner's engagements are separate pieces of
+ * work, so nothing is drawn between them.
  */
 export function OwnerRunway({
   engagements,
@@ -126,7 +102,9 @@ export function OwnerRunway({
   return (
     <div className="mx-6 mb-5 flex min-h-0 flex-1 flex-col rounded-card border border-navy/[0.06] bg-sheet-card px-8 py-2 shadow-card">
       <div className="grid h-10 shrink-0 grid-cols-[280px_minmax(0,1fr)] gap-x-6">
-        <span />
+        <span className="self-center text-[17px] font-semibold text-ink-2">
+          Estimated completion
+        </span>
         <div className="relative">
           <span
             className="absolute top-2 rounded-full bg-navy px-[9px] text-[17px] font-[650] text-white"

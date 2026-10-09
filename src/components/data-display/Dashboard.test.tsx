@@ -146,7 +146,7 @@ describe("Dashboard", () => {
     expect(screen.getByTestId("ranked-grid")).toHaveTextContent("2 engagements");
   });
 
-  it("leaves the decision count off both layouts: each row and card carries its state", () => {
+  it("leaves the behind-schedule count off both layouts: each row and card carries its state", () => {
     mockRows.current = [
       row({
         id: 1,

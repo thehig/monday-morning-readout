@@ -48,9 +48,9 @@ describe("the footer", () => {
   });
 
   it("marks the page you are on, and keeps it in the row", () => {
-    renderAt("/landing-weeks?week=39");
+    renderAt("/owner-runway?week=39");
 
-    expect(screen.getByRole("link", { name: /Landing weeks/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /Owner runway/ })).toHaveAttribute(
       "aria-current",
       "page"
     );
@@ -76,11 +76,12 @@ describe("the number keys", () => {
     await userEvent.keyboard("2");
     expect(screen.getByTestId("where")).toHaveTextContent("/ladder?week=39");
 
-    await userEvent.keyboard("4");
+    await userEvent.keyboard("3");
     expect(screen.getByTestId("where")).toHaveTextContent("/owner-runway?week=39");
 
-    await userEvent.keyboard("3");
-    expect(screen.getByTestId("where")).toHaveTextContent("/landing-weeks?week=39");
+    // There is no fourth page any more.
+    await userEvent.keyboard("4");
+    expect(screen.getByTestId("where")).toHaveTextContent("/owner-runway?week=39");
 
     await userEvent.keyboard("1");
     expect(screen.getByTestId("where")).toHaveTextContent("/grid?week=39");
@@ -90,7 +91,7 @@ describe("the number keys", () => {
     renderAt("/feedback/338?week=39");
 
     await userEvent.keyboard("3");
-    expect(screen.getByTestId("where")).toHaveTextContent("/landing-weeks?week=39");
+    expect(screen.getByTestId("where")).toHaveTextContent("/owner-runway?week=39");
   });
 
   it("leave the retired letter keys alone", async () => {
