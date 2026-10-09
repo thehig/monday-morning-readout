@@ -101,6 +101,38 @@ export function VelocityDot({ velocity }: { velocity: VelocityType | null }) {
   );
 }
 
+/**
+ * Next week's velocity as a colour-coded badge: High, Medium or Low.
+ *
+ * The stored value is the form's German traffic light (Grün, Gelb, Rot) and is
+ * never shown; the badge carries it in English and in colour. The three fills
+ * differ in lightness as well as hue - pale green, mid amber, dark red - so
+ * they stay apart on a compressed shared screen.
+ */
+const VELOCITY_BADGE: Record<VelocityType, { word: string; className: string }> = {
+  "Grün": { word: "High", className: "bg-fine-block text-fine-on" },
+  Gelb: { word: "Medium", className: "bg-watch-block1 text-watch-on" },
+  Rot: { word: "Low", className: "bg-late-block2 text-white" },
+};
+
+export function VelocityBadge({ velocity }: { velocity: VelocityType | null }) {
+  if (!velocity) {
+    return <span className="text-[17px] text-ink-3">Not reported</span>;
+  }
+
+  const { word, className } = VELOCITY_BADGE[velocity];
+
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-full py-0.5 pl-2.5 pr-3 text-[17px] font-bold ${className}`}
+      title={VELOCITY_LABELS[velocity]}
+    >
+      <span className={`h-2.5 w-2.5 rounded-full ${VELOCITY_DOT[velocity]} ring-2 ring-white/70`} aria-hidden="true" />
+      {word}
+    </span>
+  );
+}
+
 /** Traffic light for next week's velocity, with the English label beside it. */
 export function VelocityLight({
   velocity,

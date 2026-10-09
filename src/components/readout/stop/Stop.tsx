@@ -7,7 +7,7 @@ import { buildStatement } from "../../../lib/statement";
 import { buildTimeline } from "../../../lib/timeline";
 import { formatDateTime } from "../../../lib/date-utils";
 import type { StepPosition } from "../../../lib/stepping";
-import { Meter, ProgressBar, VelocityDot } from "../primitives";
+import { Meter, ProgressBar, VelocityBadge, VelocityDot } from "../primitives";
 import { FooterActions, Key } from "../chrome";
 import { STATE_TEXT } from "../state-styles";
 import { isTypingTarget } from "../useReadoutKeys";
@@ -174,6 +174,9 @@ export function Stop({
             <HeaderMetric label="Customer">
               <Meter value={engagement.customerHappiness} />
             </HeaderMetric>
+            <HeaderMetric label="Velocity next week">
+              <VelocityBadge velocity={engagement.velocity} />
+            </HeaderMetric>
           </div>
         </div>
 
@@ -315,7 +318,6 @@ export function Stop({
                 : "due on the day it was filed"}
             </span>
           )}
-          <span>stored velocity {engagement.velocity ?? "none"}</span>
         </span>
       </FooterActions>
     </div>
