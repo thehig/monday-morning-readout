@@ -49,12 +49,15 @@ function Fact({
 }) {
   return (
     <div
-      className={`flex flex-col gap-0.5 pr-7 ${
-        first ? "" : "border-l border-sheet-rule pl-7"
+      className={`flex min-w-0 flex-col gap-0.5 lg:pr-7 ${
+        first ? "" : "lg:border-l lg:border-sheet-rule lg:pl-7"
       }`}
     >
-      <span className="whitespace-nowrap text-[17px] text-ink-3">{label}</span>
-      <span className="flex items-baseline gap-2 whitespace-nowrap text-xl font-bold tabular-nums">
+      <span title={label} className="truncate text-[17px] text-ink-3">
+        {label}
+      </span>
+      {/* Inline rather than flex, so a narrow column cuts it with an ellipsis. */}
+      <span className="truncate text-xl font-bold tabular-nums">
         {children}
       </span>
     </div>
@@ -149,22 +152,38 @@ export function Stop({
   const { overdueDays, slipDays, ownerSaysOnTrack, sinceDeadline } = engagement;
 
   return (
-    <div className="flex flex-1 flex-col gap-4 px-6 py-5">
-      <section className={`shrink-0 px-8 pb-[26px] pt-6 ${CARD}`}>
-        <div className="flex items-center gap-6">
-
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <h2 className="text-[44px] font-[750] leading-[52px] tracking-[-0.025em]">
+    <div className="flex flex-1 flex-col gap-4 px-4 py-5 sm:px-6">
+      <section className={`shrink-0 px-5 pb-[26px] pt-6 sm:px-8 ${CARD}`}>
+        {/*
+          The metrics move under the name when both will not fit on one line,
+          and the name and its details are cut rather than wrapped - in full on
+          hover - so the header never grows a ragged second line.
+        */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+          <div className="flex min-w-[min(100%,360px)] flex-1 flex-col gap-0.5">
+            <h2
+              title={engagement.customer}
+              className="truncate text-[34px] font-[750] leading-[44px] tracking-[-0.025em] sm:text-[44px] sm:leading-[52px]"
+            >
               {engagement.customer}
             </h2>
-            <p className="flex gap-[18px] text-[19px] text-ink-3">
-              <span className="font-semibold text-ink-2">{engagement.owner}</span>
-              <span>{engagement.ownerEmail}</span>
-              <span>filed {formatDateTime(engagement.filedAt, "short")}</span>
+            <p className="flex min-w-0 gap-[18px] whitespace-nowrap text-[19px] text-ink-3">
+              <span title={engagement.owner} className="shrink-0 font-semibold text-ink-2">
+                {engagement.owner}
+              </span>
+              <span title={engagement.ownerEmail} className="truncate">
+                {engagement.ownerEmail}
+              </span>
+              <span
+                title={`filed ${formatDateTime(engagement.filedAt, "short")}`}
+                className="truncate"
+              >
+                filed {formatDateTime(engagement.filedAt, "short")}
+              </span>
             </p>
           </div>
 
-          <div className="ml-auto flex shrink-0 gap-10">
+          <div className="ml-auto flex flex-wrap gap-x-10 gap-y-3">
             <HeaderMetric label="Progress">
               <ProgressBar value={engagement.progress} width="w-40" />
             </HeaderMetric>
@@ -182,10 +201,15 @@ export function Stop({
 
         <div className="mb-5 mt-[22px] h-px bg-[#ECEEF2]" />
 
-        <div className="grid grid-cols-[minmax(0,1fr)_720px] items-start gap-14">
-          <div className="flex flex-col">
+        {/*
+          The calendar sits beside the statement where there is room for both,
+          sharing the width below 2xl, and under it below xl.
+        */}
+        <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2 xl:gap-14 2xl:grid-cols-[minmax(0,1fr)_720px]">
+          <div className="flex min-w-0 flex-col">
             <h3
-              className={`text-[38px] font-[750] leading-[46px] tracking-[-0.02em] ${
+              title={statement.headline}
+              className={`truncate text-[30px] font-[750] leading-[40px] tracking-[-0.02em] sm:text-[38px] sm:leading-[46px] ${
                 STATE_TEXT[engagement.state]
               }`}
             >
@@ -198,7 +222,8 @@ export function Stop({
               {statement.detail}
             </p>
 
-            <div className="mt-[18px] flex">
+            {/* Two by two until all four fit on one line with rules between them. */}
+            <div className="mt-[18px] grid grid-cols-2 gap-x-4 gap-y-3 lg:flex lg:gap-x-0">
               <Fact label="Agreed deadline" first>
                 <span className={overdueDays !== null ? "text-late-ink" : ""}>
                   {showDate(engagement.deadline)}
@@ -207,7 +232,7 @@ export function Stop({
               <Fact label="Estimated completion">
                 {showDate(engagement.estimate)}
                 {slipDays !== null && slipDays > 0 && (
-                  <span className={`text-[17px] ${STATE_TEXT[engagement.state]}`}>
+                  <span className={`ml-2 text-[17px] ${STATE_TEXT[engagement.state]}`}>
                     +{slipDays} days
                   </span>
                 )}
@@ -245,7 +270,7 @@ export function Stop({
         </div>
       </section>
 
-      <div className="grid min-h-0 flex-1 grid-cols-3 gap-4">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-3">
         <div className={`overflow-y-auto px-7 py-6 ${CARD}`}>
           <Wrote
             heading="Completed milestones"

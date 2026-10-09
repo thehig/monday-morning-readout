@@ -9,6 +9,14 @@ interface OwnerRunwayProps {
   today?: Date;
 }
 
+/**
+ * The owner column, then the calendar. The owner column narrows before the
+ * calendar does, since a cut name is still on hover and a squeezed calendar is
+ * not readable at all.
+ */
+const COLUMNS =
+  "grid-cols-[120px_minmax(0,1fr)] gap-x-4 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)] xl:gap-x-6";
+
 /** Keeps a mark's label inside the lane rather than running past its edge. */
 function labelAlign(pct: number): string {
   if (pct <= 16) return "translate-x-0 items-start";
@@ -28,10 +36,12 @@ function Lane({
   const engagements = lane.marks.length;
 
   return (
-    <section className="grid min-h-0 flex-1 grid-cols-[280px_minmax(0,1fr)] items-center gap-x-6 border-t border-[#EDEEF2]">
-      <div className="flex flex-col gap-0.5">
-        <b className="text-[21px] font-[750] tracking-[-0.01em]">{lane.owner}</b>
-        <span className="text-[17px] text-ink-3">
+    <section className={`grid min-h-0 flex-1 ${COLUMNS} items-center border-t border-[#EDEEF2]`}>
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <b title={lane.owner} className="truncate text-[21px] font-[750] tracking-[-0.01em]">
+          {lane.owner}
+        </b>
+        <span className="truncate text-[17px] text-ink-3">
           {engagements === 1 ? "1 engagement" : `${engagements} engagements`}
         </span>
       </div>
@@ -66,7 +76,12 @@ function Lane({
               }`}
               style={{ left: `${pct}%` }}
             >
-              <b className="text-[17px] font-bold leading-[21px]">{engagement.customer}</b>
+              <b
+                title={engagement.customer}
+                className="max-w-[240px] truncate text-[17px] font-bold leading-[21px]"
+              >
+                {engagement.customer}
+              </b>
               <span className="text-[17px] leading-[21px] tabular-nums text-ink-3">
                 {showDate(engagement.estimate)}
               </span>
@@ -100,9 +115,12 @@ export function OwnerRunway({
   const monthPcts = runway.months.map((m) => m.pct);
 
   return (
-    <div className="mx-6 mb-5 flex min-h-0 flex-1 flex-col rounded-card border border-navy/[0.06] bg-sheet-card px-8 py-2 shadow-card">
-      <div className="grid h-10 shrink-0 grid-cols-[280px_minmax(0,1fr)] gap-x-6">
-        <span className="self-center text-[17px] font-semibold text-ink-2">
+    <div className="mx-4 mb-5 flex min-h-0 flex-1 flex-col rounded-card border border-navy/[0.06] bg-sheet-card px-4 py-2 shadow-card sm:mx-6 sm:px-8">
+      <div className={`grid h-10 shrink-0 ${COLUMNS}`}>
+        <span
+          title="Estimated completion"
+          className="min-w-0 self-center truncate text-[17px] font-semibold text-ink-2"
+        >
           Estimated completion
         </span>
         <div className="relative">

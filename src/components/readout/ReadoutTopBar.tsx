@@ -16,7 +16,7 @@ interface ReadoutTopBarProps {
 const TOTAL_WEEKS = 52;
 
 const ROUND_BUTTON =
-  "flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.09] text-white transition-colors hover:bg-white/20 disabled:opacity-40";
+  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.09] text-white transition-colors hover:bg-white/20 disabled:opacity-40 sm:h-10 sm:w-10";
 
 /**
  * Fetches every loaded week and engagement again. Feedback filed during the
@@ -47,6 +47,10 @@ function ReloadButton() {
 /**
  * The navy bar every page shares: the logo and the pages on the left, the
  * week and a reload on the right. Large enough to read in a shared video call.
+ *
+ * Narrower windows give up detail rather than wrap or scroll sideways: the
+ * week's dates go below `xl`, the page labels below `lg`, the wordmark down
+ * to its mark below `sm`. What is cut stays in a native tooltip.
  */
 export function ReadoutTopBar({
   currentWeek,
@@ -59,21 +63,26 @@ export function ReadoutTopBar({
   return (
     // Sticky because in a window short enough to scroll, the week being read
     // out is the one piece of context the room needs kept on screen.
-    <header className="sticky top-0 z-20 flex h-[72px] shrink-0 items-center gap-10 bg-navy px-8 text-white">
+    <header className="sticky top-0 z-20 flex h-[72px] shrink-0 items-center gap-3 bg-navy px-4 text-white sm:gap-6 sm:px-8 xl:gap-10">
       {/*
         Imported rather than referenced by path, so the build inlines it as a
-        data URI and the readout stays one self-contained HTML file.
+        data URI and the readout stays one self-contained HTML file. Below sm
+        only the mark shows: the wordmark is cropped off its right.
       */}
-      <img src={logo} alt="United Signals" className="h-8 w-auto shrink-0" />
+      <img
+        src={logo}
+        alt="United Signals"
+        className="h-7 w-7 shrink-0 object-cover object-left sm:h-8 sm:w-auto"
+      />
 
       <ReadoutNav currentWeek={currentWeek} />
 
-      <div className="ml-auto flex items-center gap-[18px]">
+      <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-[18px]">
         <ReloadButton />
 
-        <span className="h-8 w-px bg-white/20" aria-hidden="true" />
+        <span className="hidden h-8 w-px shrink-0 bg-white/20 sm:block" aria-hidden="true" />
 
-        <div className="flex items-center gap-3" role="group" aria-label="Week navigation">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-3" role="group" aria-label="Week navigation">
           <button
             type="button"
             onClick={() => onWeekChange(Math.max(1, currentWeek - 1))}
@@ -85,14 +94,21 @@ export function ReadoutTopBar({
           </button>
 
           <div
-            className="flex min-w-[250px] items-baseline justify-center gap-3"
+            className="flex min-w-0 items-baseline justify-center gap-3 whitespace-nowrap xl:min-w-[250px]"
             aria-live="polite"
+            title={`Week ${currentWeek}, ${formatDate(start)} – ${formatDate(end)}${
+              isCurrent ? " (current)" : ""
+            }`}
           >
-            <span className="text-[21px] font-bold">Week {currentWeek}</span>
-            <span className="text-[18px] tabular-nums text-white/70">
+            <span className="truncate text-[19px] font-bold sm:text-[21px]">
+              Week {currentWeek}
+            </span>
+            <span className="hidden text-[18px] tabular-nums text-white/70 xl:inline">
               {formatDate(start)} &ndash; {formatDate(end)}
             </span>
-            {isCurrent && <span className="text-[18px] text-brand">current</span>}
+            {isCurrent && (
+              <span className="hidden text-[18px] text-brand xl:inline">current</span>
+            )}
           </div>
 
           <button

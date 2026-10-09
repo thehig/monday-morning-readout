@@ -12,8 +12,8 @@ interface ReadoutFooterProps {
  */
 export function ReadoutFooter({ onActionsSlot }: ReadoutFooterProps) {
   return (
-    <footer className="sticky bottom-0 z-20 flex h-11 shrink-0 items-center border-t border-sheet-rule bg-sheet-card px-8 text-[18px] text-ink-3 has-[>div:empty]:hidden">
-      <div ref={onActionsSlot} className="flex min-w-0 flex-1 items-center gap-[30px]" />
+    <footer className="sticky bottom-0 z-20 flex h-11 shrink-0 items-center border-t border-sheet-rule bg-sheet-card px-4 text-[18px] text-ink-3 sm:px-8 has-[>div:empty]:hidden">
+      <div ref={onActionsSlot} className="flex min-w-0 flex-1 items-center gap-4 whitespace-nowrap sm:gap-[30px]" />
     </footer>
   );
 }

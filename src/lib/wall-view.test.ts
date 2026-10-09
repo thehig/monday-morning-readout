@@ -4,6 +4,7 @@ import {
   CARD_MIN_WIDTH,
   GRID_GAP,
   GRID_PADDING,
+  tickStride,
 } from "./wall-view";
 import { toEngagements } from "./engagements";
 import type { POFeedback } from "../types/feedback";
@@ -132,5 +133,25 @@ describe("fitColumns", () => {
         columns * CARD_MIN_WIDTH + (columns - 1) * GRID_GAP + GRID_PADDING;
       if (columns > 1) expect(needed).toBeLessThanOrEqual(width);
     }
+  });
+});
+
+describe("tickStride", () => {
+  // Seven months across the axis, about 14% apart.
+  const months = [5, 19, 33, 47, 61, 75, 89];
+
+  it("shows every month where the column is wide enough", () => {
+    expect(tickStride(months, 700)).toBe(1);
+  });
+
+  it("skips months rather than let their labels collide", () => {
+    // 14% of 260px is about 36px - too tight for a 52px label.
+    expect(tickStride(months, 260)).toBe(2);
+    expect(tickStride(months, 160)).toBe(3);
+  });
+
+  it("shows every month before the column is measured", () => {
+    expect(tickStride(months, 0)).toBe(1);
+    expect(tickStride([50], 100)).toBe(1);
   });
 });

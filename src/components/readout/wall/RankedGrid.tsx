@@ -190,7 +190,7 @@ export function RankedGrid({ engagements, currentWeek }: RankedGridProps) {
   return (
     <div
       ref={ref}
-      className="grid flex-1 content-start justify-center gap-4 px-6 pb-5"
+      className="grid flex-1 content-start justify-center gap-4 px-4 pb-5 sm:px-6"
       style={{
         // Tiles share the width up to their maximum, and a week too small to
         // fill the screen sits centred rather than stretched.

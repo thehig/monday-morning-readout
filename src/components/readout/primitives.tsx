@@ -49,7 +49,7 @@ export function ProgressBar({
     <>
       <span
         className={`h-2.5 overflow-hidden rounded-full bg-ink/[0.10] ${
-          width ?? "min-w-[120px] flex-1"
+          width ?? "min-w-[48px] flex-1"
         }`}
       >
         {pct > 0 && (

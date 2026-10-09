@@ -9,12 +9,16 @@ import { PAGES, pageUrl } from "./pages";
  * are written down rather than remembered, and each one is also a link. The
  * page you are on stays in the row, underlined, so the row never shifts and
  * the room can see where the call is.
+ *
+ * As the window narrows the labels give way first - cut with an ellipsis, then
+ * dropped below `lg` - leaving the numbered keycaps, with the label in the
+ * native tooltip.
  */
 export function ReadoutNav({ currentWeek }: { currentWeek: number }) {
   const { pathname } = useLocation();
 
   return (
-    <nav aria-label="Pages" className="flex h-full items-stretch gap-7">
+    <nav aria-label="Pages" className="flex h-full min-w-0 items-stretch gap-2 sm:gap-4 xl:gap-7">
       {PAGES.map((page) => {
         const current = pathname === page.path;
 
@@ -23,20 +27,23 @@ export function ReadoutNav({ currentWeek }: { currentWeek: number }) {
             key={page.path}
             to={pageUrl(page.path, currentWeek)}
             aria-current={current ? "page" : undefined}
-            className={`flex items-center gap-2 border-b-[3px] pt-[3px] text-[18px] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+            aria-label={page.label}
+            title={page.label}
+            className={`flex min-w-0 items-center gap-2 whitespace-nowrap border-b-[3px] pt-[3px] text-[18px] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
               current
                 ? "border-white font-semibold text-white"
                 : "border-transparent text-white/70 hover:text-white"
             }`}
           >
             <kbd
-              className={`inline-block min-w-[26px] rounded-[6px] px-[7px] text-center font-sans text-[15px] font-bold ${
+              aria-hidden="true"
+              className={`inline-block min-w-[26px] shrink-0 rounded-[6px] px-[7px] text-center font-sans text-[15px] font-bold ${
                 current ? "bg-white text-navy" : "bg-white/[0.12] text-white/80"
               }`}
             >
               {page.key}
             </kbd>
-            {page.label}
+            <span className="hidden truncate lg:inline">{page.label}</span>
           </Link>
         );
       })}

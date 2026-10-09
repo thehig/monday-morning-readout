@@ -87,6 +87,27 @@ export function buildLadder(
 }
 
 /**
+ * Every how-many-th month label the Ladder can show without two colliding.
+ *
+ * A narrow calendar column squeezes months together until their labels
+ * overlap into an unreadable run; showing every second or third keeps them
+ * apart. Before the column is measured, every label shows.
+ */
+export function tickStride(
+  pcts: number[],
+  widthPx: number,
+  minGapPx = 52
+): number {
+  if (widthPx <= 0 || pcts.length < 2) return 1;
+
+  const gaps = pcts.slice(1).map((pct, i) => ((pct - pcts[i]) / 100) * widthPx);
+  const tightest = Math.min(...gaps);
+  if (tightest <= 0) return pcts.length;
+
+  return Math.max(1, Math.ceil(minGapPx / tightest));
+}
+
+/**
  * What one tile needs to hold its text on the lines it was drawn for.
  *
  * Inline styles never reach the Tailwind compiler, so the grid cannot read the
@@ -100,7 +121,7 @@ export const CARD_MIN_WIDTH = 360;
  */
 export const CARD_MAX_WIDTH = 440;
 
-/** `gap-4` and `px-6` on the grid, in the numbers the arithmetic needs. */
+/** `gap-4` and `px-6` on the grid (`px-4` below sm, where one column fits regardless). */
 export const GRID_GAP = 16;
 export const GRID_PADDING = 48;
 

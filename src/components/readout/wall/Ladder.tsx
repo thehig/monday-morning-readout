@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import { buildLadder } from "../../../lib/wall-view";
+import { buildLadder, tickStride } from "../../../lib/wall-view";
 import { showDate } from "../../../lib/engagements";
 import type { Engagement } from "../../../lib/engagements";
 import { Meter, ProgressBar, VelocityDot } from "../primitives";
 import { HATCH } from "../state-styles";
+import { useWidth } from "../useWidth";
 
 interface LadderProps {
   engagements: Engagement[];
@@ -12,9 +13,23 @@ interface LadderProps {
 }
 
 // Drawn at the width after each comma; the width before it is how far the
-// column will give before the page would have to scroll sideways instead.
-const GRID =
-  "grid-cols-[48px_minmax(200px,300px)_minmax(160px,1fr)_minmax(92px,112px)_minmax(150px,190px)_minmax(118px,134px)_minmax(118px,134px)_minmax(120px,150px)]";
+// column will give. Rather than scroll sideways, a narrower window drops
+// columns, least needed first - the Stop still shows every one of them:
+//
+//   2xl  all eight
+//   xl   without Team and Customer
+//   md   without Progress and Next week either
+//   below md, without the calendar: rank, engagement and the deadline
+const GRID = [
+  "grid-cols-[28px_minmax(0,1fr)_minmax(84px,104px)]",
+  "md:grid-cols-[40px_minmax(160px,260px)_minmax(220px,1fr)_minmax(92px,112px)]",
+  "xl:grid-cols-[48px_minmax(180px,280px)_minmax(260px,1fr)_minmax(92px,112px)_minmax(150px,190px)_minmax(110px,140px)]",
+  "2xl:grid-cols-[48px_minmax(200px,300px)_minmax(240px,1fr)_minmax(92px,112px)_minmax(150px,190px)_minmax(118px,134px)_minmax(118px,134px)_minmax(120px,150px)]",
+].join(" ");
+
+const CALENDAR = "hidden md:block";
+const XL = "hidden xl:flex";
+const XXL = "hidden 2xl:flex";
 
 /**
  * One row per engagement on a shared calendar.
@@ -27,6 +42,7 @@ const GRID =
  */
 export function Ladder({ engagements, currentWeek, today = new Date() }: LadderProps) {
   const ladder = buildLadder(engagements, today);
+  const [axisRef, axisWidth] = useWidth<HTMLDivElement>();
 
   if (!ladder) {
     return (
@@ -37,13 +53,20 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
   }
 
   const todayPct = ladder.todayPct;
+  const stride = tickStride(
+    ladder.months.map((m) => m.pct),
+    axisWidth
+  );
+  // The hint shares its line with the "today" pill, which covers it once the
+  // column is narrow; it stays in the heading's tooltip.
+  const roomForHint = axisWidth === 0 || axisWidth >= 460;
 
   return (
-    <div className="mx-6 mb-5 flex min-h-0 flex-1 flex-col rounded-card border border-navy/[0.06] bg-sheet-card px-6 pb-1 pt-1.5 shadow-card">
-      <div className={`grid ${GRID} h-[30px] shrink-0 gap-x-5`}>
+    <div className="mx-4 mb-5 flex min-h-0 flex-1 flex-col rounded-card border border-navy/[0.06] bg-sheet-card px-4 pb-1 pt-1.5 shadow-card sm:mx-6 sm:px-6">
+      <div className={`hidden ${GRID} h-[30px] shrink-0 gap-x-3 md:grid xl:gap-x-5`}>
         <span className="col-span-2" />
-        <div className="relative">
-          {ladder.months.map((tick) => (
+        <div ref={axisRef} className="relative">
+          {ladder.months.filter((_, i) => i % stride === 0).map((tick) => (
             <span
               key={`${tick.label}-${tick.pct}`}
               className="absolute top-1.5 -translate-x-1/2 whitespace-nowrap text-[17px] text-ink-3"
@@ -56,12 +79,16 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
       </div>
 
       <div
-        className={`grid ${GRID} min-h-[58px] shrink-0 items-end gap-x-5 border-b border-sheet-rule pb-2`}
+        className={`grid ${GRID} min-h-[58px] shrink-0 items-end gap-x-3 border-b border-sheet-rule pb-2 xl:gap-x-5`}
       >
         <span />
         <Head label="Engagement" unit="and product owner" />
-        <span className="relative">
-          <Head label="Agreed deadline → estimate" unit="hover a row for exact dates" />
+        <span className={`relative min-w-0 ${CALENDAR}`}>
+          <Head
+            label="Agreed deadline → estimate"
+            unit={roomForHint ? "hover a row for exact dates" : "\u00a0"}
+            title="Agreed deadline → estimate, hover a row for exact dates"
+          />
           <span
             className="absolute bottom-0 -translate-x-1/2 rounded-full bg-navy px-2 text-[17px] font-[650] text-white"
             style={{ left: `${todayPct}%` }}
@@ -70,10 +97,10 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
           </span>
         </span>
         <Head label="Deadline" unit="as of today" align="right" />
-        <Head label="Progress" unit="% of cycle done" />
-        <Head label="Team" unit="out of 5" />
-        <Head label="Customer" unit="out of 5" />
-        <Head label="Next week" unit="expected velocity" />
+        <Head label="Progress" unit="% of cycle done" className={XL} />
+        <Head label="Team" unit="out of 5" className={XXL} />
+        <Head label="Customer" unit="out of 5" className={XXL} />
+        <Head label="Next week" unit="expected velocity" className={XL} />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
@@ -94,7 +121,7 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
             <Link
               key={e.id}
               to={`/feedback/${e.id}?week=${currentWeek}`}
-              className={`group -mx-3 grid ${GRID} min-h-0 flex-1 items-center gap-x-5 rounded-xl px-3 transition-colors hover:bg-sheet focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand ${
+              className={`group -mx-3 grid ${GRID} min-h-0 flex-1 items-center gap-x-3 rounded-xl px-3 xl:gap-x-5 transition-colors hover:bg-sheet focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand ${
                 last ? "" : "border-b border-[#EDEEF2]"
               }`}
             >
@@ -107,13 +134,21 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
               </span>
 
               <span className="min-w-0">
-                <b className="block truncate text-[21px] font-bold leading-[26px] tracking-[-0.01em]">
+                <b
+                  title={e.customer}
+                  className="block truncate text-[21px] font-bold leading-[26px] tracking-[-0.01em]"
+                >
                   {e.customer}
                 </b>
-                <span className="text-[17px] leading-[22px] text-ink-3">{e.owner}</span>
+                <span
+                  title={e.owner}
+                  className="block truncate text-[17px] leading-[22px] text-ink-3"
+                >
+                  {e.owner}
+                </span>
               </span>
 
-              <span className="relative h-[54px]">
+              <span className={`relative h-[54px] ${CALENDAR}`}>
                 <span className="absolute inset-x-0 top-[26px] h-0.5 rounded bg-sheet-rule" />
 
                 {pair && (
@@ -204,18 +239,20 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
                 )}
               </span>
 
-              <span className="flex items-center gap-2.5">
+              <span className={`min-w-0 items-center gap-2.5 ${XL}`}>
                 <ProgressBar value={e.progress} />
               </span>
-              <span className="flex items-center gap-2.5">
+              <span className={`min-w-0 items-center gap-2.5 ${XXL}`}>
                 <Meter value={e.teamHappiness} />
               </span>
-              <span className="flex items-center gap-2.5">
+              <span className={`min-w-0 items-center gap-2.5 ${XXL}`}>
                 <Meter value={e.customerHappiness} />
               </span>
-              <span className="flex items-center gap-2 text-[17px] font-semibold">
+              <span className={`min-w-0 items-center gap-2 text-[17px] font-semibold ${XL}`}>
                 <VelocityDot velocity={e.velocity} />
-                {e.velocityLabel?.replace(" velocity expected", "") ?? "—"}
+                <span className="truncate" title={e.velocityLabel ?? undefined}>
+                  {e.velocityLabel?.replace(" velocity expected", "") ?? "—"}
+                </span>
               </span>
             </Link>
           );
@@ -229,15 +266,25 @@ function Head({
   label,
   unit,
   align,
+  className = "flex",
+  title = `${label}, ${unit}`,
 }: {
   label: string;
   unit: string;
   align?: "right";
+  title?: string;
+  /** Its display, which is how a column is dropped at narrower widths. */
+  className?: string;
 }) {
+  // One line each, cut rather than wrapped, so a narrow column keeps the
+  // header row the height of the others. The full text is in the tooltip.
   return (
-    <span className={`flex flex-col ${align === "right" ? "text-right" : ""}`}>
-      <b className="text-[18px] font-bold text-ink-2">{label}</b>
-      <span className="text-[17px] font-normal text-ink-3">{unit}</span>
+    <span
+      title={title}
+      className={`min-w-0 flex-col ${className} ${align === "right" ? "text-right" : ""}`}
+    >
+      <b className="truncate text-[18px] font-bold text-ink-2">{label}</b>
+      <span className="truncate text-[17px] font-normal text-ink-3">{unit}</span>
     </span>
   );
 }

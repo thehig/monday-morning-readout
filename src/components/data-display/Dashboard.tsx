@@ -59,7 +59,7 @@ export function Dashboard({ layout }: { layout: WallLayout }) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="flex h-16 shrink-0 items-center gap-4 px-8">
+      <div className="flex h-16 shrink-0 items-center gap-4 px-4 sm:px-8">
         {/*
           The owner doubting even the date they set themselves - the loudest
           thing the readout can say, drawn as something rather than set at the

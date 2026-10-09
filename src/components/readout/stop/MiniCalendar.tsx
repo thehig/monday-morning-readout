@@ -1,6 +1,13 @@
 import type { TimelineGeometry } from "../../../lib/timeline";
 import { formatDate } from "../../../lib/date-utils";
+import { tickStride } from "../../../lib/wall-view";
 import { HATCH } from "../state-styles";
+import { useWidth } from "../useWidth";
+
+/** Roughly the width of "deadline 31 May 2026" at 19px, with a gap. */
+const DATE_LABEL_PX = 260;
+/** How close a month label may sit to the "today" pill below the axis. */
+const TODAY_CLEARANCE_PX = 56;
 
 /**
  * Keeps a mark's label inside the axis. Centred is right until the mark nears
@@ -38,6 +45,8 @@ export function MiniCalendar({
   tone,
 }: MiniCalendarProps) {
   const { months, deadlinePct, estimatePct, todayPct, singlePoint } = timeline;
+  const [ref, width] = useWidth<HTMLDivElement>();
+  const px = (pct: number) => (pct / 100) * width;
 
   const pair =
     deadlinePct !== null && estimatePct !== null && estimatePct > deadlinePct;
@@ -48,19 +57,34 @@ export function MiniCalendar({
   const hatchW = pair ? Math.max(0, estimatePct! - hatchL) : 0;
 
   // Two labels near each other above the axis would collide, so the estimate's
-  // drops to a second line when the dates are close.
+  // drops to a second line when the dates are close - close in pixels, so a
+  // narrow window drops it sooner. Before the first measurement, by share of
+  // the axis.
   const crowded =
     deadlinePct !== null &&
     estimatePct !== null &&
-    Math.abs(estimatePct - deadlinePct) < 35;
+    (width
+      ? px(Math.abs(estimatePct - deadlinePct)) < DATE_LABEL_PX
+      : Math.abs(estimatePct - deadlinePct) < 35);
+
+  // Fewer month labels on a narrow axis, and none under the "today" pill.
+  const stride = tickStride(
+    months.map((m) => m.pct),
+    width
+  );
+  const shownMonths = months.filter(
+    (tick, i) =>
+      i % stride === 0 &&
+      (!width || px(Math.abs(tick.pct - todayPct)) >= TODAY_CLEARANCE_PX)
+  );
 
   const deadlineInk = overdueDays !== null ? "text-late-ink" : "text-ink-2";
 
   return (
-    <div className="relative h-[124px]" aria-hidden="true">
+    <div ref={ref} className="relative h-[124px]" aria-hidden="true">
       <span className="absolute inset-x-0 top-[55px] h-0.5 rounded bg-sheet-rule" />
 
-      {months.map((tick) => (
+      {shownMonths.map((tick) => (
         <span key={`${tick.label}-${tick.pct}`}>
           <span
             className="absolute top-[50px] h-3 w-0.5 bg-[#C3C7D2]"
