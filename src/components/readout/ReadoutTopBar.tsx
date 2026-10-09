@@ -4,6 +4,7 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { getWeekRange, formatDate, getCurrentWeek } from "../../lib/date-utils";
 import { ReadoutNav } from "./ReadoutNav";
 import logo from "../../logo.svg";
@@ -51,6 +52,9 @@ function ReloadButton() {
  * Narrower windows give up detail rather than wrap or scroll sideways: the
  * week's dates go below `xl`, the page labels below `lg`, the wordmark down
  * to its mark below `sm`. What is cut stays in a native tooltip.
+ *
+ * On an engagement's Stop the week cannot change: the feedback shown was filed
+ * in that week, and another week would not contain it.
  */
 export function ReadoutTopBar({
   currentWeek,
@@ -59,6 +63,10 @@ export function ReadoutTopBar({
   const year = new Date().getFullYear();
   const { start, end } = getWeekRange(currentWeek, year);
   const isCurrent = currentWeek === getCurrentWeek(year);
+  const weekLocked = useLocation().pathname.startsWith("/feedback/");
+  const lockedTitle = weekLocked
+    ? "The week is fixed while one engagement is open"
+    : undefined;
 
   return (
     // Sticky because in a window short enough to scroll, the week being read
@@ -86,8 +94,9 @@ export function ReadoutTopBar({
           <button
             type="button"
             onClick={() => onWeekChange(Math.max(1, currentWeek - 1))}
-            disabled={currentWeek <= 1}
+            disabled={weekLocked || currentWeek <= 1}
             aria-label="Previous week"
+            title={lockedTitle}
             className={ROUND_BUTTON}
           >
             <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
@@ -114,8 +123,9 @@ export function ReadoutTopBar({
           <button
             type="button"
             onClick={() => onWeekChange(Math.min(TOTAL_WEEKS, currentWeek + 1))}
-            disabled={currentWeek >= TOTAL_WEEKS}
+            disabled={weekLocked || currentWeek >= TOTAL_WEEKS}
             aria-label="Next week"
+            title={lockedTitle}
             className={ROUND_BUTTON}
           >
             <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />

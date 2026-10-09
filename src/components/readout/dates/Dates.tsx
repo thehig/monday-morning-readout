@@ -36,7 +36,11 @@ export function Dates() {
           No submissions for week {currentWeek}.
         </p>
       ) : (
-        <OwnerRunway engagements={engagements} today={today} />
+        <OwnerRunway
+          engagements={engagements}
+          currentWeek={currentWeek}
+          today={today}
+        />
       )}
     </div>
   );

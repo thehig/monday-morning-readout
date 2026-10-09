@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { buildRunway } from "../../../lib/dates-view";
 import type { Runway } from "../../../lib/dates-view";
 import { showDate } from "../../../lib/engagements";
@@ -6,6 +7,7 @@ import { STATE_MARK } from "../state-styles";
 
 interface OwnerRunwayProps {
   engagements: Engagement[];
+  currentWeek: number;
   today?: Date;
 }
 
@@ -28,10 +30,12 @@ function Lane({
   lane,
   todayPct,
   monthPcts,
+  currentWeek,
 }: {
   lane: Runway["lanes"][number];
   todayPct: number;
   monthPcts: number[];
+  currentWeek: number;
 }) {
   const engagements = lane.marks.length;
 
@@ -62,10 +66,22 @@ function Lane({
           aria-hidden="true"
         />
 
+        {/*
+          Each dot and its label open that engagement's Stop. The link has no
+          box of its own - its parts are placed on the lane - so hover and focus
+          show on the dot and the name.
+        */}
         {lane.marks.map(({ engagement, pct }, i) => (
-          <span key={engagement.id}>
+          <Link
+            key={engagement.id}
+            to={`/feedback/${engagement.id}?week=${currentWeek}`}
+            aria-label={`${engagement.customer}, estimated completion ${showDate(
+              engagement.estimate
+            )}`}
+            className="group outline-none"
+          >
             <span
-              className={`absolute top-1/2 h-[22px] w-[22px] -translate-x-1/2 -translate-y-1/2 rounded-full shadow-[0_0_0_3px_#FFFFFF,0_1px_4px_rgba(26,26,75,0.25)] ${
+              className={`absolute top-1/2 h-[22px] w-[22px] -translate-x-1/2 -translate-y-1/2 rounded-full shadow-[0_0_0_3px_#FFFFFF,0_1px_4px_rgba(26,26,75,0.25)] transition-transform group-hover:scale-125 group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-4 group-focus-visible:outline-brand ${
                 STATE_MARK[engagement.state]
               }`}
               style={{ left: `${pct}%` }}
@@ -78,7 +94,7 @@ function Lane({
             >
               <b
                 title={engagement.customer}
-                className="max-w-[240px] truncate text-[17px] font-bold leading-[21px]"
+                className="max-w-[240px] truncate text-[17px] font-bold leading-[21px] group-hover:underline group-focus-visible:underline"
               >
                 {engagement.customer}
               </b>
@@ -86,7 +102,7 @@ function Lane({
                 {showDate(engagement.estimate)}
               </span>
             </span>
-          </span>
+          </Link>
         ))}
       </div>
     </section>
@@ -100,6 +116,7 @@ function Lane({
  */
 export function OwnerRunway({
   engagements,
+  currentWeek,
   today = new Date(),
 }: OwnerRunwayProps) {
   const runway = buildRunway(engagements, today);
@@ -149,6 +166,7 @@ export function OwnerRunway({
             lane={lane}
             todayPct={runway.todayPct}
             monthPcts={monthPcts}
+            currentWeek={currentWeek}
           />
         ))}
       </div>
