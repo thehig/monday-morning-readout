@@ -18,7 +18,7 @@ function row(over: Partial<POFeedback> = {}): POFeedback {
   } as POFeedback;
 }
 
-/** Two needing a decision, then two on track - the Wall's own order. */
+/** Two needing a decision, then two on schedule - the Wall's own order. */
 const WEEK = toEngagements(
   [
     row({ id: 10, customer: "On track A", target_date: "2026-11-05",
@@ -34,7 +34,7 @@ const WEEK = toEngagements(
 );
 
 describe("stepPosition", () => {
-  it("walks the exceptions before anything on track", () => {
+  it("walks the exceptions before anything on schedule", () => {
     expect(WEEK.map((e) => e.customer)).toEqual([
       "Past deadline",
       "Overruns",
@@ -91,11 +91,11 @@ describe("describeStep", () => {
   const describe_ = (id: number) => describeStep(stepPosition(WEEK, id)!);
 
   it("counts down the remaining decisions", () => {
-    expect(describe_(11)).toBe("1 more needs a decision, then 2 on track");
+    expect(describe_(11)).toBe("1 more needs a decision, then 2 on schedule");
   });
 
   it("announces the fast pass once the exceptions are done", () => {
-    expect(describe_(13)).toBe("exceptions done · 2 on track to run through");
+    expect(describe_(13)).toBe("exceptions done · 2 on schedule to run through");
   });
 
   it("counts down the fast pass", () => {

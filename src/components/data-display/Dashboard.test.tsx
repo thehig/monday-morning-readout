@@ -12,10 +12,6 @@ vi.mock("../readout/wall/Ladder", () => ({
   Ladder: () => <div data-testid="ladder" />,
 }));
 
-vi.mock("../readout/wall/Field", () => ({
-  Field: () => <div data-testid="field" />,
-}));
-
 vi.mock("../readout/wall/RankedGrid", () => ({
   RankedGrid: ({
     engagements,
@@ -143,8 +139,8 @@ describe("Dashboard", () => {
     mockRows.current = [row()];
     render(<Dashboard />, { wrapper: createTestWrapper() });
 
-    await userEvent.keyboard("3");
-    expect(screen.getByTestId("field")).toBeInTheDocument();
+    await userEvent.keyboard("2");
+    expect(screen.getByTestId("ladder")).toBeInTheDocument();
 
     await userEvent.keyboard("1");
     expect(screen.getByTestId("ranked-grid")).toBeInTheDocument();
@@ -169,7 +165,21 @@ describe("Dashboard", () => {
     expect(screen.getByTestId("ranked-grid")).toHaveTextContent("2 engagements");
   });
 
-  it("leads with how many need a decision", () => {
+  it("leaves the count off the grid, whose cards each carry their state", () => {
+    mockRows.current = [
+      row({
+        id: 1,
+        customer: "FIDUS Finanz AG",
+        target_date: "2026-05-31",
+        estimated_completion_date: "2026-10-23",
+      }),
+    ];
+    render(<Dashboard />, { wrapper: createTestWrapper() });
+
+    expect(screen.queryByText("Needs a decision first")).not.toBeInTheDocument();
+  });
+
+  it("leads the ladder with how many need a decision", async () => {
     mockRows.current = [
       row({
         id: 1,
@@ -180,19 +190,42 @@ describe("Dashboard", () => {
       row({ id: 2, customer: "FLOWNIQ" }),
     ];
     render(<Dashboard />, { wrapper: createTestWrapper() });
+    await userEvent.keyboard("2");
 
     expect(screen.getByText("Needs a decision first")).toBeInTheDocument();
     expect(screen.getByText("1 of 2")).toBeInTheDocument();
   });
 
-  it("says so when nothing has slipped", () => {
+  it("says so on the ladder when nothing has slipped", async () => {
     mockRows.current = [row({ id: 1, customer: "FLOWNIQ" })];
     render(<Dashboard />, { wrapper: createTestWrapper() });
+    await userEvent.keyboard("2");
 
     expect(screen.getByText("All on the date")).toBeInTheDocument();
   });
 
-  it("calls out owners claiming a deadline their estimate has passed", () => {
+  it("warns about owners not on track for their own estimate", () => {
+    mockRows.current = [
+      row({
+        id: 1,
+        customer: "Test API",
+        target_date: "2026-09-08",
+        estimated_completion_date: "2026-10-13",
+        project_on_track: false,
+      }),
+    ];
+    render(<Dashboard />, { wrapper: createTestWrapper() });
+
+    // Drawn as a chip rather than a sentence: the count and the words are
+    // separate elements inside one object, so assert on the object.
+    const chip = screen.getByText("not on track for their own estimate").parentElement;
+
+    expect(chip).toHaveTextContent("1");
+  });
+
+  it("does not treat an estimate past the deadline as a warning when on track", () => {
+    // "On track" is about the owner's own estimate, so an engagement whose
+    // estimate passes the deadline can quite properly be on track for it.
     mockRows.current = [
       row({
         id: 1,
@@ -204,11 +237,8 @@ describe("Dashboard", () => {
     ];
     render(<Dashboard />, { wrapper: createTestWrapper() });
 
-    // Drawn as a chip rather than a sentence: the count and the claim are
-    // separate elements inside one object, so assert on the object.
-    const chip = screen.getByText(/own estimate says otherwise/).parentElement;
-
-    expect(chip).toHaveTextContent("1");
-    expect(chip).toHaveTextContent(/say on track/);
+    expect(
+      screen.queryByText("not on track for their own estimate")
+    ).not.toBeInTheDocument();
   });
 });

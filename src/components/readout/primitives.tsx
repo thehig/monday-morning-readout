@@ -1,3 +1,4 @@
+import { CheckIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import type { VelocityType } from "../../types/indicators";
 import { VELOCITY_LABELS } from "../../lib/velocity";
 import { VELOCITY_DOT } from "./state-styles";
@@ -14,82 +15,74 @@ import { VELOCITY_DOT } from "./state-styles";
 interface LabelledProps {
   label: string;
   children: React.ReactNode;
-  /** Fixed label column, so the marks line up down a card. */
-  labelWidth?: string;
-  /** How the label reads on the surface behind it; see STATE_LABEL. */
+  /** How the label reads on the surface behind it. */
   tone?: string;
 }
 
-/**
- * A label-and-value row. The label is quiet, the value is not.
- *
- * The column is as narrow as the longest label allows - "Next week" - because
- * the widest value, "Medium velocity expected", clears a tile by only a few
- * pixels. Widen this and that value starts being cut instead.
- */
-export function Labelled({
-  label,
-  children,
-  labelWidth = "w-[84px]",
-  tone = "text-ink-3",
-}: LabelledProps) {
+/** A label-and-value row on a card. The label is quiet, the value is not. */
+export function Labelled({ label, children, tone = "text-ink-3" }: LabelledProps) {
   return (
-    <div className="flex items-center gap-2 text-[17px]">
-      <span className={`${labelWidth} shrink-0 ${tone}`}>{label}</span>
+    <div className="flex h-6 min-w-0 items-center gap-2.5 text-[17px]">
+      <span className={`w-[84px] shrink-0 ${tone}`}>{label}</span>
       {children}
     </div>
   );
 }
 
 /**
- * Progress as a bar with the number beside it.
+ * Progress as a rounded bar with the number beside it.
  *
  * The percentage sits outside the fill: printed inside, it is white on grey
  * below about 20% and invisible at zero.
  */
-export function ProgressBar({ value }: { value: number }) {
+export function ProgressBar({
+  value,
+  width,
+}: {
+  value: number;
+  /** A fixed track width, for places with no row to fill. */
+  width?: string;
+}) {
   const pct = Math.max(0, Math.min(100, value));
 
   return (
     <>
-      {/*
-        A floor as well as a share. The track fills the row it is given, but in
-        a container that is only as wide as its contents - the Stop's header -
-        a bare flex-1 has nothing to take a share of and the bar disappears,
-        leaving the percentage sitting on its own.
-      */}
-      <span className="h-[13px] min-w-[132px] flex-1 overflow-hidden rounded-full bg-ink/[0.12]">
+      <span
+        className={`h-2.5 overflow-hidden rounded-full bg-ink/[0.10] ${
+          width ?? "min-w-[120px] flex-1"
+        }`}
+      >
         {pct > 0 && (
           <span
-            className="block h-full min-w-[7px] rounded-full bg-meter"
+            className="block h-full min-w-[6px] rounded-full bg-meter"
             style={{ width: `${pct}%` }}
           />
         )}
       </span>
-      <span className="w-[52px] shrink-0 text-right text-[17px] font-bold tabular-nums">
+      <span className="w-[46px] shrink-0 text-right text-[17px] font-bold tabular-nums">
         {pct}%
       </span>
     </>
   );
 }
 
-/** Sentiment as five segments plus the score. Replaces the emoji scale. */
+/** Sentiment as five dots plus the score. Replaces the emoji scale. */
 export function Meter({ value, max = 5 }: { value: number; max?: number }) {
   const filled = Math.max(0, Math.min(max, Math.round(value)));
 
   return (
     <>
-      <span className="flex gap-[3px]" role="img" aria-label={`${filled} out of ${max}`}>
+      <span className="flex gap-[5px]" role="img" aria-label={`${filled} out of ${max}`}>
         {Array.from({ length: max }, (_, i) => (
           <span
             key={i}
-            className={`h-[13px] w-[17px] rounded-sm ${
+            className={`h-[13px] w-[13px] rounded-full ${
               i < filled ? "bg-meter" : "bg-ink/[0.12]"
             }`}
           />
         ))}
       </span>
-      <span className="w-[52px] shrink-0 text-right text-[17px] font-bold tabular-nums">
+      <span className="ml-auto shrink-0 text-[17px] font-bold tabular-nums">
         {filled}/{max}
       </span>
     </>
@@ -102,7 +95,7 @@ export function VelocityDot({ velocity }: { velocity: VelocityType | null }) {
 
   return (
     <span
-      className={`h-[15px] w-[15px] shrink-0 rounded-full ${VELOCITY_DOT[velocity]}`}
+      className={`h-3 w-3 shrink-0 rounded-full ${VELOCITY_DOT[velocity]}`}
       title={VELOCITY_LABELS[velocity]}
     />
   );
@@ -123,10 +116,8 @@ export function VelocityLight({
   const label = VELOCITY_LABELS[velocity];
 
   return (
-    <span className="flex min-w-0 items-center gap-2">
-      <span
-        className={`h-[15px] w-[15px] shrink-0 rounded-full ${VELOCITY_DOT[velocity]}`}
-      />
+    <span className="flex min-w-0 items-center gap-2.5">
+      <VelocityDot velocity={velocity} />
       {/*
         One line, cut if it has to be. The dot carries the same reading, so a
         clipped tail costs nothing, where a second line would push the rows
@@ -140,12 +131,40 @@ export function VelocityLight({
 }
 
 /**
+ * The owner's answer to "is it on track?".
+ *
+ * That question is about the owner's own estimated completion date, not the
+ * agreed deadline - so an engagement past its deadline can quite properly be on
+ * track for its estimate. "Not on track" is the owner doubting even the date
+ * they set, and it is the one that gets the warning.
+ */
+export function OnTrack({ value }: { value: boolean | null }) {
+  if (value === null) {
+    return (
+      <span className="text-[17px] text-ink-3">On track for its estimate: not reported</span>
+    );
+  }
+
+  return value ? (
+    <span className="flex items-center gap-2 text-[17px] font-[650] text-fine-ink">
+      <CheckIcon className="h-[19px] w-[19px] shrink-0 stroke-[2.4]" aria-hidden="true" />
+      On track for its estimate
+    </span>
+  ) : (
+    <span className="flex items-center gap-2 text-[17px] font-bold text-late-ink">
+      <ExclamationTriangleIcon className="h-[19px] w-[19px] shrink-0 stroke-2" aria-hidden="true" />
+      Not on track for its estimate
+    </span>
+  );
+}
+
+/**
  * How a count moved since last week.
  *
  * Only drawn when there is a baseline and the number actually changed, so an
  * unchanged week stays quiet rather than filling the strip with zeroes. The
- * direction that is bad depends on the count - more commitments is good, more
- * overruns is not - so the caller says which way is worse.
+ * direction that is bad depends on the count, so the caller says which way is
+ * worse.
  */
 export function Delta({
   now,
@@ -165,8 +184,8 @@ export function Delta({
 
   return (
     <span
-      className={`ml-1.5 text-[17px] font-bold tabular-nums ${
-        worse ? "text-late-ink" : "text-fine-ink"
+      className={`ml-2 rounded-full px-2 text-[17px] font-bold tabular-nums ${
+        worse ? "bg-late-tint text-late-ink" : "bg-fine-block text-fine-on"
       }`}
       title={`${before} last week`}
     >

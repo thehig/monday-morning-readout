@@ -18,7 +18,7 @@ export function FooterActions({ children }: { children: React.ReactNode }) {
 /** A keycap. The letter is the interface, so it is drawn like one. */
 export function Key({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="mr-1.5 rounded border-2 border-sheet-rule bg-sheet px-2 font-bold text-ink-2">
+    <kbd className="mr-2 inline-block min-w-[30px] rounded-[7px] bg-sheet-key px-[9px] text-center font-sans text-[17px] font-bold text-ink-2 shadow-key">
       {children}
     </kbd>
   );
@@ -40,9 +40,9 @@ interface SegmentedProps<T extends string> {
 }
 
 /**
- * The view switcher, drawn for the navy bar.
+ * The view switcher, drawn for the navy bar as a row of pills.
  *
- * Selection is carried by a filled white segment rather than by hue, so it
+ * Selection is carried by a filled white pill rather than by hue, so it
  * survives the same compression everything else on this screen is drawn for.
  */
 export function Segmented<T extends string>({
@@ -55,7 +55,7 @@ export function Segmented<T extends string>({
     <div
       role="group"
       aria-label={label}
-      className="flex overflow-hidden rounded border-2 border-navy-line"
+      className="flex gap-1 rounded-full bg-white/[0.09] p-1"
     >
       {options.map((option) => {
         const selected = option.value === value;
@@ -66,16 +66,16 @@ export function Segmented<T extends string>({
             type="button"
             onClick={() => onChange(option.value)}
             aria-pressed={selected}
-            className={`px-3.5 py-1 text-[17px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand ${
+            className={`rounded-full px-4 py-[7px] text-[17px] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
               selected
-                ? "bg-white text-navy"
-                : "text-white/85 hover:bg-white/10 hover:text-white"
+                ? "bg-white font-[650] text-navy"
+                : "font-semibold text-white/85 hover:bg-white/10 hover:text-white"
             }`}
           >
             {option.digit && (
               <span
-                className={`mr-1.5 text-[17px] ${
-                  selected ? "text-navy/50" : "text-white/50"
+                className={`mr-2 text-[17px] ${
+                  selected ? "text-navy/45" : "text-white/45"
                 }`}
               >
                 {option.digit}

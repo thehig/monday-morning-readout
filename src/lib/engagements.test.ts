@@ -1,12 +1,11 @@
 import {
   cleanText,
   isTestRow,
-  parseCommitments,
   scheduleState,
   toEngagement,
   toEngagements,
   summarise,
-  groupByOwner,
+  severity,
   showDate,
 } from "./engagements";
 import type { POFeedback } from "../types/feedback";
@@ -65,43 +64,6 @@ describe("engagements", () => {
     });
   });
 
-  describe("parseCommitments", () => {
-    it("splits a bulleted list", () => {
-      expect(
-        parseCommitments(
-          "- Start the shared wallet address fix\n- Hand over the specs\n- Close open SB items"
-        )
-      ).toEqual([
-        "Start the shared wallet address fix",
-        "Hand over the specs",
-        "Close open SB items",
-      ]);
-    });
-
-    it("splits a numbered list", () => {
-      expect(
-        parseCommitments("1. Implementation of joint account feedback\n2. Clarify open points")
-      ).toEqual([
-        "Implementation of joint account feedback",
-        "Clarify open points",
-      ]);
-    });
-
-    it("keeps a single sentence as one commitment", () => {
-      expect(parseCommitments("Waiting for client feedback")).toEqual([
-        "Waiting for client feedback",
-      ]);
-    });
-
-    it("reads a placeholder as nothing committed", () => {
-      expect(parseCommitments("-")).toEqual([]);
-      expect(parseCommitments("--")).toEqual([]);
-      expect(parseCommitments("")).toEqual([]);
-      expect(parseCommitments(null)).toEqual([]);
-      expect(parseCommitments(undefined)).toEqual([]);
-    });
-  });
-
   describe("scheduleState", () => {
     it("is late once the committed date has passed", () => {
       expect(scheduleState(new Date(2026, 8, 30), 31, TODAY)).toBe("late");
@@ -157,7 +119,7 @@ describe("engagements", () => {
       });
     });
 
-    it("flags an owner who claims a deadline their estimate has passed", () => {
+    it("counts the days since the agreed deadline as of today, apart from the estimate", () => {
       const e = toEngagement(
         row({
           target_date: "2026-05-31",
@@ -167,12 +129,25 @@ describe("engagements", () => {
         TODAY
       );
 
+      // 129 days have passed since the deadline; the estimate lands 145 after
+      // it. The first is a fact, the second is the owner's forecast.
+      expect(e.overdueDays).toBe(129);
+      expect(e.daysToDeadline).toBe(-129);
       expect(e.slipDays).toBe(145);
-      expect(e.contradicts).toBe(true);
     });
 
-    it("does not flag an owner who agrees the deadline will be missed", () => {
-      const e = toEngagement(
+    it("reads on track as a view of the estimate, not of the deadline", () => {
+      // Past the deadline and flagged on track: the owner expects to hit their
+      // own revised date. That is consistent, so it carries no warning.
+      const onTrack = toEngagement(
+        row({
+          target_date: "2026-05-31",
+          estimated_completion_date: "2026-10-23",
+          project_on_track: true,
+        }),
+        TODAY
+      );
+      const offTrack = toEngagement(
         row({
           target_date: "2026-09-08",
           estimated_completion_date: "2026-10-13",
@@ -181,8 +156,19 @@ describe("engagements", () => {
         TODAY
       );
 
-      expect(e.slipDays).toBe(35);
-      expect(e.contradicts).toBe(false);
+      expect(onTrack.ownerSaysOnTrack).toBe(true);
+      expect(offTrack.ownerSaysOnTrack).toBe(false);
+      expect(summarise([onTrack, offTrack]).offTrack).toBe(1);
+    });
+
+    it("counts down to a deadline still ahead", () => {
+      const e = toEngagement(
+        row({ target_date: "2026-11-30", estimated_completion_date: "2026-12-15" }),
+        TODAY
+      );
+
+      expect(e.daysToDeadline).toBe(54);
+      expect(e.overdueDays).toBeNull();
     });
 
     it("treats a placeholder risks field as nothing recorded", () => {
@@ -200,7 +186,8 @@ describe("engagements", () => {
       expect(e.slipDays).toBeNull();
       expect(e.landingWeek).toBeNull();
       expect(e.state).toBe("unknown");
-      expect(e.contradicts).toBe(false);
+      expect(e.daysToDeadline).toBeNull();
+      expect(e.overdueDays).toBeNull();
       expect(showDate(e.deadline)).toBe("—");
     });
 
@@ -252,13 +239,26 @@ describe("engagements", () => {
       expect(result.map((e) => e.customer)).not.toContain("Test 4 Ignore");
     });
 
-    it("puts the worst schedule first and the biggest overrun ahead of it", () => {
+    it("puts the longest overdue first, then overruns still ahead of their deadline", () => {
       expect(toEngagements(week39, TODAY).map((e) => e.customer)).toEqual([
-        "FIDUS Finanz AG", // late, 145 days
-        "Test API", // late, 35 days
-        "Volksbank Kraichgau", // watch, deadline still ahead
-        "UBS", // fine
+        "FIDUS Finanz AG", // 129 days past its deadline
+        "Test API", // 29 days past its deadline
+        "Volksbank Kraichgau", // deadline ahead, estimate 15 days after it
+        "UBS", // on schedule
       ]);
+    });
+
+    it("orders late engagements by days overdue, not by the estimate", () => {
+      // B passed its deadline longer ago but expects to finish sooner after it.
+      const ordered = toEngagements(
+        [
+          row({ id: 1, customer: "A", target_date: "2026-10-02", estimated_completion_date: "2026-10-27" }),
+          row({ id: 2, customer: "B", target_date: "2026-09-29", estimated_completion_date: "2026-10-22" }),
+        ],
+        TODAY
+      );
+
+      expect(ordered.map((e) => e.customer)).toEqual(["B", "A"]);
     });
 
     it("survives an empty or missing week", () => {
@@ -284,32 +284,29 @@ describe("engagements", () => {
         engagements: 2,
         scheduled: 2,
         needingDecision: 1,
-        contradicting: 1,
-        commitments: 3,
-        owners: 2,
-        slipDaysTotal: 145,
+        offTrack: 0,
       });
     });
   });
 
-  describe("groupByOwner", () => {
-    it("groups by address and leads with the busiest owner", () => {
-      const groups = groupByOwner(
-        toEngagements(
-          [
-            row({ id: 1, customer: "A", submitted_by: "david.siegel@x.com", goals_next_week: "- one" }),
-            row({ id: 2, customer: "B", submitted_by: "david.siegel@x.com", goals_next_week: "- two\n- three" }),
-            row({ id: 3, customer: "C", submitted_by: "adwait.sompura@x.com", goals_next_week: "- four" }),
-          ],
-          TODAY
-        )
+  describe("severity", () => {
+    it("measures a late engagement by days overdue", () => {
+      const e = toEngagement(
+        row({ target_date: "2026-09-29", estimated_completion_date: "2026-12-30" }),
+        TODAY
       );
 
-      expect(groups).toHaveLength(2);
-      expect(groups[0].owner).toBe("David Siegel");
-      expect(groups[0].engagements).toHaveLength(2);
-      expect(groups[0].commitments).toBe(3);
-      expect(groups[1].owner).toBe("Adwait Sompura");
+      expect(e.overdueDays).toBe(8);
+      expect(severity(e)).toBe(1);
+    });
+
+    it("measures one still ahead of its deadline by the estimate's overrun", () => {
+      const e = toEngagement(
+        row({ target_date: "2026-11-30", estimated_completion_date: "2026-12-15" }),
+        TODAY
+      );
+
+      expect(severity(e)).toBe(2);
     });
   });
 });

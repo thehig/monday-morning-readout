@@ -38,8 +38,6 @@ export interface Engagement {
   milestones: string | null;
   risks: string | null;
   goals: string | null;
-  /** `goals_next_week` split into the individual things being promised. */
-  commitments: string[];
 
   psCallRequested: boolean | null;
   psCallAnswer: string;
@@ -67,12 +65,24 @@ export interface Engagement {
   /** The stored `target_diff`, humanised: how overdue it was when filed. */
   sinceDeadline: TargetDiffSummary | null;
 
+  /**
+   * The agreed deadline minus today, in whole days: negative once it has
+   * passed. This is the hard fact - the deadline was agreed with the customer
+   * and does not move - where `slipDays` is only the owner's forecast.
+   */
+  daysToDeadline: number | null;
+  /** Days since the deadline passed, or null while it is still ahead. */
+  overdueDays: number | null;
+
+  /**
+   * The owner's answer to "is the project on track?" - on track to meet their
+   * own estimated completion date, not the deadline. An estimate past the
+   * deadline flagged on track is therefore consistent, not a contradiction.
+   */
   ownerSaysOnTrack: boolean | null;
   delayReason: string | null;
 
   state: ScheduleState;
-  /** The owner says the deadline will be met while the estimate lands after it. */
-  contradicts: boolean;
 }
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -114,44 +124,38 @@ export function isTestRow(customer: string | null | undefined): boolean {
 }
 
 /**
- * Splits a goals field into discrete commitments.
- *
- * Owners write these as newline lists, sometimes bulleted with "-" and
- * sometimes numbered "1." - and sometimes as one sentence, which stays one
- * commitment. A lone "-" means nothing was committed.
- */
-export function parseCommitments(goals: string | null | undefined): string[] {
-  if (typeof goals !== "string") return [];
-
-  return goals
-    .split(/\r?\n/)
-    .map((line) => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim())
-    .filter((line) => line.length > 0 && line !== "-" && line !== "--");
-}
-
-/**
- * Red once the committed date has passed; amber while it is still ahead but
- * the estimate already overruns it.
- */
-/**
  * How badly, not just whether.
  *
- * FIDUS at 145 days over and Plutos at 30 are both "late" and drew the same
- * colour, leaving the room to compare two numbers to find the worse one. The
- * thresholds are calendar meaning rather than a split of this week's figures:
- * inside a fortnight is a slip, up to two months is a problem, past two months
- * is a different kind of conversation.
+ * Two late engagements drew the same colour, leaving the room to compare two
+ * numbers to find the worse one. The thresholds are calendar meaning rather
+ * than a split of this week's figures: inside a fortnight is a slip, up to two
+ * months is a problem, past two months is a different kind of conversation.
  */
 export type SlipSeverity = 1 | 2 | 3;
 
 const SEVERE_DAYS = 60;
 const MODERATE_DAYS = 14;
 
-export function slipSeverity(slipDays: number | null): SlipSeverity {
-  if (slipDays === null || slipDays < MODERATE_DAYS) return 1;
-  return slipDays >= SEVERE_DAYS ? 3 : 2;
+export function slipSeverity(days: number | null): SlipSeverity {
+  if (days === null || days < MODERATE_DAYS) return 1;
+  return days >= SEVERE_DAYS ? 3 : 2;
 }
 
+/**
+ * The tier an engagement is drawn at. A late one is measured by how long its
+ * deadline has been gone - the hard fact; one still ahead of its deadline can
+ * only be measured by how far its estimate overruns.
+ */
+export function severity(engagement: Engagement): SlipSeverity {
+  return slipSeverity(
+    engagement.state === "late" ? engagement.overdueDays : engagement.slipDays
+  );
+}
+
+/**
+ * Red once the agreed deadline has passed; amber while it is still ahead but
+ * the estimate already overruns it.
+ */
 export function scheduleState(
   deadline: Date | null,
   slipDays: number | null,
@@ -173,6 +177,7 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
   const deadline = parseDateOnly(row.target_date);
   const estimate = parseDateOnly(row.estimated_completion_date);
   const slipDays = deadline && estimate ? daysBetween(deadline, estimate) : null;
+  const daysToDeadline = deadline ? daysBetween(today, deadline) : null;
   const velocity = (row.velocity_next_week as VelocityType) ?? null;
   const ownerSaysOnTrack =
     typeof row.project_on_track === "boolean" ? row.project_on_track : null;
@@ -202,7 +207,6 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
     milestones: cleanText(row.milestones_done),
     risks: cleanText(row.risks),
     goals: cleanText(row.goals_next_week),
-    commitments: parseCommitments(row.goals_next_week),
 
     psCallRequested,
     psCallAnswer:
@@ -221,12 +225,14 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
     landsInDays: estimate ? daysBetween(today, estimate) : null,
     landingWeek: estimate ? getWeekNumber(estimate, today.getFullYear()) : null,
     sinceDeadline: describeTargetDiff(row.target_diff),
+    daysToDeadline,
+    overdueDays:
+      daysToDeadline !== null && daysToDeadline < 0 ? -daysToDeadline : null,
 
     ownerSaysOnTrack,
     delayReason,
 
     state: scheduleState(deadline, slipDays, today),
-    contradicts: ownerSaysOnTrack === true && (slipDays ?? 0) > 0,
   };
 }
 
@@ -247,12 +253,12 @@ export function toEngagements(
       const byState = STATE_ORDER[a.state] - STATE_ORDER[b.state];
       if (byState !== 0) return byState;
 
-      // Within the slipping groups the biggest overrun leads; within the rest
-      // the nearest landing does.
-      if (a.state === "late" || a.state === "watch") {
-        return (b.slipDays ?? 0) - (a.slipDays ?? 0);
-      }
-      return (a.landsInDays ?? Infinity) - (b.landsInDays ?? Infinity);
+      // Late engagements lead by how long their deadline has been gone - the
+      // hard fact - and overruns still ahead of their deadline by how far the
+      // estimate passes it. The rest follow in order of their deadline.
+      if (a.state === "late") return (b.overdueDays ?? 0) - (a.overdueDays ?? 0);
+      if (a.state === "watch") return (b.slipDays ?? 0) - (a.slipDays ?? 0);
+      return (a.daysToDeadline ?? Infinity) - (b.daysToDeadline ?? Infinity);
     });
 }
 
@@ -269,10 +275,11 @@ export interface ReadoutTotals {
    */
   scheduled: number;
   needingDecision: number;
-  contradicting: number;
-  commitments: number;
-  owners: number;
-  slipDaysTotal: number;
+  /**
+   * Owners who say they are not on track for their own estimated completion
+   * date - the owner doubting even the date they set, which is the warning.
+   */
+  offTrack: number;
 }
 
 export function summarise(engagements: Engagement[]): ReadoutTotals {
@@ -282,68 +289,8 @@ export function summarise(engagements: Engagement[]): ReadoutTotals {
     needingDecision: engagements.filter(
       (e) => e.state === "late" || e.state === "watch"
     ).length,
-    contradicting: engagements.filter((e) => e.contradicts).length,
-    commitments: engagements.reduce((n, e) => n + e.commitments.length, 0),
-    owners: new Set(engagements.map((e) => e.ownerKey)).size,
-    slipDaysTotal: engagements.reduce(
-      (n, e) => n + Math.max(0, e.slipDays ?? 0),
-      0
-    ),
+    offTrack: engagements.filter((e) => e.ownerSaysOnTrack === false).length,
   };
-}
-
-/** Engagements grouped by product owner, busiest first - used by the Plan. */
-export function groupByOwner(
-  engagements: Engagement[]
-): { owner: string; ownerEmail: string; engagements: Engagement[]; commitments: number }[] {
-  const groups = new Map<string, Engagement[]>();
-
-  for (const engagement of engagements) {
-    const existing = groups.get(engagement.ownerKey);
-    if (existing) existing.push(engagement);
-    else groups.set(engagement.ownerKey, [engagement]);
-  }
-
-  return [...groups.entries()]
-    .map(([ownerEmail, list]) => ({
-      owner: list[0].owner,
-      ownerEmail,
-      engagements: list,
-      commitments: list.reduce((n, e) => n + e.commitments.length, 0),
-    }))
-    .sort((a, b) => b.engagements.length - a.engagements.length);
-}
-
-export interface Commitment {
-  /** Position in the week's list, 1-based, in schedule-risk order. */
-  index: number;
-  text: string;
-  engagement: Engagement;
-}
-
-/**
- * Every commitment the week promises, flattened in the engagements' own order
- * so the worst schedule's promises come first.
- */
-export function flattenCommitments(engagements: Engagement[]): Commitment[] {
-  return engagements.flatMap((engagement) =>
-    engagement.commitments.map((text) => ({ index: 0, text, engagement }))
-  ).map((commitment, i) => ({ ...commitment, index: i + 1 }));
-}
-
-/** The short schedule phrase used wherever an engagement is named in passing. */
-export function scheduleNote(engagement: Engagement): string {
-  const { state, slipDays, estimate, deadline } = engagement;
-
-  if (state === "late" && slipDays !== null && slipDays > 0) {
-    return `${slipDays} days past deadline`;
-  }
-  if (state === "late") return "past its deadline";
-  if (state === "watch" && slipDays !== null && slipDays > 0) {
-    return `estimate overruns by ${slipDays} days`;
-  }
-  if (estimate || deadline) return `due ${showDate(estimate ?? deadline)}`;
-  return "no deadline recorded";
 }
 
 /** "Sep 30, 2026", or a dash when the column is empty. */

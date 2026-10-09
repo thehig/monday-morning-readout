@@ -1,20 +1,23 @@
 import type { Engagement } from "./engagements";
+import { showDate } from "./engagements";
 
 /**
  * The sentence the Stop screen opens with.
  *
  * The call stops on an engagement for a reason, and this states it before any
- * detail. Where the owner's own verdict disagrees with their dates, both are
- * reported and neither is resolved - that disagreement is usually why the call
- * stopped here at all.
+ * detail. The headline is the hard fact: the deadline was agreed with the
+ * customer and does not move, so how far past it (or how far ahead of it) the
+ * engagement is today is not anyone's opinion. The estimate is the owner's own
+ * forecast, and "on track" is the owner's view of that estimate - so neither
+ * can contradict the deadline, and the detail reports them as what they are.
  */
 
 export type StatementTone = "late" | "watch" | "fine" | "unknown";
 
 export interface Statement {
-  /** The headline, e.g. "145 days past the date it committed to". */
+  /** The headline, e.g. "117 days past the agreed deadline". */
   headline: string;
-  /** The owner's own position, and what they expect next week. */
+  /** The estimate, the owner's view of it, and next week's velocity. */
   detail: string;
   tone: StatementTone;
 }
@@ -23,28 +26,41 @@ function days(n: number): string {
   return `${n} ${n === 1 ? "day" : "days"}`;
 }
 
-function ownersPosition(engagement: Engagement): string {
-  const { ownerSaysOnTrack, contradicts, slipDays } = engagement;
+function estimateSentence(engagement: Engagement): string {
+  const { estimate, slipDays } = engagement;
 
-  if (ownerSaysOnTrack === null) return "The owner did not record a view.";
-  if (contradicts) {
-    return `The owner disagrees: records the deadline as on track, ${days(
-      slipDays ?? 0
-    )} after their own estimate.`;
+  if (!estimate || slipDays === null) {
+    return "No completion estimate recorded.";
+  }
+  if (slipDays === 0) {
+    return `Estimated completion is ${showDate(estimate)}, on the deadline.`;
+  }
+  return `Estimated completion is ${showDate(estimate)}, ${days(
+    Math.abs(slipDays)
+  )} ${slipDays > 0 ? "after" : "before"} the deadline.`;
+}
+
+function onTrackSentence(engagement: Engagement): string {
+  const { ownerSaysOnTrack, estimate } = engagement;
+  const target = estimate ? "that estimate" : "its estimate";
+
+  if (ownerSaysOnTrack === null) {
+    return "The owner did not say whether it is on track.";
   }
   return ownerSaysOnTrack
-    ? "The owner agrees: says the deadline will be met."
-    : "The owner agrees: says the deadline will be missed.";
+    ? `The owner reports it on track for ${target}.`
+    : `The owner reports it not on track for ${target}.`;
 }
 
 export function buildStatement(engagement: Engagement): Statement {
-  const { state, slipDays, deadline, velocityLabel } = engagement;
+  const { state, deadline, daysToDeadline, overdueDays, velocityLabel } =
+    engagement;
 
   const outlook = velocityLabel
     ? ` ${velocityLabel} next week.`
     : " No velocity recorded for next week.";
 
-  if (!deadline) {
+  if (!deadline || daysToDeadline === null) {
     return {
       headline: "No deadline recorded",
       detail:
@@ -54,33 +70,24 @@ export function buildStatement(engagement: Engagement): Statement {
     };
   }
 
-  if (state === "late" && slipDays !== null && slipDays > 0) {
-    return {
-      headline: `${days(slipDays)} past the date it committed to`,
-      detail: ownersPosition(engagement) + outlook,
-      tone: "late",
-    };
-  }
+  const detail = `${estimateSentence(engagement)} ${onTrackSentence(
+    engagement
+  )}${outlook}`;
 
-  if (state === "late") {
+  if (overdueDays !== null) {
     return {
-      headline: "Past the date it committed to",
-      detail: ownersPosition(engagement) + outlook,
+      headline: `${days(overdueDays)} past the agreed deadline`,
+      detail,
       tone: "late",
-    };
-  }
-
-  if (state === "watch" && slipDays !== null && slipDays > 0) {
-    return {
-      headline: `Finishing ${days(slipDays)} after the date it committed to`,
-      detail: ownersPosition(engagement) + outlook,
-      tone: "watch",
     };
   }
 
   return {
-    headline: "Finishing on the date it committed to",
-    detail: ownersPosition(engagement) + outlook,
-    tone: "fine",
+    headline:
+      daysToDeadline === 0
+        ? "Due today"
+        : `${days(daysToDeadline)} to the agreed deadline`,
+    detail,
+    tone: state === "watch" ? "watch" : "fine",
   };
 }

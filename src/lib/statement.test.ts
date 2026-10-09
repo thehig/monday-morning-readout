@@ -23,7 +23,7 @@ function engagement(over: Partial<POFeedback> = {}) {
 }
 
 describe("buildStatement", () => {
-  it("leads with the overrun once the deadline has passed", () => {
+  it("leads with the days since the agreed deadline, counted from today", () => {
     const s = buildStatement(
       engagement({
         target_date: "2026-05-31",
@@ -33,11 +33,12 @@ describe("buildStatement", () => {
       })
     );
 
-    expect(s.headline).toBe("145 days past the date it committed to");
+    // 129 days since May 31 - not the 145 by which the estimate overruns.
+    expect(s.headline).toBe("129 days past the agreed deadline");
     expect(s.tone).toBe("late");
   });
 
-  it("reports the owner's disagreement without resolving it", () => {
+  it("reports the estimate as the owner's forecast, apart from the deadline", () => {
     const s = buildStatement(
       engagement({
         target_date: "2026-05-31",
@@ -46,11 +47,25 @@ describe("buildStatement", () => {
       })
     );
 
-    expect(s.detail).toContain("The owner disagrees");
-    expect(s.detail).toContain("145 days after their own estimate");
+    expect(s.detail).toContain(
+      "Estimated completion is Oct 23, 2026, 145 days after the deadline."
+    );
   });
 
-  it("says the owner agrees when they expect to miss it", () => {
+  it("reads on track as a view of the estimate, never as a disagreement", () => {
+    const s = buildStatement(
+      engagement({
+        target_date: "2026-05-31",
+        estimated_completion_date: "2026-10-23",
+        project_on_track: true,
+      })
+    );
+
+    expect(s.detail).toContain("The owner reports it on track for that estimate.");
+    expect(s.detail).not.toMatch(/disagree/i);
+  });
+
+  it("says when the owner doubts even their own estimate", () => {
     const s = buildStatement(
       engagement({
         target_date: "2026-09-08",
@@ -59,10 +74,10 @@ describe("buildStatement", () => {
       })
     );
 
-    expect(s.detail).toContain("The owner agrees: says the deadline will be missed.");
+    expect(s.detail).toContain("The owner reports it not on track for that estimate.");
   });
 
-  it("distinguishes an overrun still ahead of its deadline", () => {
+  it("counts down to a deadline still ahead whose estimate overruns it", () => {
     const s = buildStatement(
       engagement({
         target_date: "2026-11-30",
@@ -71,11 +86,12 @@ describe("buildStatement", () => {
       })
     );
 
-    expect(s.headline).toBe("Finishing 15 days after the date it committed to");
+    expect(s.headline).toBe("54 days to the agreed deadline");
+    expect(s.detail).toContain("15 days after the deadline.");
     expect(s.tone).toBe("watch");
   });
 
-  it("is plain when the estimate lands on the committed date", () => {
+  it("is plain when the estimate lands on the deadline", () => {
     const s = buildStatement(
       engagement({
         target_date: "2026-11-06",
@@ -84,8 +100,9 @@ describe("buildStatement", () => {
       })
     );
 
-    expect(s.headline).toBe("Finishing on the date it committed to");
+    expect(s.headline).toBe("30 days to the agreed deadline");
     expect(s.tone).toBe("fine");
+    expect(s.detail).toContain("Nov 6, 2026, on the deadline.");
     expect(s.detail).toContain("High velocity expected next week.");
   });
 
@@ -96,15 +113,23 @@ describe("buildStatement", () => {
     expect(s.tone).toBe("unknown");
   });
 
-  it("singularises a one-day overrun", () => {
+  it("singularises a single day", () => {
     const s = buildStatement(
       engagement({
-        target_date: "2026-11-30",
-        estimated_completion_date: "2026-12-01",
+        target_date: "2026-10-06",
+        estimated_completion_date: "2026-10-07",
       })
     );
 
-    expect(s.headline).toBe("Finishing 1 day after the date it committed to");
+    expect(s.headline).toBe("1 day past the agreed deadline");
+    expect(s.detail).toContain("1 day after the deadline.");
+  });
+
+  it("says when no estimate or on-track view was recorded", () => {
+    const s = buildStatement(engagement({ target_date: "2026-11-06" }));
+
+    expect(s.detail).toContain("No completion estimate recorded.");
+    expect(s.detail).toContain("The owner did not say whether it is on track.");
   });
 
   it("notes a missing velocity rather than leaving a gap", () => {

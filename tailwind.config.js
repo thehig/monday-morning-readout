@@ -4,37 +4,56 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Readout palette. Status separates by lightness as well as hue, so it
-        // survives the chroma subsampling in a shared video call.
-        navy: { DEFAULT: "#1A1A4B", deep: "#12123A", line: "#2E2E63" },
+        // "Clean cards": navy chrome, white cards on a cool ground, and colour
+        // only where the call has to stop. Status separates by lightness as
+        // well as hue, so it survives the chroma subsampling in a shared call.
+        navy: { DEFAULT: "#1A1A4B" },
         brand: "#FF7F00",
-        ink: { DEFAULT: "#15171F", 2: "#474B5C", 3: "#6E7384" },
-        sheet: { DEFAULT: "#F4F5F8", card: "#FFFFFF", rule: "#D8DAE3" },
-        // wash2 and wash3 deepen the same wash with the overrun, so how far
-        // behind reads before the number does. Each keeps its ink above 5:1.
+        ink: { DEFAULT: "#15171F", 2: "#464B5D", 3: "#61667A" },
+        sheet: {
+          DEFAULT: "#F3F4F7",
+          card: "#FFFFFF",
+          rule: "#E6E8EE",
+          key: "#EDEFF3",
+        },
+        // A state's solid block steps darker with how far behind it is
+        // (block1-3); `on` is the text that sits on a pale block; `tint` is the
+        // pale surface small tiles take; `mark` is the dot and bar colour.
         late: {
-          ink: "#7E2A1E",
-          wash: "#F8E2DD",
-          wash2: "#F2D2CA",
-          wash3: "#E9BDB2",
-          mark: "#B8442F",
+          ink: "#A32A1C",
+          block1: "#C8442F",
+          block2: "#AE3221",
+          block3: "#8C2215",
+          tint: "#FCEEEB",
+          capsule: "#FBE1DC",
+          mark: "#C8442F",
+          hatch: "#F4C7BE",
         },
         watch: {
-          ink: "#6E4A00",
-          wash: "#FAEED2",
-          wash2: "#F6E3B6",
-          wash3: "#F0D492",
-          mark: "#BC8A14",
+          ink: "#8A5300",
+          block1: "#F7D990",
+          block2: "#F1BE55",
+          block3: "#E6A126",
+          on: "#3D2600",
+          tint: "#FEF6E4",
+          mark: "#E0A027",
+          hatch: "#F8E3B5",
         },
-        fine: { ink: "#1C5B46", wash: "#E3EFE9", mark: "#2E7D63" },
-        // The meter fill only. Its unfilled track is a tint of the ink
-        // underneath, so it works on white and on a state wash alike.
-        meter: "#3B3B87",
+        fine: { ink: "#1E6A4A", block: "#E4F2EA", on: "#17583C", mark: "#2F8A63" },
+        // Progress and sentiment fills only: quantities, never status.
+        meter: "#3A3E98",
       },
       fontFamily: {
-        // Reserved for text a person typed, so a sentence never looks like a
-        // measurement.
-        serif: ['"Literata"', "Georgia", "serif"],
+        sans: ['"Figtree"', '"Segoe UI"', "system-ui", "sans-serif"],
+      },
+      boxShadow: {
+        card: "0 1px 2px rgba(26,26,75,0.05), 0 6px 18px rgba(26,26,75,0.05)",
+        tile: "0 1px 2px rgba(26,26,75,0.05), 0 4px 12px rgba(26,26,75,0.04)",
+        key: "inset 0 -1px 0 rgba(26,26,75,0.14)",
+      },
+      borderRadius: {
+        card: "18px",
+        tile: "14px",
       },
       minHeight: {
         // The readout's frame: the window, but never under the 1080px every

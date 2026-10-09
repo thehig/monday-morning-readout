@@ -2,20 +2,13 @@ import { Link } from "react-router-dom";
 import { landingWeeks, weekWeight } from "../../../lib/dates-view";
 import { showDate } from "../../../lib/engagements";
 import type { Engagement } from "../../../lib/engagements";
-import { STATE_TEXT } from "../state-styles";
+import { STATE_LABEL, STATE_MARK, STATE_TEXT, STATE_TINT } from "../state-styles";
 
 interface LandingWeeksProps {
   engagements: Engagement[];
   currentWeek: number;
   year?: number;
 }
-
-const TOP_EDGE: Record<string, string> = {
-  late: "border-t-late-mark",
-  watch: "border-t-watch-mark",
-  fine: "border-t-fine-mark",
-  unknown: "border-t-sheet-rule",
-};
 
 function Tile({
   engagement,
@@ -29,19 +22,24 @@ function Tile({
   return (
     <Link
       to={`/feedback/${engagement.id}?week=${currentWeek}`}
-      className={`grid gap-1 rounded border-2 border-t-[7px] border-sheet-rule bg-sheet-card px-2.5 py-2.5 transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-        TOP_EDGE[engagement.state]
+      className={`flex flex-col gap-0.5 rounded-tile border border-navy/[0.06] px-3.5 pb-[13px] pt-3 shadow-tile transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+        STATE_TINT[engagement.state]
       }`}
     >
-      <b className="text-[17px] font-bold leading-tight">{engagement.customer}</b>
-      <span className="text-[17px] leading-tight text-ink-3">
+      <b className="text-[18px] font-bold leading-[23px]">{engagement.customer}</b>
+      <span className={`text-[17px] leading-[22px] ${STATE_LABEL[engagement.state]}`}>
         {engagement.owner}
       </span>
-      <span className="text-[17px] font-bold tabular-nums">
+      <span className="mt-1.5 flex items-center gap-2 text-[17px] font-bold leading-[22px] tabular-nums">
+        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATE_MARK[engagement.state]}`} />
         {showDate(engagement.estimate)}
       </span>
       {slipped && (
-        <span className={`text-[17px] font-semibold ${STATE_TEXT[engagement.state]}`}>
+        <span
+          className={`text-[17px] font-semibold leading-[22px] tabular-nums ${
+            STATE_TEXT[engagement.state]
+          }`}
+        >
           committed {showDate(engagement.deadline)}
         </span>
       )}
@@ -63,28 +61,28 @@ export function LandingWeeks({
   const { track, undated, peak } = landingWeeks(engagements, currentWeek, year);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col px-6 pb-3 pt-3">
+    <div className="flex min-h-0 flex-1 flex-col px-6 pb-5 pt-1">
       {/*
         Width follows what lands, not the calendar. Weeks share the row in
         proportion to their load, so the busiest is the widest thing on the
         screen, and runs of empty weeks are one narrow marker rather than half
         the width spent on nothing.
       */}
-      <div className="flex min-h-0 flex-1 gap-2.5">
+      <div className="flex min-h-0 flex-1 gap-3">
         {track.map((entry) => {
           if (entry.kind === "quiet") {
             return (
               <div
                 key={`quiet-${entry.from}`}
-                className="flex w-[78px] shrink-0 flex-col items-center justify-center gap-1 rounded border-2 border-dashed border-sheet-rule px-1 text-center"
+                className="flex w-[88px] shrink-0 flex-col items-center justify-center gap-1 rounded-tile border-2 border-dashed border-[#D5D8E0] px-1 text-center text-ink-3"
               >
-                <b className="text-[19px] font-bold leading-none tabular-nums text-ink-3">
-                  {entry.weeks}
-                </b>
-                <span className="text-[17px] leading-tight text-ink-3">
-                  quiet weeks
+                <b className="text-[22px] font-[750] tabular-nums">{entry.weeks}</b>
+                <span className="text-[17px] leading-5">
+                  quiet
+                  <br />
+                  weeks
                 </span>
-                <span className="text-[17px] leading-none tabular-nums text-ink-3">
+                <span className="text-[17px] tabular-nums">
                   {entry.from}&ndash;{entry.to}
                 </span>
               </div>
@@ -95,7 +93,7 @@ export function LandingWeeks({
           const busiest = peak > 1 && column.engagements.length === peak;
 
           return (
-            <div
+            <section
               key={column.week}
               className="flex min-h-0 min-w-0 flex-col gap-2.5"
               style={{
@@ -106,26 +104,26 @@ export function LandingWeeks({
               }}
             >
               <div
-                className={`grid gap-0.5 border-b-[3px] pb-2 ${
+                className={`flex flex-col gap-px px-1 pb-2.5 pt-0.5 ${
                   busiest
-                    ? "border-late-mark"
+                    ? "border-b-2 border-late-mark"
                     : column.isCurrent
-                    ? "border-navy"
-                    : "border-sheet-rule"
+                    ? "border-b-2 border-navy"
+                    : "border-b border-[#DFE2E8]"
                 }`}
               >
                 <b
-                  className={`text-[19px] font-bold leading-tight ${
+                  className={`text-[19px] font-[750] ${
                     busiest ? "text-late-ink" : column.isCurrent ? "text-navy" : ""
                   }`}
                 >
                   {column.weekLabel}
                 </b>
-                <span className="text-[17px] tabular-nums text-ink-3">
+                <span className="whitespace-nowrap text-[17px] tabular-nums text-ink-3">
                   {column.label}
                 </span>
                 {busiest && (
-                  <span className="text-[17px] font-bold text-late-ink">
+                  <span className="mt-0.5 self-start rounded-full bg-late-block2 px-[9px] text-[17px] font-bold text-white">
                     {column.engagements.length} landing
                   </span>
                 )}
@@ -140,15 +138,15 @@ export function LandingWeeks({
                   />
                 ))
               ) : (
-                <span className="text-[17px] text-ink-3">&mdash;</span>
+                <span className="px-1 text-[17px] text-ink-3">&mdash;</span>
               )}
-            </div>
+            </section>
           );
         })}
       </div>
 
       {undated.length > 0 && (
-        <p className="shrink-0 border-t-2 border-sheet-rule pt-2.5 text-[17px] text-ink-3">
+        <p className="shrink-0 pt-3 text-[17px] text-ink-3">
           <span className="font-semibold text-ink-2">
             No completion date recorded:
           </span>{" "}

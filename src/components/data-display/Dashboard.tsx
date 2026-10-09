@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { usePOFeedbackByWeek } from "../../hooks/use-po-feedback";
 import { getPreviousWeek } from "../../lib/date-utils";
 import { toEngagements, summarise } from "../../lib/engagements";
@@ -10,7 +11,6 @@ import {
 import { Delta } from "../readout/primitives";
 import { RankedGrid } from "../readout/wall/RankedGrid";
 import { Ladder } from "../readout/wall/Ladder";
-import { Field } from "../readout/wall/Field";
 import {
   FooterActions,
   Key,
@@ -19,19 +19,18 @@ import {
 } from "../readout/chrome";
 import { isTypingTarget } from "../readout/useReadoutKeys";
 
-type WallLayout = "grid" | "ladder" | "field";
+type WallLayout = "grid" | "ladder";
 
 const LAYOUTS: { value: WallLayout; label: string; digit: string }[] = [
   { value: "grid", label: "Ranked grid", digit: "1" },
   { value: "ladder", label: "Ladder", digit: "2" },
-  { value: "field", label: "Field", digit: "3" },
 ];
 
 /**
  * The Wall: the state the Monday call opens on.
  *
- * Three layouts over identical data, each directing the eye differently - by
- * rank, by a shared scale, or by position. The operator picks one; they are not
+ * Two layouts over identical data, each directing the eye differently - by
+ * rank, or along a shared calendar. The operator picks one; they are not
  * different information.
  */
 export function Dashboard() {
@@ -82,33 +81,46 @@ export function Dashboard() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="flex shrink-0 items-center gap-4 border-b-2 border-sheet-rule bg-sheet-card px-6 py-2">
-        <h2 className="text-xl font-bold tracking-tight">
-          {totals.needingDecision > 0 ? "Needs a decision first" : "All on the date"}
-        </h2>
-        <span className="text-lg tabular-nums text-ink-3">
-          {totals.needingDecision} of {totals.engagements}
-          <Delta
-            now={totals.needingDecision}
-            before={scheduleBaseline(lastWeek, (t) => t.needingDecision)}
-          />
-        </span>
+      <div className="flex h-16 shrink-0 items-center gap-4 px-8">
+        {/*
+          The grid's cards each carry their own state, so a count over them
+          only restated the board. The Ladder's rows do not, so it keeps one.
+        */}
+        {layout === "ladder" && (
+          <>
+            <h2 className="text-2xl font-[750] tracking-[-0.015em]">
+              {totals.needingDecision > 0 ? "Needs a decision first" : "All on the date"}
+            </h2>
+            <span className="flex items-center text-xl tabular-nums text-ink-3">
+              {totals.needingDecision} of {totals.engagements}
+              <Delta
+                now={totals.needingDecision}
+                before={scheduleBaseline(lastWeek, (t) => t.needingDecision)}
+              />
+            </span>
+          </>
+        )}
 
         {/*
-          The loudest thing the readout can say, drawn as something rather
-          than set at the weight of a caption.
+          The owner doubting even the date they set themselves - the loudest
+          thing the readout can say, drawn as something rather than set at the
+          weight of a caption. "On track" is about the owner's own estimate, so
+          this is the warning, not an owner whose estimate passes the deadline.
         */}
-        {totals.contradicting > 0 && (
-          <span className="flex items-center gap-2 rounded bg-late-mark px-3 py-0.5 text-white">
-            <b className="text-xl font-extrabold leading-none tabular-nums">
-              {totals.contradicting}
-            </b>
+        {totals.offTrack > 0 && (
+          <span
+            className={`flex items-center gap-2.5 rounded-full bg-late-block2 py-[5px] pl-3 pr-4 text-white ${
+              layout === "ladder" ? "ml-2.5" : ""
+            }`}
+          >
+            <ExclamationTriangleIcon className="h-5 w-5 stroke-2" aria-hidden="true" />
+            <b className="text-xl font-extrabold tabular-nums">{totals.offTrack}</b>
             {/*
               One line: the Wall's grid uses the whole frame, so a second line
               here comes straight off the tiles below it.
             */}
             <span className="whitespace-nowrap text-[17px] font-semibold">
-              say on track, own estimate says otherwise
+              not on track for their own estimate
             </span>
           </span>
         )}
@@ -126,7 +138,6 @@ export function Dashboard() {
           <span>
             <Key>1</Key>
             <Key>2</Key>
-            <Key>3</Key>
             layout
           </span>
           {firstId !== undefined && (
@@ -143,14 +154,8 @@ export function Dashboard() {
         </p>
       ) : layout === "grid" ? (
         <RankedGrid engagements={engagements} currentWeek={currentWeek} />
-      ) : layout === "ladder" ? (
-        <Ladder
-          engagements={engagements}
-          currentWeek={currentWeek}
-          today={today}
-        />
       ) : (
-        <Field
+        <Ladder
           engagements={engagements}
           currentWeek={currentWeek}
           today={today}

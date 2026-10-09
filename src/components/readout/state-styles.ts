@@ -4,89 +4,77 @@ import type { VelocityType } from "../../types/indicators";
 /**
  * Status classes, kept out of the component files so fast refresh keeps working.
  *
- * Each state pairs a dark ink with a pale wash, so it separates by lightness as
- * well as by hue. Video codecs keep luminance and halve chroma, so a palette
- * that relies on hue alone degrades in a shared call - and the same pairing
- * makes the states readable to anyone who cannot separate red from green.
+ * Colour is spent only where the call has to stop: cards stay white, and each
+ * carries its state in one block. The three states differ in lightness as well
+ * as hue - a dark red block, a mid amber one, a pale green one - because video
+ * codecs keep luminance and halve chroma, and the same pairing makes the states
+ * readable to anyone who cannot separate red from green.
  */
-export const STATE_EDGE: Record<ScheduleState, string> = {
-  late: "border-l-late-mark",
-  watch: "border-l-watch-mark",
-  fine: "border-l-fine-mark",
-  unknown: "border-l-sheet-rule",
-};
 
 /**
- * The state across a whole surface, not along one edge of it.
+ * The state block on a Wall card, deepened by how far behind it is.
  *
- * Spent this way the Wall reads as a board of colour from across a room -
- * which is the point of putting ten engagements on one screen - where an edge
- * has to be looked for first. The wash is the pale half of the same pair the
- * ink comes from, so the lightness separation still does the work and the
- * contrast against the state's own ink stays well clear.
+ * Only the two states that can be behind have a ramp; on schedule is on
+ * schedule. The step is in lightness, the channel a video call keeps.
  */
-export const STATE_FILL: Record<ScheduleState, string> = {
-  late: "border-late-mark bg-late-wash",
-  watch: "border-watch-mark bg-watch-wash",
-  fine: "border-fine-mark bg-fine-wash",
-  unknown: "border-sheet-rule bg-sheet-card",
-};
-
-/**
- * The same fill, deepened by how far behind the engagement is.
- *
- * Only the two states that can be behind have a ramp; on the date is on the
- * date. The step is in lightness, which is the channel a video call keeps, so
- * the three tiers stay apart after compression.
- */
-const RAMP: Record<"late" | "watch", Record<SlipSeverity, string>> = {
+const BLOCK: Record<"late" | "watch", Record<SlipSeverity, string>> = {
   late: {
-    1: "border-late-mark bg-late-wash",
-    2: "border-late-mark bg-late-wash2",
-    3: "border-late-mark bg-late-wash3",
+    1: "bg-late-block1 text-white",
+    2: "bg-late-block2 text-white",
+    3: "bg-late-block3 text-white",
   },
   watch: {
-    1: "border-watch-mark bg-watch-wash",
-    2: "border-watch-mark bg-watch-wash2",
-    3: "border-watch-mark bg-watch-wash3",
+    1: "bg-watch-block1 text-watch-on",
+    2: "bg-watch-block2 text-watch-on",
+    3: "bg-watch-block3 text-watch-on",
   },
 };
 
-export function stateFill(
-  state: ScheduleState,
-  severity: SlipSeverity
-): string {
-  if (state === "late" || state === "watch") return RAMP[state][severity];
-  return STATE_FILL[state];
+export function stateBlock(state: ScheduleState, severity: SlipSeverity): string {
+  if (state === "late" || state === "watch") return BLOCK[state][severity];
+  if (state === "fine") return "bg-fine-block text-fine-on";
+  return "bg-sheet-key text-ink-2";
 }
 
-/**
- * Quieter text on a washed surface.
- *
- * `text-ink-3` is tuned for white and goes muddy on a wash, so labels take the
- * state's own ink held back instead - same hue family as the surface, enough
- * separation to read as secondary.
- */
-export const STATE_LABEL: Record<ScheduleState, string> = {
-  late: "text-late-ink/75",
-  watch: "text-watch-ink/75",
-  fine: "text-fine-ink/75",
-  unknown: "text-ink-3",
-};
-
-/** The rule between a tile's facts, which has to sit on the wash too. */
-export const STATE_RULE: Record<ScheduleState, string> = {
-  late: "border-late-mark/30",
-  watch: "border-watch-mark/30",
-  fine: "border-fine-mark/30",
-  unknown: "border-sheet-rule",
-};
-
+/** Text in the state's own ink - a figure or phrase that carries the state. */
 export const STATE_TEXT: Record<ScheduleState, string> = {
   late: "text-late-ink",
   watch: "text-watch-ink",
   fine: "text-fine-ink",
   unknown: "text-ink-3",
+};
+
+/** Dots and bars: the mid-tone of each state. */
+export const STATE_MARK: Record<ScheduleState, string> = {
+  late: "bg-late-mark",
+  watch: "bg-watch-mark",
+  fine: "bg-fine-mark",
+  unknown: "bg-ink-3",
+};
+
+/**
+ * The pale surface a small tile takes. Tiles are too small for a block, so an
+ * engagement past or overrunning its deadline tints the whole tile instead.
+ */
+export const STATE_TINT: Record<ScheduleState, string> = {
+  late: "bg-late-tint",
+  watch: "bg-watch-tint",
+  fine: "bg-sheet-card",
+  unknown: "bg-sheet-card",
+};
+
+/** Quieter text on a tinted tile: `text-ink-3` goes muddy on a tint. */
+export const STATE_LABEL: Record<ScheduleState, string> = {
+  late: "text-late-ink/80",
+  watch: "text-watch-ink/80",
+  fine: "text-ink-3",
+  unknown: "text-ink-3",
+};
+
+/** The hatching that marks a span as forecast rather than fact. */
+export const HATCH: Record<"late" | "watch", string> = {
+  late: "repeating-linear-gradient(135deg, #C8442F 0 4px, #F4C7BE 4px 8px)",
+  watch: "repeating-linear-gradient(135deg, #E0A027 0 4px, #F8E3B5 4px 8px)",
 };
 
 export const VELOCITY_DOT: Record<VelocityType, string> = {

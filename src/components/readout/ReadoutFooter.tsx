@@ -9,7 +9,6 @@ interface ReadoutFooterProps {
 /** Where each key goes, and the path that means you are already there. */
 const MOVES = [
   { key: "Esc", label: "the wall", path: "/" },
-  { key: "P", label: "the plan", path: "/plan" },
   { key: "D", label: "the dates", path: "/dates" },
 ];
 
@@ -32,8 +31,8 @@ export function ReadoutFooter({ onActionsSlot }: ReadoutFooterProps) {
   const moves = MOVES.filter((move) => onStop || move.path !== pathname);
 
   return (
-    <footer className="sticky bottom-0 z-20 flex h-[40px] shrink-0 items-center gap-6 border-t-2 border-sheet-rule bg-sheet-card px-8 text-[18px] text-ink-3">
-      <span className="flex shrink-0 items-center gap-5">
+    <footer className="sticky bottom-0 z-20 flex h-11 shrink-0 items-center gap-[30px] border-t border-sheet-rule bg-sheet-card px-8 text-[18px] text-ink-3">
+      <span className="flex shrink-0 items-center gap-[30px]">
         {moves.map((move) => (
           <span key={move.key}>
             <Key>{move.key}</Key>
@@ -45,7 +44,7 @@ export function ReadoutFooter({ onActionsSlot }: ReadoutFooterProps) {
       {/* The current state adds its own keys and position here. */}
       <div
         ref={onActionsSlot}
-        className="flex min-w-0 flex-1 items-center gap-6"
+        className="flex min-w-0 flex-1 items-center gap-[30px]"
       />
     </footer>
   );

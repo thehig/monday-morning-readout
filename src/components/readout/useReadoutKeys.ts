@@ -36,10 +36,6 @@ export function useReadoutKeys(currentWeek: number) {
         case "Escape":
           navigate(`/?week=${currentWeek}`);
           break;
-        case "p":
-        case "P":
-          navigate(`/plan?week=${currentWeek}`);
-          break;
         case "d":
         case "D":
           navigate(`/dates?week=${currentWeek}`);

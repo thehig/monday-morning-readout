@@ -32,16 +32,16 @@ function Stat({
   alarm?: boolean;
 }) {
   return (
-    <div className="grid gap-0.5">
-      <span
-        className={`text-xl font-extrabold leading-none tabular-nums ${
-          alarm ? "text-late-ink" : ""
+    <span className="flex items-baseline gap-2 text-[17px] text-ink-3">
+      <b
+        className={`text-2xl font-extrabold tabular-nums ${
+          alarm ? "text-late-ink" : "text-ink"
         }`}
       >
         {value}
-      </span>
-      <span className="text-[17px] text-ink-3">{label}</span>
-    </div>
+      </b>
+      {label}
+    </span>
   );
 }
 
@@ -91,11 +91,11 @@ export function Dates() {
   const slipping = engagements.filter((e) => (e.slipDays ?? 0) > 0).length;
 
   return (
-    <div className="flex flex-1 flex-col bg-sheet">
-      <div className="flex shrink-0 items-center gap-7 border-b-2 border-sheet-rule bg-sheet-card px-6 py-2.5">
-        <h2 className="text-xl font-bold tracking-tight">What lands when</h2>
+    <div className="flex flex-1 flex-col">
+      <div className="flex h-[72px] shrink-0 items-center gap-10 px-8">
+        <h2 className="text-2xl font-[750] tracking-[-0.015em]">What lands when</h2>
 
-        <div className="flex gap-7">
+        <div className="flex items-baseline gap-9">
           <Stat value={landing} label="with a completion estimate" />
           <Stat value={peak} label="in the busiest single week" alarm={peak >= 3} />
           <Stat

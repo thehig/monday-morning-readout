@@ -27,31 +27,30 @@ export function ReadoutTopBar({
     // Sticky because in a window short enough to scroll, the week being read
     // out is the one piece of context the room needs kept on screen.
     <header className="sticky top-0 z-20 flex h-[72px] shrink-0 items-center justify-between gap-6 bg-navy px-8 text-white">
-      <span className="text-2xl font-extrabold tracking-tight text-brand">
+      <span className="w-[460px] text-2xl font-extrabold tracking-[-0.01em] text-brand">
         United Signals
       </span>
 
-      <div className="flex items-center gap-4" role="group" aria-label="Week navigation">
+      <div className="flex items-center gap-[18px]" role="group" aria-label="Week navigation">
         <button
           type="button"
           onClick={() => onWeekChange(Math.max(1, currentWeek - 1))}
           disabled={currentWeek <= 1}
           aria-label="Previous week"
-          className="rounded border border-navy-line p-1.5 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.09] text-white transition-colors hover:bg-white/20 disabled:opacity-40"
         >
           <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
         </button>
 
-        <div className="text-center" aria-live="polite">
-          <div className="text-xl font-semibold leading-tight">
-            Week {currentWeek}
-            {isCurrent && (
-              <span className="ml-2 text-[18px] font-normal text-brand">current</span>
-            )}
-          </div>
-          <div className="text-[18px] tabular-nums text-white/70">
+        <div
+          className="flex min-w-[250px] items-baseline justify-center gap-3"
+          aria-live="polite"
+        >
+          <span className="text-[21px] font-bold">Week {currentWeek}</span>
+          <span className="text-[18px] tabular-nums text-white/70">
             {formatDate(start)} &ndash; {formatDate(end)}
-          </div>
+          </span>
+          {isCurrent && <span className="text-[18px] text-brand">current</span>}
         </div>
 
         <button
@@ -59,7 +58,7 @@ export function ReadoutTopBar({
           onClick={() => onWeekChange(Math.min(TOTAL_WEEKS, currentWeek + 1))}
           disabled={currentWeek >= TOTAL_WEEKS}
           aria-label="Next week"
-          className="rounded border border-navy-line p-1.5 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.09] text-white transition-colors hover:bg-white/20 disabled:opacity-40"
         >
           <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -68,7 +67,7 @@ export function ReadoutTopBar({
       {/* The current state fills this with its own view switcher. */}
       <div
         ref={onActionsSlot}
-        className="flex min-w-[280px] items-center justify-end gap-4"
+        className="flex w-[460px] items-center justify-end gap-4"
       />
     </header>
   );

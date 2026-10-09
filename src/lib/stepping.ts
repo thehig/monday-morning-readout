@@ -6,7 +6,7 @@ import type { Engagement } from "./engagements";
  * The order is the Wall's own order - everything needing a decision first,
  * then the rest - so the arrow keys walk the running order the meeting
  * actually follows: stop on the exceptions, then a fast pass of what is on
- * track.
+ * schedule.
  */
 export interface StepPosition {
   /** 1-based, for display. */
@@ -55,9 +55,9 @@ export function describeStep(step: StepPosition): string {
     if (left > 0) {
       return `${left} more ${left === 1 ? "needs" : "need"} a decision, then ${
         step.total - step.exceptions
-      } on track`;
+      } on schedule`;
     }
-    return `exceptions done · ${step.total - step.exceptions} on track to run through`;
+    return `exceptions done · ${step.total - step.exceptions} on schedule to run through`;
   }
 
   const left = step.total - step.position;

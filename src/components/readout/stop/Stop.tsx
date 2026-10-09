@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import type { Engagement } from "../../../lib/engagements";
+import { showDate } from "../../../lib/engagements";
 import { buildStatement } from "../../../lib/statement";
 import { buildTimeline } from "../../../lib/timeline";
 import { formatDateTime } from "../../../lib/date-utils";
@@ -29,36 +30,48 @@ function HeaderMetric({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid justify-items-end gap-0.5">
+    <div className="flex flex-col gap-1.5">
       <span className="text-[17px] text-ink-3">{label}</span>
-      <span className="flex items-center gap-2 text-[19px]">{children}</span>
+      <span className="flex items-center gap-2.5 text-[19px]">{children}</span>
     </div>
   );
 }
 
-/** One of the three facts under the statement. */
-function Chip({
+/** One of the facts under the statement. */
+function Fact({
   label,
-  value,
-  tone,
+  children,
+  first,
 }: {
   label: string;
-  value: string;
-  tone?: string;
+  children: React.ReactNode;
+  first?: boolean;
 }) {
   return (
-    <div className="grid gap-0.5 border-r-2 border-sheet-rule pr-7 last:border-r-0 last:pr-0">
+    <div
+      className={`flex flex-col gap-0.5 pr-7 ${
+        first ? "" : "border-l border-sheet-rule pl-7"
+      }`}
+    >
       <span className="whitespace-nowrap text-[17px] text-ink-3">{label}</span>
-      <span
-        className={`whitespace-nowrap text-xl font-bold tabular-nums ${tone ?? ""}`}
-      >
-        {value}
+      <span className="flex items-baseline gap-2 whitespace-nowrap text-xl font-bold tabular-nums">
+        {children}
       </span>
     </div>
   );
 }
 
-/** A block of what the owner wrote, or a plain line saying they wrote nothing. */
+/** The heading over a block of what the owner wrote. */
+function Heading({ title, sub }: { title: string; sub: string }) {
+  return (
+    <h3 className="flex flex-col text-xl font-bold leading-[26px] text-ink-2">
+      {title}
+      <span className="text-[17px] font-normal leading-[22px] text-ink-3">{sub}</span>
+    </h3>
+  );
+}
+
+/** What the owner wrote, or a plain line saying they wrote nothing. */
 function Wrote({
   heading,
   sub,
@@ -72,30 +85,31 @@ function Wrote({
   flag?: string;
 }) {
   return (
-    <section className="grid gap-2">
-      <h3 className="text-xl font-bold leading-tight text-ink-2">
-        {heading}
-        <span className="block text-[17px] font-normal text-ink-3">{sub}</span>
-      </h3>
+    <section className="flex flex-col gap-3">
+      <Heading title={heading} sub={sub} />
       {text ? (
-        <p className="whitespace-pre-line font-serif text-[22px] leading-snug">
-          {text}
+        <p className="whitespace-pre-line text-[21px] leading-[31px]">{text}</p>
+      ) : flag ? (
+        <p className="flex items-start gap-2.5 rounded-xl bg-late-tint px-3.5 py-3 text-[19px] font-semibold leading-[27px] text-late-ink">
+          <ExclamationTriangleIcon className="mt-1 h-5 w-5 shrink-0 stroke-2" aria-hidden="true" />
+          {flag}
         </p>
       ) : (
-        <p className={`text-[19px] ${flag ? "font-semibold text-late-ink" : "text-ink-3"}`}>
-          {flag ?? "Nothing recorded for this week."}
-        </p>
+        <p className="text-[19px] text-ink-3">Nothing recorded for this week.</p>
       )}
     </section>
   );
 }
 
+const CARD =
+  "rounded-card border border-navy/[0.06] bg-sheet-card shadow-card";
+
 /**
  * The Stop: one engagement, full screen, while someone talks about it.
  *
- * Opens with a generated statement of where the engagement stands, so the room
- * reads the conclusion before the detail. Every one of the table's columns
- * appears somewhere on this screen.
+ * Opens with a generated statement of where the engagement stands against its
+ * agreed deadline, so the room reads the conclusion before the detail. Every
+ * one of the table's columns appears somewhere on this screen.
  */
 export function Stop({
   engagement,
@@ -132,103 +146,112 @@ export function Stop({
   }, [navigate, currentWeek, step]);
 
   const timeline = buildTimeline(engagement.deadline, engagement.estimate, today);
-
-  const sinceDeadline = engagement.sinceDeadline;
+  const { overdueDays, slipDays, ownerSaysOnTrack, sinceDeadline } = engagement;
 
   return (
-    <div className="flex flex-1 flex-col bg-sheet">
-      <header className="flex shrink-0 items-start gap-7 border-b-2 border-sheet-rule bg-sheet-card px-8 py-4">
-        <button
-          type="button"
-          onClick={() => navigate(`/?week=${currentWeek}`)}
-          aria-label="Back to the wall"
-          className="mt-1 rounded border-2 border-sheet-rule p-1.5 text-ink-2 transition-colors hover:bg-sheet"
-        >
-          <ChevronLeftIcon className="h-6 w-6" aria-hidden="true" />
-        </button>
-
-        <div className="min-w-0">
-          <h2 className="text-[42px] font-extrabold leading-tight tracking-tighter">
-            {engagement.customer}
-          </h2>
-          <p className="text-[19px] text-ink-2">
-            {engagement.owner} &middot;{" "}
-            <span className="text-ink-3">{engagement.ownerEmail}</span> &middot;
-            filed {formatDateTime(engagement.filedAt, "short")}
-          </p>
-        </div>
-
-        <div className="ml-auto flex shrink-0 gap-7">
-          <HeaderMetric label="Progress">
-            <ProgressBar value={engagement.progress} />
-          </HeaderMetric>
-          <HeaderMetric label="Team">
-            <Meter value={engagement.teamHappiness} />
-          </HeaderMetric>
-          <HeaderMetric label="Customer">
-            <Meter value={engagement.customerHappiness} />
-          </HeaderMetric>
-        </div>
-      </header>
-
-      <section className="grid shrink-0 grid-cols-[1fr_720px] items-start gap-10 border-b-2 border-sheet-rule bg-sheet-card px-8 py-4">
-        <div>
-          <h3
-            className={`max-w-[21ch] text-[37px] font-extrabold leading-tight tracking-tight ${
-              STATE_TEXT[engagement.state]
-            }`}
+    <div className="flex flex-1 flex-col gap-4 px-6 py-5">
+      <section className={`shrink-0 px-8 pb-[26px] pt-6 ${CARD}`}>
+        <div className="flex items-center gap-6">
+          <button
+            type="button"
+            onClick={() => navigate(`/?week=${currentWeek}`)}
+            aria-label="Back to the wall"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sheet text-ink-2 transition-colors hover:bg-sheet-key"
           >
-            {statement.headline}
-          </h3>
-          <p className="mt-1.5 flex items-center gap-2 text-xl font-medium text-ink-2">
-            <VelocityDot velocity={engagement.velocity} />
-            {statement.detail}
-          </p>
+            <ChevronLeftIcon className="h-6 w-6 stroke-2" aria-hidden="true" />
+          </button>
 
-          <div className="mt-3 flex border-t-2 border-sheet-rule pt-2.5 [&>*]:mr-7">
-            <Chip
-              label={sinceDeadline ? sinceDeadline.label : "Against the deadline"}
-              value={sinceDeadline ? sinceDeadline.text : "Not recorded"}
-              tone={
-                sinceDeadline?.direction === "overdue" ? "text-late-ink" : undefined
-              }
-            />
-            <Chip label="Invoiced this week" value={engagement.amountCharged} />
-            <Chip
-              label="Owner&rsquo;s own call"
-              value={
-                engagement.ownerSaysOnTrack === null
-                  ? "Not reported"
-                  : engagement.ownerSaysOnTrack
-                  ? "Deadline will be met"
-                  : "Deadline will be missed"
-              }
-              tone={
-                engagement.contradicts || engagement.ownerSaysOnTrack === false
-                  ? "text-late-ink"
-                  : engagement.ownerSaysOnTrack
-                  ? "text-fine-ink"
-                  : undefined
-              }
-            />
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <h2 className="text-[44px] font-[750] leading-[52px] tracking-[-0.025em]">
+              {engagement.customer}
+            </h2>
+            <p className="flex gap-[18px] text-[19px] text-ink-3">
+              <span className="font-semibold text-ink-2">{engagement.owner}</span>
+              <span>{engagement.ownerEmail}</span>
+              <span>filed {formatDateTime(engagement.filedAt, "short")}</span>
+            </p>
+          </div>
+
+          <div className="ml-auto flex shrink-0 gap-10">
+            <HeaderMetric label="Progress">
+              <ProgressBar value={engagement.progress} width="w-40" />
+            </HeaderMetric>
+            <HeaderMetric label="Team">
+              <Meter value={engagement.teamHappiness} />
+            </HeaderMetric>
+            <HeaderMetric label="Customer">
+              <Meter value={engagement.customerHappiness} />
+            </HeaderMetric>
           </div>
         </div>
 
-        {timeline ? (
-          <MiniCalendar
-            timeline={timeline}
-            deadline={engagement.deadline}
-            estimate={engagement.estimate}
-          />
-        ) : (
-          <p className="pt-8 text-[19px] text-ink-3">
-            No deadline or estimate was recorded for this engagement.
-          </p>
-        )}
+        <div className="mb-5 mt-[22px] h-px bg-[#ECEEF2]" />
+
+        <div className="grid grid-cols-[minmax(0,1fr)_720px] items-start gap-14">
+          <div className="flex flex-col">
+            <h3
+              className={`text-[38px] font-[750] leading-[46px] tracking-[-0.02em] ${
+                STATE_TEXT[engagement.state]
+              }`}
+            >
+              {statement.headline}
+            </h3>
+            <p className="mt-2 flex items-start gap-3 text-xl font-medium leading-7 text-ink-2">
+              <span className="mt-[7px] flex">
+                <VelocityDot velocity={engagement.velocity} />
+              </span>
+              {statement.detail}
+            </p>
+
+            <div className="mt-[18px] flex">
+              <Fact label="Agreed deadline" first>
+                <span className={overdueDays !== null ? "text-late-ink" : ""}>
+                  {showDate(engagement.deadline)}
+                </span>
+              </Fact>
+              <Fact label="Estimated completion">
+                {showDate(engagement.estimate)}
+                {slipDays !== null && slipDays > 0 && (
+                  <span className={`text-[17px] ${STATE_TEXT[engagement.state]}`}>
+                    +{slipDays} days
+                  </span>
+                )}
+              </Fact>
+              <Fact label="On track for the estimate">
+                <span
+                  className={
+                    ownerSaysOnTrack === null
+                      ? "text-ink-3"
+                      : ownerSaysOnTrack
+                      ? "text-fine-ink"
+                      : "text-late-ink"
+                  }
+                >
+                  {ownerSaysOnTrack === null ? "Not reported" : ownerSaysOnTrack ? "Yes" : "No"}
+                </span>
+              </Fact>
+              <Fact label="Invoiced this week">{engagement.amountCharged}</Fact>
+            </div>
+          </div>
+
+          {timeline ? (
+            <MiniCalendar
+              timeline={timeline}
+              deadline={engagement.deadline}
+              estimate={engagement.estimate}
+              overdueDays={overdueDays}
+              tone={engagement.state === "late" ? "late" : "watch"}
+            />
+          ) : (
+            <p className="pt-8 text-[19px] text-ink-3">
+              No deadline or estimate was recorded for this engagement.
+            </p>
+          )}
+        </div>
       </section>
 
-      <div className="grid min-h-0 flex-1 grid-cols-3">
-        <div className="overflow-y-auto border-r-2 border-sheet-rule px-7 py-4">
+      <div className="grid min-h-0 flex-1 grid-cols-3 gap-4">
+        <div className={`overflow-y-auto px-7 py-6 ${CARD}`}>
           <Wrote
             heading="Completed milestones"
             sub="what got done this week"
@@ -236,43 +259,36 @@ export function Stop({
           />
         </div>
 
-        <div className="grid content-start gap-4 overflow-y-auto border-r-2 border-sheet-rule bg-sheet-card px-7 py-4">
+        <div className={`flex flex-col gap-[18px] overflow-y-auto px-7 py-6 ${CARD}`}>
           <Wrote
             heading="Identified risks"
             sub="what is in the way"
             text={engagement.risks}
             flag={
               engagement.state === "late"
-                ? "Nothing recorded — on an engagement past its deadline, worth asking about."
+                ? "Nothing recorded. On an engagement past its deadline, worth asking about."
                 : undefined
             }
           />
-          <div className="border-t-2 border-sheet-rule pt-3">
-            <Wrote
-              heading="Reason for the delay"
-              sub="recorded by the owner"
-              text={engagement.delayReason}
-            />
-          </div>
-          <div className="border-t-2 border-sheet-rule pt-3">
-            <section className="grid gap-2">
-              <h3 className="text-xl font-bold leading-tight text-ink-2">
-                Problem-solving call
-                <span className="block text-[17px] font-normal text-ink-3">
-                  requested by the owner
-                </span>
-              </h3>
-              <p className="text-[19px]">{engagement.psCallAnswer}</p>
-              {engagement.psCallContext && (
-                <p className="whitespace-pre-line font-serif text-[22px] leading-snug">
-                  {engagement.psCallContext}
-                </p>
-              )}
-            </section>
-          </div>
+          <div className="h-px shrink-0 bg-[#ECEEF2]" />
+          <Wrote
+            heading="Reason for the delay"
+            sub="recorded by the owner"
+            text={engagement.delayReason}
+          />
+          <div className="h-px shrink-0 bg-[#ECEEF2]" />
+          <section className="flex flex-col gap-3">
+            <Heading title="Problem-solving call" sub="requested by the owner" />
+            <p className="text-[21px]">{engagement.psCallAnswer}</p>
+            {engagement.psCallContext && (
+              <p className="whitespace-pre-line text-[21px] leading-[31px]">
+                {engagement.psCallContext}
+              </p>
+            )}
+          </section>
         </div>
 
-        <div className="overflow-y-auto px-7 py-4">
+        <div className={`overflow-y-auto px-7 py-6 ${CARD}`}>
           <Wrote
             heading={`Goals for week ${currentWeek + 1}`}
             sub="what happens next week"
@@ -282,7 +298,7 @@ export function Stop({
       </div>
 
       <FooterActions>
-        <span className="flex items-center gap-5">
+        <span className="flex items-center gap-[30px]">
           {step?.previousId !== null && step !== null && (
             <span>
               <Key>&larr;</Key>previous
@@ -297,21 +313,28 @@ export function Stop({
         </span>
 
         {step && (
-          <span className="shrink-0 font-semibold text-ink-2">
-            {step.position} of {step.total}
-            <span className="ml-2 font-normal text-ink-3">
-              &middot; {describeStep(step)}
-            </span>
+          <span className="flex shrink-0 gap-2.5">
+            <b className="font-bold text-ink-2">
+              {step.position} of {step.total}
+            </b>
+            {describeStep(step)}
           </span>
         )}
 
-        <span className="ml-auto truncate">
-          Feedback {engagement.id} &middot; filed{" "}
-          {formatDateTime(engagement.filedAt, "long")} &middot; stored velocity{" "}
-          {engagement.velocity ?? "none"}
+        <span className="ml-auto flex gap-[18px] truncate text-[17px]">
+          <span>Feedback {engagement.id}</span>
+          {sinceDeadline && (
+            <span>
+              {sinceDeadline.direction === "overdue"
+                ? `overdue ${sinceDeadline.text} when filed`
+                : sinceDeadline.direction === "remaining"
+                ? `${sinceDeadline.text} left when filed`
+                : "due on the day it was filed"}
+            </span>
+          )}
+          <span>stored velocity {engagement.velocity ?? "none"}</span>
         </span>
       </FooterActions>
     </div>
   );
 }
-
