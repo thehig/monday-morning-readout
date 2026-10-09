@@ -39,7 +39,7 @@ export function Layout() {
           <Outlet context={{ isDecrypted: true }} />
         </FooterSlotContext.Provider>
       </main>
-      <ReadoutFooter currentWeek={currentWeek} onActionsSlot={setFooterSlot} />
+      <ReadoutFooter onActionsSlot={setFooterSlot} />
     </div>
   );
 }

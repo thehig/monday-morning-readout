@@ -120,7 +120,7 @@ describe("Dashboard", () => {
     expect(screen.queryByTestId("ranked-grid")).not.toBeInTheDocument();
   });
 
-  it("keeps no layout switcher of its own: the footer links the pages", () => {
+  it("keeps no layout switcher of its own: the header links the pages", () => {
     mockRows.current = [row()];
     render(<Dashboard layout="grid" />, { wrapper: createTestWrapper() });
 

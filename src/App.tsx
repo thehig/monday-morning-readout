@@ -39,7 +39,7 @@ function App() {
   }
 
   // Every page has its own address, so any of them can be opened, bookmarked
-  // or shared directly; the footer and the number keys are just links to them.
+  // or shared directly; the header nav and the number keys are just links to them.
   return (
     <QueryClientProvider client={queryClient}>
       <HashRouter>

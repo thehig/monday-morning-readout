@@ -21,7 +21,7 @@ export function isTypingTarget(event: KeyboardEvent): boolean {
 
 /**
  * The readout's navigation keys: one number per page, the same numbers the
- * footer draws.
+ * header draws.
  *
  * One operator drives the screen while talking to a room, so moving between
  * pages is a keystroke rather than a small target to aim at. Every page has its

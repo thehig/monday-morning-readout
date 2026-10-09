@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
-import { ReadoutFooter } from "./ReadoutFooter";
+import { ReadoutNav } from "./ReadoutNav";
 import { useReadoutKeys } from "./useReadoutKeys";
 import { PAGES } from "./pages";
 
@@ -26,7 +26,7 @@ function renderAt(path: string, week = 39) {
           element={
             <>
               <Keys week={week} />
-              <ReadoutFooter currentWeek={week} onActionsSlot={() => {}} />
+              <ReadoutNav currentWeek={week} />
               <Where />
             </>
           }
@@ -36,7 +36,7 @@ function renderAt(path: string, week = 39) {
   );
 }
 
-describe("the footer", () => {
+describe("the header nav", () => {
   it("links every page with its number, keeping the week", () => {
     renderAt("/grid?week=39");
 

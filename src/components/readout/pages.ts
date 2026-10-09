@@ -1,14 +1,14 @@
 /**
  * The readout's pages, each at its own address.
  *
- * One list drives the footer's links and the number keys, so the two can
+ * One list drives the header's links and the number keys, so the two can
  * never disagree about what "3" means. The order is the running order of the
  * call: open on the grid, read the ladder, then look ahead at the dates. An
  * engagement's Stop is its own address too (`/feedback/:id`) but is reached
  * from the pages rather than listed among them.
  */
 export interface ReadoutPage {
-  /** The number key that opens it, drawn as a keycap in the footer. */
+  /** The number key that opens it, drawn as a keycap in the header. */
   key: string;
   label: string;
   path: string;

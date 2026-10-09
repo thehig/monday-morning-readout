@@ -94,6 +94,12 @@ export function buildLadder(
  */
 export const CARD_MIN_WIDTH = 360;
 
+/**
+ * The widest a tile grows. Past this a week with few engagements would stretch
+ * each card across half the screen, its facts lost in the space between them.
+ */
+export const CARD_MAX_WIDTH = 440;
+
 /** `gap-4` and `px-6` on the grid, in the numbers the arithmetic needs. */
 export const GRID_GAP = 16;
 export const GRID_PADDING = 48;

@@ -9,7 +9,7 @@ import {
   ProgressBar,
   VelocityLight,
 } from "../primitives";
-import { fitColumns, GRID_PADDING } from "../../../lib/wall-view";
+import { CARD_MAX_WIDTH, fitColumns, GRID_PADDING } from "../../../lib/wall-view";
 import { stateBlock, STATE_TEXT } from "../state-styles";
 
 interface RankedGridProps {
@@ -190,12 +190,14 @@ export function RankedGrid({ engagements, currentWeek }: RankedGridProps) {
   return (
     <div
       ref={ref}
-      className="grid flex-1 gap-4 px-6 pb-5"
+      className="grid flex-1 content-start justify-center gap-4 px-6 pb-5"
       style={{
-        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-        // Rows take their content's height and share anything left over, so
-        // reflowing to a third row grows the page rather than squashing two.
-        gridAutoRows: "minmax(min-content, 1fr)",
+        // Tiles share the width up to their maximum, and a week too small to
+        // fill the screen sits centred rather than stretched.
+        gridTemplateColumns: `repeat(${columns}, minmax(0, ${CARD_MAX_WIDTH}px))`,
+        // Rows take their content's height and no more, so a short week does
+        // not stretch its cards to fill the screen.
+        gridAutoRows: "min-content",
       }}
     >
       {engagements.map((engagement) => (
