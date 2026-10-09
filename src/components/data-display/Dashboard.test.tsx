@@ -1,10 +1,7 @@
-import { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TopBarSlotContext } from "../readout/top-bar-slot";
 import { Dashboard } from "./Dashboard";
 
 // Mock the Wall's grid so these tests stay about the Dashboard's own wiring
@@ -58,7 +55,7 @@ function row(over: Record<string, unknown> = {}) {
   };
 }
 
-function createTestWrapper(initialEntries: string[] = ["/?"]) {
+function createTestWrapper(initialEntries: string[] = ["/grid"]) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -67,23 +64,11 @@ function createTestWrapper(initialEntries: string[] = ["/?"]) {
     },
   });
 
-  // The Dashboard renders its layout switcher into the navy bar, which the
-  // Layout owns, so the wrapper has to stand in for it or the switcher has
-  // nowhere to go and never appears.
-  return ({ children }: { children: React.ReactNode }) => {
-    const [slot, setSlot] = useState<HTMLDivElement | null>(null);
-
-    return (
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={initialEntries}>
-          <div ref={setSlot} />
-          <TopBarSlotContext.Provider value={slot}>
-            {children}
-          </TopBarSlotContext.Provider>
-        </MemoryRouter>
-      </QueryClientProvider>
-    );
-  };
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
+    </QueryClientProvider>
+  );
 }
 
 describe("Dashboard", () => {
@@ -94,61 +79,57 @@ describe("Dashboard", () => {
 
   it("renders without crashing", () => {
     expect(() => {
-      render(<Dashboard />, { wrapper: createTestWrapper() });
+      render(<Dashboard layout="grid" />, { wrapper: createTestWrapper() });
     }).not.toThrow();
   });
 
   it("falls back to the previous week when the URL has no week", () => {
     mockRows.current = [row()];
-    render(<Dashboard />, { wrapper: createTestWrapper() });
+    render(<Dashboard layout="grid" />, { wrapper: createTestWrapper() });
 
     expect(screen.getByTestId("ranked-grid")).toHaveAttribute("data-week", "24");
   });
 
   it("takes the week from the URL when it is given", () => {
     mockRows.current = [row()];
-    render(<Dashboard />, { wrapper: createTestWrapper(["/?week=25"]) });
+    render(<Dashboard layout="grid" />, { wrapper: createTestWrapper(["/grid?week=25"]) });
 
     expect(screen.getByTestId("ranked-grid")).toHaveAttribute("data-week", "25");
   });
 
   it("says so rather than showing an empty board", () => {
-    render(<Dashboard />, { wrapper: createTestWrapper() });
+    render(<Dashboard layout="grid" />, { wrapper: createTestWrapper() });
 
     expect(screen.getByText("No submissions for week 24.")).toBeInTheDocument();
     expect(screen.queryByTestId("ranked-grid")).not.toBeInTheDocument();
   });
 
-  it("opens on the ranked grid and switches layout on click", async () => {
+  it("draws the layout its page asks for", () => {
     mockRows.current = [row()];
-    render(<Dashboard />, { wrapper: createTestWrapper() });
+    const { unmount } = render(<Dashboard layout="grid" />, {
+      wrapper: createTestWrapper(),
+    });
 
     expect(screen.getByTestId("ranked-grid")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Ranked grid/ })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    expect(screen.queryByTestId("ladder")).not.toBeInTheDocument();
+    unmount();
 
-    await userEvent.click(screen.getByRole("button", { name: /Ladder/ }));
+    render(<Dashboard layout="ladder" />, { wrapper: createTestWrapper(["/ladder"]) });
 
     expect(screen.getByTestId("ladder")).toBeInTheDocument();
     expect(screen.queryByTestId("ranked-grid")).not.toBeInTheDocument();
   });
 
-  it("switches layout from the number keys", async () => {
+  it("keeps no layout switcher of its own: the footer links the pages", () => {
     mockRows.current = [row()];
-    render(<Dashboard />, { wrapper: createTestWrapper() });
+    render(<Dashboard layout="grid" />, { wrapper: createTestWrapper() });
 
-    await userEvent.keyboard("2");
-    expect(screen.getByTestId("ladder")).toBeInTheDocument();
-
-    await userEvent.keyboard("1");
-    expect(screen.getByTestId("ranked-grid")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: /layout/i })).not.toBeInTheDocument();
   });
 
   it("shows a loading line rather than an empty board", () => {
     mockRows.loading = true;
-    render(<Dashboard />, { wrapper: createTestWrapper() });
+    render(<Dashboard layout="grid" />, { wrapper: createTestWrapper() });
 
     expect(screen.getByText(/Loading week 24/)).toBeInTheDocument();
     expect(screen.queryByTestId("ranked-grid")).not.toBeInTheDocument();
@@ -160,26 +141,12 @@ describe("Dashboard", () => {
       row({ id: 2, customer: "Test 4 Ignore" }),
       row({ id: 3, customer: "FLOWNIQ" }),
     ];
-    render(<Dashboard />, { wrapper: createTestWrapper() });
+    render(<Dashboard layout="grid" />, { wrapper: createTestWrapper() });
 
     expect(screen.getByTestId("ranked-grid")).toHaveTextContent("2 engagements");
   });
 
-  it("leaves the count off the grid, whose cards each carry their state", () => {
-    mockRows.current = [
-      row({
-        id: 1,
-        customer: "FIDUS Finanz AG",
-        target_date: "2026-05-31",
-        estimated_completion_date: "2026-10-23",
-      }),
-    ];
-    render(<Dashboard />, { wrapper: createTestWrapper() });
-
-    expect(screen.queryByText("Needs a decision first")).not.toBeInTheDocument();
-  });
-
-  it("leads the ladder with how many need a decision", async () => {
+  it("leaves the decision count off both layouts: each row and card carries its state", () => {
     mockRows.current = [
       row({
         id: 1,
@@ -189,19 +156,17 @@ describe("Dashboard", () => {
       }),
       row({ id: 2, customer: "FLOWNIQ" }),
     ];
-    render(<Dashboard />, { wrapper: createTestWrapper() });
-    await userEvent.keyboard("2");
 
-    expect(screen.getByText("Needs a decision first")).toBeInTheDocument();
-    expect(screen.getByText("1 of 2")).toBeInTheDocument();
-  });
+    for (const layout of ["grid", "ladder"] as const) {
+      const { unmount } = render(<Dashboard layout={layout} />, {
+        wrapper: createTestWrapper([`/${layout}`]),
+      });
 
-  it("says so on the ladder when nothing has slipped", async () => {
-    mockRows.current = [row({ id: 1, customer: "FLOWNIQ" })];
-    render(<Dashboard />, { wrapper: createTestWrapper() });
-    await userEvent.keyboard("2");
-
-    expect(screen.getByText("All on the date")).toBeInTheDocument();
+      expect(screen.queryByText("Needs a decision first")).not.toBeInTheDocument();
+      expect(screen.queryByText("All on the date")).not.toBeInTheDocument();
+      expect(screen.queryByText("1 of 2")).not.toBeInTheDocument();
+      unmount();
+    }
   });
 
   it("warns about owners not on track for their own estimate", () => {
@@ -214,7 +179,7 @@ describe("Dashboard", () => {
         project_on_track: false,
       }),
     ];
-    render(<Dashboard />, { wrapper: createTestWrapper() });
+    render(<Dashboard layout="grid" />, { wrapper: createTestWrapper() });
 
     // Drawn as a chip rather than a sentence: the count and the words are
     // separate elements inside one object, so assert on the object.
@@ -235,7 +200,7 @@ describe("Dashboard", () => {
         project_on_track: true,
       }),
     ];
-    render(<Dashboard />, { wrapper: createTestWrapper() });
+    render(<Dashboard layout="grid" />, { wrapper: createTestWrapper() });
 
     expect(
       screen.queryByText("not on track for their own estimate")

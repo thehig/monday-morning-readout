@@ -1,18 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { PAGES, pageUrl } from "./pages";
 
-/**
- * The readout's navigation keys.
- *
- * One operator drives the screen while talking to a room, so moving between
- * states is a keystroke rather than a small target to aim at. Keys are ignored
- * while a field has focus, so typing never navigates.
- */
 /**
  * True while a keystroke belongs to a field rather than to navigation.
  *
- * Shared with the per-view keys - the Wall's layout digits and the Stop's
- * arrows - so none of them can fire while someone is typing.
+ * Shared with the per-page keys - the Stop's arrows and the Wall's step-in -
+ * so none of them can fire while someone is typing.
  */
 export function isTypingTarget(event: KeyboardEvent): boolean {
   if (event.metaKey || event.ctrlKey || event.altKey) return true;
@@ -25,6 +19,16 @@ export function isTypingTarget(event: KeyboardEvent): boolean {
   );
 }
 
+/**
+ * The readout's navigation keys: one number per page, the same numbers the
+ * footer draws.
+ *
+ * One operator drives the screen while talking to a room, so moving between
+ * pages is a keystroke rather than a small target to aim at. Every page has its
+ * own address, so a number key is simply a link, and works from anywhere -
+ * including an engagement's Stop. Keys are ignored while a field has focus, so
+ * typing never navigates.
+ */
 export function useReadoutKeys(currentWeek: number) {
   const navigate = useNavigate();
 
@@ -32,16 +36,8 @@ export function useReadoutKeys(currentWeek: number) {
     const onKey = (event: KeyboardEvent) => {
       if (isTypingTarget(event)) return;
 
-      switch (event.key) {
-        case "Escape":
-          navigate(`/?week=${currentWeek}`);
-          break;
-        case "d":
-        case "D":
-          navigate(`/dates?week=${currentWeek}`);
-          break;
-        default:
-      }
+      const page = PAGES.find((p) => p.key === event.key);
+      if (page) navigate(pageUrl(page.path, currentWeek));
     };
 
     window.addEventListener("keydown", onKey);

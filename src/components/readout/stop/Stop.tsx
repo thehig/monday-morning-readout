@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeftIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import type { Engagement } from "../../../lib/engagements";
 import { showDate } from "../../../lib/engagements";
 import { buildStatement } from "../../../lib/statement";
@@ -152,14 +152,6 @@ export function Stop({
     <div className="flex flex-1 flex-col gap-4 px-6 py-5">
       <section className={`shrink-0 px-8 pb-[26px] pt-6 ${CARD}`}>
         <div className="flex items-center gap-6">
-          <button
-            type="button"
-            onClick={() => navigate(`/?week=${currentWeek}`)}
-            aria-label="Back to the wall"
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sheet text-ink-2 transition-colors hover:bg-sheet-key"
-          >
-            <ChevronLeftIcon className="h-6 w-6 stroke-2" aria-hidden="true" />
-          </button>
 
           <div className="flex min-w-0 flex-col gap-0.5">
             <h2 className="text-[44px] font-[750] leading-[52px] tracking-[-0.025em]">

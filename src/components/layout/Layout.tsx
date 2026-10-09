@@ -1,28 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams, Outlet } from "react-router-dom";
 import { getPreviousWeek } from "../../lib/date-utils";
 import { ReadoutTopBar } from "../readout/ReadoutTopBar";
 import { ReadoutFooter } from "../readout/ReadoutFooter";
-import { TopBarSlotContext } from "../readout/top-bar-slot";
 import { FooterSlotContext } from "../readout/footer-slot";
 import { useReadoutKeys } from "../readout/useReadoutKeys";
 
 export function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
-  // Held in state rather than a ref so the states re-render once it exists.
-  const [actionsSlot, setActionsSlot] = useState<HTMLDivElement | null>(null);
+  // Held in state rather than a ref so the pages re-render once it exists.
   const [footerSlot, setFooterSlot] = useState<HTMLDivElement | null>(null);
 
+  // The address is the one source of the week. Every page has its own URL, so a
+  // bookmarked or shared link has to open on the week it names, and editing the
+  // week in the address has to change what is shown - a copy held in state
+  // would drift from it.
   const weekParam = searchParams.get("week");
-  const [currentWeek, setCurrentWeek] = useState(
-    weekParam ? parseInt(weekParam) : getPreviousWeek(new Date().getFullYear())
-  );
+  const currentWeek = weekParam
+    ? parseInt(weekParam)
+    : getPreviousWeek(new Date().getFullYear());
+
+  const setCurrentWeek = (week: number) =>
+    setSearchParams({ week: week.toString() });
 
   useReadoutKeys(currentWeek);
-
-  useEffect(() => {
-    setSearchParams({ week: currentWeek.toString() });
-  }, [currentWeek, setSearchParams]);
 
   // The frame is the window, floored at the height the states were drawn for
   // and free to grow past it when a state needs the room. Nothing clips: what
@@ -32,16 +33,13 @@ export function Layout() {
       <ReadoutTopBar
         currentWeek={currentWeek}
         onWeekChange={setCurrentWeek}
-        onActionsSlot={setActionsSlot}
       />
       <main className="flex flex-1 flex-col">
-        <TopBarSlotContext.Provider value={actionsSlot}>
-          <FooterSlotContext.Provider value={footerSlot}>
-            <Outlet context={{ isDecrypted: true }} />
-          </FooterSlotContext.Provider>
-        </TopBarSlotContext.Provider>
+        <FooterSlotContext.Provider value={footerSlot}>
+          <Outlet context={{ isDecrypted: true }} />
+        </FooterSlotContext.Provider>
       </main>
-      <ReadoutFooter onActionsSlot={setFooterSlot} />
+      <ReadoutFooter currentWeek={currentWeek} onActionsSlot={setFooterSlot} />
     </div>
   );
 }

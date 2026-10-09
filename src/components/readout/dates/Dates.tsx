@@ -1,26 +1,13 @@
-import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { usePOFeedbackByWeek } from "../../../hooks/use-po-feedback";
 import { getPreviousWeek } from "../../../lib/date-utils";
 import { toEngagements } from "../../../lib/engagements";
 import { landingWeeks, buildRunway } from "../../../lib/dates-view";
-import {
-  FooterActions,
-  Key,
-  Segmented,
-  TopBarActions,
-  type SegmentedOption,
-} from "../chrome";
 import { LandingWeeks } from "./LandingWeeks";
 import { OwnerRunway } from "./OwnerRunway";
 
-type DatesView = "weeks" | "runway";
-
 /** Two axes on one dataset: load per week, or collisions per person. */
-const DATES_VIEWS: SegmentedOption<DatesView>[] = [
-  { value: "weeks", label: "Landing weeks" },
-  { value: "runway", label: "Owner runway" },
-];
+export type DatesView = "weeks" | "runway";
 
 function Stat({
   value,
@@ -50,11 +37,10 @@ function Stat({
  *
  * Deliberately not a second Ladder. The Ladder looks back at the week just
  * filed; this places everything by estimated completion, because the estimate
- * is what will actually happen.
+ * is what will actually happen. Each view is its own page.
  */
-export function Dates() {
+export function Dates({ view }: { view: DatesView }) {
   const [searchParams] = useSearchParams();
-  const [view, setView] = useState<DatesView>("weeks");
   const today = new Date();
 
   const weekParam = searchParams.get("week");
@@ -64,16 +50,6 @@ export function Dates() {
 
   const { data, isLoading } = usePOFeedbackByWeek(currentWeek, true);
   const engagements = toEngagements(data);
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "t" || event.key === "T") {
-        setView((current) => (current === "weeks" ? "runway" : "weeks"));
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   if (isLoading) {
     return (
@@ -112,21 +88,6 @@ export function Dates() {
             <Stat value={undated.length} label="with no estimate" />
           )}
         </div>
-
-        <TopBarActions>
-          <Segmented
-            label="Dates view"
-            options={DATES_VIEWS}
-            value={view}
-            onChange={setView}
-          />
-        </TopBarActions>
-
-        <FooterActions>
-          <span>
-            <Key>T</Key>switch the view
-          </span>
-        </FooterActions>
       </div>
 
       {engagements.length === 0 ? (
