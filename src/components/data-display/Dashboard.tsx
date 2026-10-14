@@ -64,7 +64,7 @@ export function Dashboard({ layout }: { layout: WallLayout }) {
           The owner doubting even the date they set themselves - the loudest
           thing the readout can say, drawn as something rather than set at the
           weight of a caption. "On track" is about the owner's own estimate, so
-          this is the warning, not an owner whose estimate passes the deadline.
+          this is the warning, not an owner whose estimate passes the release.
         */}
         {totals.offTrack > 0 && (
           <span

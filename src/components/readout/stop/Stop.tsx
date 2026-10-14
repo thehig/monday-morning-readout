@@ -111,7 +111,7 @@ const CARD =
  * The Stop: one engagement, full screen, while someone talks about it.
  *
  * Opens with a generated statement of where the engagement stands against its
- * agreed deadline, so the room reads the conclusion before the detail. Every
+ * agreed release, so the room reads the conclusion before the detail. Every
  * one of the table's columns appears somewhere on this screen.
  */
 export function Stop({
@@ -148,8 +148,8 @@ export function Stop({
     return () => window.removeEventListener("keydown", onKey);
   }, [navigate, currentWeek, step]);
 
-  const timeline = buildTimeline(engagement.deadline, engagement.estimate, today);
-  const { overdueDays, slipDays, ownerSaysOnTrack, sinceDeadline } = engagement;
+  const timeline = buildTimeline(engagement.release, engagement.estimate, today);
+  const { overdueDays, slipDays, ownerSaysOnTrack, sinceRelease } = engagement;
 
   return (
     <div className="flex flex-1 flex-col gap-4 px-4 py-5 sm:px-6">
@@ -224,9 +224,9 @@ export function Stop({
 
             {/* Two by two until all four fit on one line with rules between them. */}
             <div className="mt-[18px] grid grid-cols-2 gap-x-4 gap-y-3 lg:flex lg:gap-x-0">
-              <Fact label="Agreed deadline" first>
+              <Fact label="Agreed release date" first>
                 <span className={overdueDays !== null ? "text-late-ink" : ""}>
-                  {showDate(engagement.deadline)}
+                  {showDate(engagement.release)}
                 </span>
               </Fact>
               <Fact label="Estimated completion">
@@ -257,14 +257,14 @@ export function Stop({
           {timeline ? (
             <MiniCalendar
               timeline={timeline}
-              deadline={engagement.deadline}
+              release={engagement.release}
               estimate={engagement.estimate}
               overdueDays={overdueDays}
               tone={engagement.state === "late" ? "late" : "watch"}
             />
           ) : (
             <p className="pt-8 text-[19px] text-ink-3">
-              No deadline or estimate was recorded for this engagement.
+              No release date or estimate was recorded for this engagement.
             </p>
           )}
         </div>
@@ -286,7 +286,7 @@ export function Stop({
             text={engagement.risks}
             flag={
               engagement.state === "late"
-                ? "Nothing recorded. On an engagement past its deadline, worth asking about."
+                ? "Nothing recorded. On an engagement past its release date, worth asking about."
                 : undefined
             }
           />
@@ -334,12 +334,12 @@ export function Stop({
 
         <span className="ml-auto flex gap-[18px] truncate text-[17px]">
           <span>Feedback {engagement.id}</span>
-          {sinceDeadline && (
+          {sinceRelease && (
             <span>
-              {sinceDeadline.direction === "overdue"
-                ? `overdue ${sinceDeadline.text} when filed`
-                : sinceDeadline.direction === "remaining"
-                ? `${sinceDeadline.text} left when filed`
+              {sinceRelease.direction === "overdue"
+                ? `overdue ${sinceRelease.text} when filed`
+                : sinceRelease.direction === "remaining"
+                ? `${sinceRelease.text} left when filed`
                 : "due on the day it was filed"}
             </span>
           )}

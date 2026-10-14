@@ -23,7 +23,7 @@ const WEEK = toEngagements(
   [
     row({ id: 10, customer: "On track A", target_date: "2026-11-05",
           estimated_completion_date: "2026-11-05" }),
-    row({ id: 11, customer: "Past deadline", target_date: "2026-05-31",
+    row({ id: 11, customer: "Past release", target_date: "2026-05-31",
           estimated_completion_date: "2026-10-23" }),
     row({ id: 12, customer: "On track B", target_date: "2026-11-08",
           estimated_completion_date: "2026-11-08" }),
@@ -36,7 +36,7 @@ const WEEK = toEngagements(
 describe("stepPosition", () => {
   it("walks the exceptions before anything on schedule", () => {
     expect(WEEK.map((e) => e.customer)).toEqual([
-      "Past deadline",
+      "Past release",
       "Overruns",
       "On track A",
       "On track B",

@@ -66,9 +66,9 @@ describe("buildRunway", () => {
     expect(david.marks).toHaveLength(3);
   });
 
-  it("places each dot by its estimated completion date, not its deadline", () => {
-    // FIDUS: deadline May 31, estimate Oct 23. Its dot sits after today,
-    // where the estimate is, not months back at the deadline.
+  it("places each dot by its estimated completion date, not its release", () => {
+    // FIDUS: release May 31, estimate Oct 23. Its dot sits after today,
+    // where the estimate is, not months back at the release.
     const raunaq = runway.lanes.find((l) => l.owner === "Raunaq Inam")!;
     const fidus = raunaq.marks.find((m) => m.engagement.customer === "FIDUS Finanz AG")!;
 

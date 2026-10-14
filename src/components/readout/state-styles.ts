@@ -54,7 +54,7 @@ export const STATE_MARK: Record<ScheduleState, string> = {
 
 /**
  * The pale surface a small tile takes. Tiles are too small for a block, so an
- * engagement past or overrunning its deadline tints the whole tile instead.
+ * engagement past or overrunning its release tints the whole tile instead.
  */
 export const STATE_TINT: Record<ScheduleState, string> = {
   late: "bg-late-tint",

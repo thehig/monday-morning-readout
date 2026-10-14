@@ -67,15 +67,15 @@ describe("engagements", () => {
   describe("scheduleState", () => {
     it("is late once the committed date has passed", () => {
       expect(scheduleState(new Date(2026, 8, 30), 31, TODAY)).toBe("late");
-      // past its deadline even though the estimate holds
+      // past its release even though the estimate holds
       expect(scheduleState(new Date(2026, 8, 30), 0, TODAY)).toBe("late");
     });
 
-    it("is watch while the deadline is ahead but the estimate overruns", () => {
+    it("is watch while the release is ahead but the estimate overruns", () => {
       expect(scheduleState(new Date(2026, 10, 30), 15, TODAY)).toBe("watch");
     });
 
-    it("is fine when the estimate lands on or before the deadline", () => {
+    it("is fine when the estimate lands on or before the release", () => {
       expect(scheduleState(new Date(2026, 10, 5), 0, TODAY)).toBe("fine");
       expect(scheduleState(new Date(2026, 10, 5), -3, TODAY)).toBe("fine");
     });
@@ -99,7 +99,7 @@ describe("engagements", () => {
     });
 
     it("does not confuse slip with the stored target_diff", () => {
-      // identical dates, so no slip, but filed a month before the deadline
+      // identical dates, so no slip, but filed a month before the release
       const e = toEngagement(
         row({
           target_date: "2026-11-05",
@@ -111,14 +111,14 @@ describe("engagements", () => {
 
       expect(e.slipDays).toBe(0);
       expect(e.state).toBe("fine");
-      expect(e.sinceDeadline).toEqual({
+      expect(e.sinceRelease).toEqual({
         direction: "remaining",
         label: "Time left",
         text: "1 month 3 days",
       });
     });
 
-    it("counts the days since the agreed deadline as of today, apart from the estimate", () => {
+    it("counts the days since the agreed release as of today, apart from the estimate", () => {
       const e = toEngagement(
         row({
           target_date: "2026-05-31",
@@ -128,15 +128,15 @@ describe("engagements", () => {
         TODAY
       );
 
-      // 129 days have passed since the deadline; the estimate lands 145 after
+      // 129 days have passed since the release; the estimate lands 145 after
       // it. The first is a fact, the second is the owner's forecast.
       expect(e.overdueDays).toBe(129);
-      expect(e.daysToDeadline).toBe(-129);
+      expect(e.daysToRelease).toBe(-129);
       expect(e.slipDays).toBe(145);
     });
 
-    it("reads on track as a view of the estimate, not of the deadline", () => {
-      // Past the deadline and flagged on track: the owner expects to hit their
+    it("reads on track as a view of the estimate, not of the release", () => {
+      // Past the release and flagged on track: the owner expects to hit their
       // own revised date. That is consistent, so it carries no warning.
       const onTrack = toEngagement(
         row({
@@ -160,13 +160,13 @@ describe("engagements", () => {
       expect(summarise([onTrack, offTrack]).offTrack).toBe(1);
     });
 
-    it("counts down to a deadline still ahead", () => {
+    it("counts down to a release still ahead", () => {
       const e = toEngagement(
         row({ target_date: "2026-11-30", estimated_completion_date: "2026-12-15" }),
         TODAY
       );
 
-      expect(e.daysToDeadline).toBe(54);
+      expect(e.daysToRelease).toBe(54);
       expect(e.overdueDays).toBeNull();
     });
 
@@ -180,13 +180,13 @@ describe("engagements", () => {
     it("carries no schedule at all for rows filed before the columns existed", () => {
       const e = toEngagement(row(), TODAY);
 
-      expect(e.deadline).toBeNull();
+      expect(e.release).toBeNull();
       expect(e.estimate).toBeNull();
       expect(e.slipDays).toBeNull();
       expect(e.state).toBe("unknown");
-      expect(e.daysToDeadline).toBeNull();
+      expect(e.daysToRelease).toBeNull();
       expect(e.overdueDays).toBeNull();
-      expect(showDate(e.deadline)).toBe("—");
+      expect(showDate(e.release)).toBe("—");
     });
 
     it("shows the stored velocity in English without changing it", () => {
@@ -237,17 +237,17 @@ describe("engagements", () => {
       expect(result.map((e) => e.customer)).not.toContain("Test 4 Ignore");
     });
 
-    it("puts the longest overdue first, then overruns still ahead of their deadline", () => {
+    it("puts the longest overdue first, then overruns still ahead of their release", () => {
       expect(toEngagements(week39, TODAY).map((e) => e.customer)).toEqual([
-        "FIDUS Finanz AG", // 129 days past its deadline
-        "Test API", // 29 days past its deadline
-        "Volksbank Kraichgau", // deadline ahead, estimate 15 days after it
+        "FIDUS Finanz AG", // 129 days past its release
+        "Test API", // 29 days past its release
+        "Volksbank Kraichgau", // release ahead, estimate 15 days after it
         "UBS", // on schedule
       ]);
     });
 
     it("orders late engagements by days overdue, not by the estimate", () => {
-      // B passed its deadline longer ago but expects to finish sooner after it.
+      // B passed its release longer ago but expects to finish sooner after it.
       const ordered = toEngagements(
         [
           row({ id: 1, customer: "A", target_date: "2026-10-02", estimated_completion_date: "2026-10-27" }),
@@ -298,7 +298,7 @@ describe("engagements", () => {
       expect(severity(e)).toBe(1);
     });
 
-    it("measures one still ahead of its deadline by the estimate's overrun", () => {
+    it("measures one still ahead of its release by the estimate's overrun", () => {
       const e = toEngagement(
         row({ target_date: "2026-11-30", estimated_completion_date: "2026-12-15" }),
         TODAY

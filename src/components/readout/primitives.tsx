@@ -166,7 +166,7 @@ export function VelocityLight({
  * The owner's answer to "is it on track?".
  *
  * That question is about the owner's own estimated completion date, not the
- * agreed deadline - so an engagement past its deadline can quite properly be on
+ * agreed release - so an engagement past its release can quite properly be on
  * track for its estimate. "Not on track" is the owner doubting even the date
  * they set, and it is the one that gets the warning.
  */

@@ -5,17 +5,17 @@ import { showDate } from "./engagements";
  * The sentence the Stop screen opens with.
  *
  * The call stops on an engagement for a reason, and this states it before any
- * detail. The headline is the hard fact: the deadline was agreed with the
+ * detail. The headline is the hard fact: the release was agreed with the
  * customer and does not move, so how far past it (or how far ahead of it) the
  * engagement is today is not anyone's opinion. The estimate is the owner's own
  * forecast, and "on track" is the owner's view of that estimate - so neither
- * can contradict the deadline, and the detail reports them as what they are.
+ * can contradict the release, and the detail reports them as what they are.
  */
 
 export type StatementTone = "late" | "watch" | "fine" | "unknown";
 
 export interface Statement {
-  /** The headline, e.g. "117 days past the agreed deadline". */
+  /** The headline, e.g. "117 days past the agreed release date". */
   headline: string;
   /** The estimate, the owner's view of it, and next week's velocity. */
   detail: string;
@@ -33,11 +33,11 @@ function estimateSentence(engagement: Engagement): string {
     return "No completion estimate recorded.";
   }
   if (slipDays === 0) {
-    return `Estimated completion is ${showDate(estimate)}, on the deadline.`;
+    return `Estimated completion is ${showDate(estimate)}, on the release date.`;
   }
   return `Estimated completion is ${showDate(estimate)}, ${days(
     Math.abs(slipDays)
-  )} ${slipDays > 0 ? "after" : "before"} the deadline.`;
+  )} ${slipDays > 0 ? "after" : "before"} the release date.`;
 }
 
 function onTrackSentence(engagement: Engagement): string {
@@ -53,16 +53,16 @@ function onTrackSentence(engagement: Engagement): string {
 }
 
 export function buildStatement(engagement: Engagement): Statement {
-  const { state, deadline, daysToDeadline, overdueDays, velocityLabel } =
+  const { state, release, daysToRelease, overdueDays, velocityLabel } =
     engagement;
 
   const outlook = velocityLabel
     ? ` ${velocityLabel} next week.`
     : " No velocity recorded for next week.";
 
-  if (!deadline || daysToDeadline === null) {
+  if (!release || daysToRelease === null) {
     return {
-      headline: "No deadline recorded",
+      headline: "No release date recorded",
       detail:
         "Nothing to measure this against." +
         (velocityLabel ? ` ${velocityLabel} next week.` : ""),
@@ -76,7 +76,7 @@ export function buildStatement(engagement: Engagement): Statement {
 
   if (overdueDays !== null) {
     return {
-      headline: `${days(overdueDays)} past the agreed deadline`,
+      headline: `${days(overdueDays)} past the agreed release date`,
       detail,
       tone: "late",
     };
@@ -84,9 +84,9 @@ export function buildStatement(engagement: Engagement): Statement {
 
   return {
     headline:
-      daysToDeadline === 0
+      daysToRelease === 0
         ? "Due today"
-        : `${days(daysToDeadline)} to the agreed deadline`,
+        : `${days(daysToRelease)} to the agreed release date`,
     detail,
     tone: state === "watch" ? "watch" : "fine",
   };

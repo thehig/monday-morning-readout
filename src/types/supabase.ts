@@ -8,7 +8,7 @@ export type Json =
 
 /**
  * Shape of the `target_diff` jsonb column: the submission date minus the
- * deadline, broken into calendar parts. Positive values mean the deadline has
+ * release, broken into calendar parts. Positive values mean the release has
  * passed, negative values mean there is time left.
  *
  * Typed optimistically here because that is what the column holds today, but

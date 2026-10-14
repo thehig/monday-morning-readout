@@ -188,9 +188,9 @@ describe("Dashboard", () => {
     expect(chip).toHaveTextContent("1");
   });
 
-  it("does not treat an estimate past the deadline as a warning when on track", () => {
+  it("does not treat an estimate past the release as a warning when on track", () => {
     // "On track" is about the owner's own estimate, so an engagement whose
-    // estimate passes the deadline can quite properly be on track for it.
+    // estimate passes the release can quite properly be on track for it.
     mockRows.current = [
       row({
         id: 1,

@@ -52,7 +52,7 @@ describe("buildLadder", () => {
     expect(ladder.rows).toHaveLength(7);
 
     for (const row of ladder.rows) {
-      for (const pct of [row.deadlinePct, row.estimatePct]) {
+      for (const pct of [row.releasePct, row.estimatePct]) {
         if (pct !== null) {
           expect(pct).toBeGreaterThanOrEqual(0);
           expect(pct).toBeLessThanOrEqual(100);

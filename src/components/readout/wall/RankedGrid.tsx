@@ -18,30 +18,30 @@ interface RankedGridProps {
 }
 
 /**
- * The card's one coloured element: the hard fact about the agreed deadline.
+ * The card's one coloured element: the hard fact about the agreed release.
  *
  * Past it, how many days ago; ahead of it, how many days remain - and for an
  * engagement still ahead whose estimate already overruns, that overrun, which
  * is why its block is amber.
  */
 function StateBlock({ engagement }: { engagement: Engagement }) {
-  const { state, overdueDays, daysToDeadline, slipDays } = engagement;
+  const { state, overdueDays, daysToRelease, slipDays } = engagement;
 
   let figure: string;
   let lines: [string, string];
 
   if (overdueDays !== null) {
     figure = String(overdueDays);
-    lines = ["days past", "the deadline"];
-  } else if (daysToDeadline === null) {
+    lines = ["days past", "release date"];
+  } else if (daysToRelease === null) {
     figure = "–";
     lines = ["schedule", "not recorded"];
   } else if (state === "watch" && slipDays !== null && slipDays > 0) {
-    figure = String(daysToDeadline);
-    lines = ["days to the deadline,", `estimate +${slipDays} days`];
+    figure = String(daysToRelease);
+    lines = ["days to release,", `estimate +${slipDays} days`];
   } else {
-    figure = String(daysToDeadline);
-    lines = ["days to", "the deadline"];
+    figure = String(daysToRelease);
+    lines = ["days to", "release date"];
   }
 
   return (
@@ -63,18 +63,18 @@ function StateBlock({ engagement }: { engagement: Engagement }) {
 }
 
 /**
- * The agreed deadline, and the owner's estimate against it. The estimate's
- * distance from the deadline is labelled as the estimate's, so it is never read
+ * The agreed release, and the owner's estimate against it. The estimate's
+ * distance from the release is labelled as the estimate's, so it is never read
  * as how late the engagement is today.
  */
 function Dates({ engagement }: { engagement: Engagement }) {
-  const { deadline, estimate, slipDays, state } = engagement;
+  const { release, estimate, slipDays, state } = engagement;
 
-  if (deadline && estimate && slipDays === 0) {
+  if (release && estimate && slipDays === 0) {
     return (
       <div className="mt-3 flex flex-col gap-0.5 text-[17px] leading-[21px]">
-        <span className="text-ink-3">Deadline and estimate</span>
-        <span className="font-[650] tabular-nums">{showDate(deadline)}</span>
+        <span className="text-ink-3">Release and estimate</span>
+        <span className="font-[650] tabular-nums">{showDate(release)}</span>
       </div>
     );
   }
@@ -82,8 +82,8 @@ function Dates({ engagement }: { engagement: Engagement }) {
   return (
     <div className="mt-3 flex flex-col gap-1 text-[17px] leading-[21px]">
       <div className="flex items-baseline gap-2.5">
-        <span className="w-[84px] shrink-0 text-ink-3">Deadline</span>
-        <span className="font-[650] tabular-nums">{showDate(deadline)}</span>
+        <span className="w-[84px] shrink-0 text-ink-3">Release</span>
+        <span className="font-[650] tabular-nums">{showDate(release)}</span>
       </div>
       <div className="flex items-baseline gap-2.5">
         <span className="w-[84px] shrink-0 text-ink-3">Estimate</span>

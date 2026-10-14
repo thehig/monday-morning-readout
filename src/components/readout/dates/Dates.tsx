@@ -8,7 +8,7 @@ import { OwnerRunway } from "./OwnerRunway";
  * The owner runway page: what is coming, and who has to deliver it.
  *
  * Deliberately not a second Ladder. The Ladder looks back at the week just
- * filed against the agreed deadlines; this looks forward, placing each
+ * filed against the agreed releases; this looks forward, placing each
  * engagement by its estimated completion date in its owner's lane.
  */
 export function Dates() {

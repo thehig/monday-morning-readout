@@ -23,7 +23,7 @@ function engagement(over: Partial<POFeedback> = {}) {
 }
 
 describe("buildStatement", () => {
-  it("leads with the days since the agreed deadline, counted from today", () => {
+  it("leads with the days since the agreed release, counted from today", () => {
     const s = buildStatement(
       engagement({
         target_date: "2026-05-31",
@@ -34,11 +34,11 @@ describe("buildStatement", () => {
     );
 
     // 129 days since May 31 - not the 145 by which the estimate overruns.
-    expect(s.headline).toBe("129 days past the agreed deadline");
+    expect(s.headline).toBe("129 days past the agreed release date");
     expect(s.tone).toBe("late");
   });
 
-  it("reports the estimate as the owner's forecast, apart from the deadline", () => {
+  it("reports the estimate as the owner's forecast, apart from the release", () => {
     const s = buildStatement(
       engagement({
         target_date: "2026-05-31",
@@ -48,7 +48,7 @@ describe("buildStatement", () => {
     );
 
     expect(s.detail).toContain(
-      "Estimated completion is Oct 23, 2026, 145 days after the deadline."
+      "Estimated completion is Oct 23, 2026, 145 days after the release date."
     );
   });
 
@@ -77,7 +77,7 @@ describe("buildStatement", () => {
     expect(s.detail).toContain("The owner reports it not on track for that estimate.");
   });
 
-  it("counts down to a deadline still ahead whose estimate overruns it", () => {
+  it("counts down to a release still ahead whose estimate overruns it", () => {
     const s = buildStatement(
       engagement({
         target_date: "2026-11-30",
@@ -86,12 +86,12 @@ describe("buildStatement", () => {
       })
     );
 
-    expect(s.headline).toBe("54 days to the agreed deadline");
-    expect(s.detail).toContain("15 days after the deadline.");
+    expect(s.headline).toBe("54 days to the agreed release date");
+    expect(s.detail).toContain("15 days after the release date.");
     expect(s.tone).toBe("watch");
   });
 
-  it("is plain when the estimate lands on the deadline", () => {
+  it("is plain when the estimate lands on the release date", () => {
     const s = buildStatement(
       engagement({
         target_date: "2026-11-06",
@@ -100,16 +100,16 @@ describe("buildStatement", () => {
       })
     );
 
-    expect(s.headline).toBe("30 days to the agreed deadline");
+    expect(s.headline).toBe("30 days to the agreed release date");
     expect(s.tone).toBe("fine");
-    expect(s.detail).toContain("Nov 6, 2026, on the deadline.");
+    expect(s.detail).toContain("Nov 6, 2026, on the release date.");
     expect(s.detail).toContain("High velocity expected next week.");
   });
 
-  it("says so when there is no deadline to measure against", () => {
+  it("says so when there is no release to measure against", () => {
     const s = buildStatement(engagement());
 
-    expect(s.headline).toBe("No deadline recorded");
+    expect(s.headline).toBe("No release date recorded");
     expect(s.tone).toBe("unknown");
   });
 
@@ -121,8 +121,8 @@ describe("buildStatement", () => {
       })
     );
 
-    expect(s.headline).toBe("1 day past the agreed deadline");
-    expect(s.detail).toContain("1 day after the deadline.");
+    expect(s.headline).toBe("1 day past the agreed release date");
+    expect(s.detail).toContain("1 day after the release date.");
   });
 
   it("says when no estimate or on-track view was recorded", () => {
@@ -149,24 +149,24 @@ describe("buildTimeline", () => {
   it("places the committed date before the estimate and draws the gap", () => {
     const t = buildTimeline(new Date(2026, 4, 31), new Date(2026, 9, 23), TODAY)!;
 
-    expect(t.deadlinePct).toBeLessThan(t.estimatePct!);
+    expect(t.releasePct).toBeLessThan(t.estimatePct!);
     expect(t.slipBar).not.toBeNull();
-    expect(t.slipBar!.leftPct).toBe(t.deadlinePct);
-    expect(t.slipBar!.widthPct).toBeCloseTo(t.estimatePct! - t.deadlinePct!, 5);
+    expect(t.slipBar!.leftPct).toBe(t.releasePct);
+    expect(t.slipBar!.widthPct).toBeCloseTo(t.estimatePct! - t.releasePct!, 5);
     expect(t.singlePoint).toBe(false);
   });
 
   it("keeps every mark inside the axis", () => {
     const t = buildTimeline(new Date(2026, 4, 31), new Date(2026, 9, 23), TODAY)!;
 
-    for (const pct of [t.deadlinePct!, t.estimatePct!, t.todayPct]) {
+    for (const pct of [t.releasePct!, t.estimatePct!, t.todayPct]) {
       expect(pct).toBeGreaterThanOrEqual(0);
       expect(pct).toBeLessThanOrEqual(100);
     }
     expect(t.months.every((m) => m.pct >= 0 && m.pct <= 100)).toBe(true);
   });
 
-  it("collapses to one mark when the estimate lands on the deadline", () => {
+  it("collapses to one mark when the estimate lands on the release date", () => {
     const t = buildTimeline(new Date(2026, 10, 6), new Date(2026, 10, 6), TODAY)!;
 
     expect(t.singlePoint).toBe(true);
@@ -180,11 +180,11 @@ describe("buildTimeline", () => {
     expect(t.months.length).toBeGreaterThan(0);
   });
 
-  it("draws no slip when the estimate beats the deadline", () => {
+  it("draws no slip when the estimate beats the release", () => {
     const t = buildTimeline(new Date(2026, 10, 30), new Date(2026, 10, 20), TODAY)!;
 
     expect(t.slipBar).toBeNull();
-    expect(t.estimatePct).toBeLessThan(t.deadlinePct!);
+    expect(t.estimatePct).toBeLessThan(t.releasePct!);
   });
 
   it("thins the month ticks over a long span", () => {
@@ -209,7 +209,7 @@ describe("buildTimeline", () => {
   it("works from one date alone", () => {
     const t = buildTimeline(new Date(2026, 10, 6), null, TODAY)!;
 
-    expect(t.deadlinePct).not.toBeNull();
+    expect(t.releasePct).not.toBeNull();
     expect(t.estimatePct).toBeNull();
     expect(t.slipBar).toBeNull();
   });

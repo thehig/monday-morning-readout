@@ -67,8 +67,8 @@ function pluralise(amount: number, singular: string): string {
 /**
  * Turns `target_diff` into a label and a readable duration.
  *
- * The column holds the submission date minus the deadline, so a positive value
- * means the deadline has already passed and a negative value means there is
+ * The column holds the submission date minus the release, so a positive value
+ * means the release has already passed and a negative value means there is
  * time left. Components are read in descending order, so a mixed-sign object
  * takes its direction from the largest unit.
  */

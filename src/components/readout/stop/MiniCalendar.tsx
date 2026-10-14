@@ -4,7 +4,7 @@ import { tickStride } from "../../../lib/wall-view";
 import { HATCH } from "../state-styles";
 import { useWidth } from "../useWidth";
 
-/** Roughly the width of "deadline 31 May 2026" at 19px, with a gap. */
+/** Roughly the width of "release 31 May 2026" at 19px, with a gap. */
 const DATE_LABEL_PX = 260;
 /** How close a month label may sit to the "today" pill below the axis. */
 const TODAY_CLEARANCE_PX = 56;
@@ -21,39 +21,39 @@ function labelAlign(pct: number): string {
 
 interface MiniCalendarProps {
   timeline: TimelineGeometry;
-  deadline: Date | null;
+  release: Date | null;
   estimate: Date | null;
-  /** Days since the deadline passed, or null while it is still ahead. */
+  /** Days since the release passed, or null while it is still ahead. */
   overdueDays: number | null;
   /** Whether the estimate's overrun reads as late or as a warning. */
   tone: "late" | "watch";
 }
 
 /**
- * The agreed deadline and the owner's estimate on one axis.
+ * The agreed release and the owner's estimate on one axis.
  *
- * The span from the deadline to today is solid and named - it has already
+ * The span from the release to today is solid and named - it has already
  * happened. The span from today on to the estimate is hatched: that part is the
  * owner's forecast, not a fact. A length is read faster than a number of days,
  * and it is the one encoding that survives a compressed video call intact.
  */
 export function MiniCalendar({
   timeline,
-  deadline,
+  release,
   estimate,
   overdueDays,
   tone,
 }: MiniCalendarProps) {
-  const { months, deadlinePct, estimatePct, todayPct, singlePoint } = timeline;
+  const { months, releasePct, estimatePct, todayPct, singlePoint } = timeline;
   const [ref, width] = useWidth<HTMLDivElement>();
   const px = (pct: number) => (pct / 100) * width;
 
   const pair =
-    deadlinePct !== null && estimatePct !== null && estimatePct > deadlinePct;
+    releasePct !== null && estimatePct !== null && estimatePct > releasePct;
   const solidEnd =
     pair && overdueDays !== null ? Math.min(estimatePct!, todayPct) : null;
-  const solidW = solidEnd !== null ? Math.max(0, solidEnd - deadlinePct!) : 0;
-  const hatchL = pair ? Math.max(deadlinePct!, solidEnd ?? deadlinePct!) : 0;
+  const solidW = solidEnd !== null ? Math.max(0, solidEnd - releasePct!) : 0;
+  const hatchL = pair ? Math.max(releasePct!, solidEnd ?? releasePct!) : 0;
   const hatchW = pair ? Math.max(0, estimatePct! - hatchL) : 0;
 
   // Two labels near each other above the axis would collide, so the estimate's
@@ -61,11 +61,11 @@ export function MiniCalendar({
   // narrow window drops it sooner. Before the first measurement, by share of
   // the axis.
   const crowded =
-    deadlinePct !== null &&
+    releasePct !== null &&
     estimatePct !== null &&
     (width
-      ? px(Math.abs(estimatePct - deadlinePct)) < DATE_LABEL_PX
-      : Math.abs(estimatePct - deadlinePct) < 35);
+      ? px(Math.abs(estimatePct - releasePct)) < DATE_LABEL_PX
+      : Math.abs(estimatePct - releasePct) < 35);
 
   // Fewer month labels on a narrow axis, and none under the "today" pill.
   const stride = tickStride(
@@ -78,7 +78,7 @@ export function MiniCalendar({
       (!width || px(Math.abs(tick.pct - todayPct)) >= TODAY_CLEARANCE_PX)
   );
 
-  const deadlineInk = overdueDays !== null ? "text-late-ink" : "text-ink-2";
+  const releaseInk = overdueDays !== null ? "text-late-ink" : "text-ink-2";
 
   return (
     <div ref={ref} className="relative h-[124px]" aria-hidden="true">
@@ -106,7 +106,7 @@ export function MiniCalendar({
           className={`absolute top-[45px] flex h-[22px] items-center overflow-hidden whitespace-nowrap bg-late-mark pl-[18px] text-[17px] font-bold text-white ${
             hatchW > 0 ? "rounded-l-full" : "rounded-full"
           }`}
-          style={{ left: `${deadlinePct}%`, width: `${solidW}%` }}
+          style={{ left: `${releasePct}%`, width: `${solidW}%` }}
         >
           {solidW >= 25 && `${overdueDays} ${overdueDays === 1 ? "day" : "days"} overdue`}
         </span>
@@ -132,26 +132,26 @@ export function MiniCalendar({
             )}`}
             style={{ left: `${estimatePct}%` }}
           >
-            deadline and estimate {formatDate(estimate, "dayMonthYear")}
+            release and estimate {formatDate(estimate, "dayMonthYear")}
           </span>
         </>
       ) : (
         <>
-          {deadlinePct !== null && deadline && (
+          {releasePct !== null && release && (
             <>
               <span
                 className={`absolute top-[46px] h-5 w-5 -translate-x-1/2 rounded-full border-4 bg-white ${
                   overdueDays !== null ? "border-late-mark" : "border-ink-3"
                 }`}
-                style={{ left: `${deadlinePct}%` }}
+                style={{ left: `${releasePct}%` }}
               />
               <span
-                className={`absolute top-0 whitespace-nowrap text-[19px] font-bold ${deadlineInk} ${labelAlign(
-                  deadlinePct
+                className={`absolute top-0 whitespace-nowrap text-[19px] font-bold ${releaseInk} ${labelAlign(
+                  releasePct
                 )}`}
-                style={{ left: `${deadlinePct}%` }}
+                style={{ left: `${releasePct}%` }}
               >
-                deadline {formatDate(deadline, "dayMonthYear")}
+                release {formatDate(release, "dayMonthYear")}
               </span>
             </>
           )}

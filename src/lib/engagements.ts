@@ -45,34 +45,34 @@ export interface Engagement {
 
   amountCharged: string;
 
-  deadline: Date | null;
+  release: Date | null;
   estimate: Date | null;
   /**
-   * Estimated completion minus the committed deadline, in whole days. Positive
+   * Estimated completion minus the committed release, in whole days. Positive
    * means it will land after the date it committed to.
    *
    * Not to be confused with the stored `target_diff`, which is the submission
-   * date minus the deadline - see `sinceDeadline`.
+   * date minus the release - see `sinceRelease`.
    */
   slipDays: number | null;
   /** Estimated completion minus today, in whole days. */
   landsInDays: number | null;
   /** The stored `target_diff`, humanised: how overdue it was when filed. */
-  sinceDeadline: TargetDiffSummary | null;
+  sinceRelease: TargetDiffSummary | null;
 
   /**
-   * The agreed deadline minus today, in whole days: negative once it has
-   * passed. This is the hard fact - the deadline was agreed with the customer
+   * The agreed release minus today, in whole days: negative once it has
+   * passed. This is the hard fact - the release was agreed with the customer
    * and does not move - where `slipDays` is only the owner's forecast.
    */
-  daysToDeadline: number | null;
-  /** Days since the deadline passed, or null while it is still ahead. */
+  daysToRelease: number | null;
+  /** Days since the release passed, or null while it is still ahead. */
   overdueDays: number | null;
 
   /**
    * The owner's answer to "is the project on track?" - on track to meet their
-   * own estimated completion date, not the deadline. An estimate past the
-   * deadline flagged on track is therefore consistent, not a contradiction.
+   * own estimated completion date, not the release. An estimate past the
+   * release flagged on track is therefore consistent, not a contradiction.
    */
   ownerSaysOnTrack: boolean | null;
   delayReason: string | null;
@@ -138,7 +138,7 @@ export function slipSeverity(days: number | null): SlipSeverity {
 
 /**
  * The tier an engagement is drawn at. A late one is measured by how long its
- * deadline has been gone - the hard fact; one still ahead of its deadline can
+ * release has been gone - the hard fact; one still ahead of its release can
  * only be measured by how far its estimate overruns.
  */
 export function severity(engagement: Engagement): SlipSeverity {
@@ -148,16 +148,16 @@ export function severity(engagement: Engagement): SlipSeverity {
 }
 
 /**
- * Red once the agreed deadline has passed; amber while it is still ahead but
+ * Red once the agreed release has passed; amber while it is still ahead but
  * the estimate already overruns it.
  */
 export function scheduleState(
-  deadline: Date | null,
+  release: Date | null,
   slipDays: number | null,
   today: Date
 ): ScheduleState {
-  if (!deadline || slipDays === null) return "unknown";
-  if (daysBetween(today, deadline) < 0) return "late";
+  if (!release || slipDays === null) return "unknown";
+  if (daysBetween(today, release) < 0) return "late";
   return slipDays > 0 ? "watch" : "fine";
 }
 
@@ -169,10 +169,10 @@ const STATE_ORDER: Record<ScheduleState, number> = {
 };
 
 export function toEngagement(row: POFeedback, today = new Date()): Engagement {
-  const deadline = parseDateOnly(row.target_date);
+  const release = parseDateOnly(row.target_date);
   const estimate = parseDateOnly(row.estimated_completion_date);
-  const slipDays = deadline && estimate ? daysBetween(deadline, estimate) : null;
-  const daysToDeadline = deadline ? daysBetween(today, deadline) : null;
+  const slipDays = release && estimate ? daysBetween(release, estimate) : null;
+  const daysToRelease = release ? daysBetween(today, release) : null;
   const velocity = (row.velocity_next_week as VelocityType) ?? null;
   const ownerSaysOnTrack =
     typeof row.project_on_track === "boolean" ? row.project_on_track : null;
@@ -214,19 +214,19 @@ export function toEngagement(row: POFeedback, today = new Date()): Engagement {
 
     amountCharged: formatAmount(row.amount_charged ?? undefined),
 
-    deadline,
+    release,
     estimate,
     slipDays,
     landsInDays: estimate ? daysBetween(today, estimate) : null,
-    sinceDeadline: describeTargetDiff(row.target_diff),
-    daysToDeadline,
+    sinceRelease: describeTargetDiff(row.target_diff),
+    daysToRelease,
     overdueDays:
-      daysToDeadline !== null && daysToDeadline < 0 ? -daysToDeadline : null,
+      daysToRelease !== null && daysToRelease < 0 ? -daysToRelease : null,
 
     ownerSaysOnTrack,
     delayReason,
 
-    state: scheduleState(deadline, slipDays, today),
+    state: scheduleState(release, slipDays, today),
   };
 }
 
@@ -247,12 +247,12 @@ export function toEngagements(
       const byState = STATE_ORDER[a.state] - STATE_ORDER[b.state];
       if (byState !== 0) return byState;
 
-      // Late engagements lead by how long their deadline has been gone - the
-      // hard fact - and overruns still ahead of their deadline by how far the
-      // estimate passes it. The rest follow in order of their deadline.
+      // Late engagements lead by how long their release has been gone - the
+      // hard fact - and overruns still ahead of their release by how far the
+      // estimate passes it. The rest follow in order of their release.
       if (a.state === "late") return (b.overdueDays ?? 0) - (a.overdueDays ?? 0);
       if (a.state === "watch") return (b.slipDays ?? 0) - (a.slipDays ?? 0);
-      return (a.daysToDeadline ?? Infinity) - (b.daysToDeadline ?? Infinity);
+      return (a.daysToRelease ?? Infinity) - (b.daysToRelease ?? Infinity);
     });
 }
 

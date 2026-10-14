@@ -16,11 +16,11 @@ const DAY = 24 * 60 * 60 * 1000;
 
 export interface LadderRow {
   engagement: Engagement;
-  deadlinePct: number | null;
+  releasePct: number | null;
   estimatePct: number | null;
   /** The overrun, drawn from the committed date to the estimate. */
   slipBar: { leftPct: number; widthPct: number } | null;
-  /** Deadline and estimate coincide, so one mark says both. */
+  /** Release and estimate coincide, so one mark says both. */
   singlePoint: boolean;
 }
 
@@ -35,14 +35,14 @@ export interface LadderGeometry {
 /**
  * One shared axis spanning every date in the week, so two rows' bars can be
  * compared directly. Outliers stretch the scale rather than being hidden: an
- * engagement five months past its deadline is the thing most worth seeing.
+ * engagement five months past its release is the thing most worth seeing.
  */
 export function buildLadder(
   engagements: Engagement[],
   today: Date
 ): LadderGeometry | null {
   const dates = engagements.flatMap((e) =>
-    [e.deadline, e.estimate].filter((d): d is Date => d instanceof Date)
+    [e.release, e.estimate].filter((d): d is Date => d instanceof Date)
   );
   if (!dates.length) return null;
 
@@ -59,21 +59,21 @@ export function buildLadder(
     Math.round(((date.getTime() - rangeStart.getTime()) / total) * 10000) / 100;
 
   const rows: LadderRow[] = engagements.map((engagement) => {
-    const deadlinePct = engagement.deadline ? pct(engagement.deadline) : null;
+    const releasePct = engagement.release ? pct(engagement.release) : null;
     const estimatePct = engagement.estimate ? pct(engagement.estimate) : null;
 
     return {
       engagement,
-      deadlinePct,
+      releasePct,
       estimatePct,
       slipBar:
-        deadlinePct !== null && estimatePct !== null && estimatePct > deadlinePct
-          ? { leftPct: deadlinePct, widthPct: estimatePct - deadlinePct }
+        releasePct !== null && estimatePct !== null && estimatePct > releasePct
+          ? { leftPct: releasePct, widthPct: estimatePct - releasePct }
           : null,
       singlePoint:
-        deadlinePct !== null &&
+        releasePct !== null &&
         estimatePct !== null &&
-        deadlinePct === estimatePct,
+        releasePct === estimatePct,
     };
   });
 

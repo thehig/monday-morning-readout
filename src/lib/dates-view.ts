@@ -5,7 +5,7 @@ import type { Engagement } from "./engagements";
  * Data for the owner runway: one lane per product owner, one dot per
  * engagement, placed on a shared calendar by its estimated completion date.
  *
- * Placed by the estimate rather than the deadline because the runway looks
+ * Placed by the estimate rather than the release because the runway looks
  * forward: the estimate is when the owner expects the work to land. An owner's
  * engagements are separate pieces of work for separate customers, so the lane
  * draws where each one lands and nothing between them.

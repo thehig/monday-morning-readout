@@ -19,7 +19,7 @@ interface LadderProps {
 //   2xl  all eight
 //   xl   without Team and Customer
 //   md   without Progress and Next week either
-//   below md, without the calendar: rank, engagement and the deadline
+//   below md, without the calendar: rank, engagement and the release
 const GRID = [
   "grid-cols-[28px_minmax(0,1fr)_minmax(84px,104px)]",
   "md:grid-cols-[40px_minmax(160px,260px)_minmax(220px,1fr)_minmax(92px,112px)]",
@@ -35,7 +35,7 @@ const XXL = "hidden 2xl:flex";
  * One row per engagement on a shared calendar.
  *
  * The only Wall layout where slip is comparable down a column, because every
- * engagement sits on the same scale. The span from the agreed deadline to
+ * engagement sits on the same scale. The span from the agreed release to
  * today is solid - it has happened - and the span from today to the estimate
  * is hatched, because it is the owner's forecast. Exact dates stay hidden until
  * a row is hovered, so the resting state is calm.
@@ -47,7 +47,7 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
   if (!ladder) {
     return (
       <p className="p-8 text-xl text-ink-3">
-        No engagement has a deadline or estimate recorded.
+        No engagement has a release date or estimate recorded.
       </p>
     );
   }
@@ -85,9 +85,9 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
         <Head label="Engagement" unit="and product owner" />
         <span className={`relative min-w-0 ${CALENDAR}`}>
           <Head
-            label="Agreed deadline → estimate"
+            label="Release date → estimate"
             unit={roomForHint ? "hover a row for exact dates" : "\u00a0"}
-            title="Agreed deadline → estimate, hover a row for exact dates"
+            title="Release date → estimate, hover a row for exact dates"
           />
           <span
             className="absolute bottom-0 -translate-x-1/2 rounded-full bg-navy px-2 text-[17px] font-[650] text-white"
@@ -96,7 +96,7 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
             today
           </span>
         </span>
-        <Head label="Deadline" unit="as of today" align="right" />
+        <Head label="Release" unit="as of today" align="right" />
         <Head label="Progress" unit="% of cycle done" className={XL} />
         <Head label="Team" unit="out of 5" className={XXL} />
         <Head label="Customer" unit="out of 5" className={XXL} />
@@ -110,7 +110,7 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
           const last = i === ladder.rows.length - 1;
 
           // The bar, split at today: what has happened, then what is forecast.
-          const d = row.deadlinePct;
+          const d = row.releasePct;
           const est = row.estimatePct;
           const pair = d !== null && est !== null && est > d;
           const solidW = pair ? Math.max(0, Math.min(est, todayPct) - d) : 0;
@@ -207,12 +207,12 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
 
                 {d !== null && !row.singlePoint && (
                   <HoverLabel pct={d} top="-top-1.5" tone={late ? "text-late-ink" : "text-ink-2"}>
-                    deadline {showDate(e.deadline)}
+                    release {showDate(e.release)}
                   </HoverLabel>
                 )}
                 {est !== null && (
                   <HoverLabel pct={est} top="top-[38px]" tone="text-ink">
-                    {row.singlePoint ? "deadline and estimate" : "est."}{" "}
+                    {row.singlePoint ? "release and estimate" : "est."}{" "}
                     {showDate(e.estimate)}
                     {e.slipDays !== null && e.slipDays > 0 && `, +${e.slipDays} days`}
                   </HoverLabel>
@@ -227,10 +227,10 @@ export function Ladder({ engagements, currentWeek, today = new Date() }: LadderP
                     </b>
                     <span className="text-[17px] text-late-ink">days over</span>
                   </>
-                ) : e.daysToDeadline !== null ? (
+                ) : e.daysToRelease !== null ? (
                   <>
                     <b className="block text-[19px] font-semibold leading-[26px] tabular-nums text-ink-2">
-                      {e.daysToDeadline}
+                      {e.daysToRelease}
                     </b>
                     <span className="text-[17px] text-ink-3">days left</span>
                   </>
